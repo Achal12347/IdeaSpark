@@ -1,0 +1,49 @@
+.landing-container {
+  text-align: center;
+  font-family: Arial, sans-serif;
+  padding: 2rem;
+}
+
+.landing-header {
+  margin-bottom: 3rem;
+}
+
+.landing-header h1 {
+  font-size: 3rem;
+  color: #1a73e8;
+}
+
+.landing-header p {
+  font-size: 1.2rem;
+  color: #555;
+}
+
+.cta-button {
+  padding: 0.8rem 2rem;
+  background-color: #1a73e8;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.features {
+  margin: 2rem 0;
+}
+
+.features ul {
+  list-style: none;
+  padding: 0;
+}
+
+.features li {
+  margin: 0.5rem 0;
+  font-size: 1.1rem;
+}
+
+.landing-footer {
+  margin-top: 3rem;
+  color: #888;
+  font-size: 0.9rem;
+}
