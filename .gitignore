@@ -8,6 +8,9 @@ node_modules
 /client/build
 /server/build
 
+# Firebase service account (DO NOT push to GitHub!)
+/server/firebase-service-account.json
+
 # Logs
 *.log
 npm-debug.log*

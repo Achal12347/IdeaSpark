@@ -1,0 +1,58 @@
+import React, { useState } from "react";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../firebase";
+import { useNavigate, Link } from "react-router-dom";
+import "../styles/Login.css";
+
+const Login = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      navigate("/dashboard");
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  return (
+    <div className="login-container">
+      <form className="login-card" onSubmit={handleLogin}>
+        <h2>Login to IdeaSpark</h2>
+
+        {error && <p className="error-text">{error}</p>}
+
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
+
+        <button type="submit">Login</button>
+
+        <p className="signup-text">
+          Don’t have an account? <Link to="/signup">Sign up</Link>
+        </p>
+      </form>
+    </div>
+  );
+};
+
+export default Login;

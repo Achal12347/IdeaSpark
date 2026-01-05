@@ -1,29 +1,63 @@
 import React from "react";
-import "./LandingPage.css";
+import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
+import "../styles/LandingPage.css";
 
 const LandingPage = () => {
   return (
     <div className="landing-container">
-      <header className="landing-header">
-        <h1>Welcome to IdeaSpark</h1>
-        <p>Innovation & Startup Brainstorm Hub</p>
-        <button className="cta-button">Get Started</button>
-      </header>
+      <div className="overlay"></div>
 
-      <section className="features">
-        <h2>Features</h2>
-        <ul>
-          <li>Share your innovative ideas</li>
-          <li>Form teams & collaborate</li>
-          <li>Real-time chat & discussion</li>
-          <li>Participate in hackathons</li>
-          <li>Connect with investors</li>
-        </ul>
-      </section>
+      <motion.div
+        className="landing-content"
+        initial={{ opacity: 0, y: 50 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+      >
+        <motion.h1
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+        >
+          IdeaSpark 🚀
+        </motion.h1>
 
-      <footer className="landing-footer">
-        <p>© 2026 IdeaSpark | All Rights Reserved</p>
-      </footer>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+        >
+          A platform where innovators, startups, and investors connect to turn
+          ideas into reality.
+        </motion.p>
+
+        <motion.div
+          className="button-group"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.7 }}
+        >
+          <Link to="/login">
+            <motion.button
+              className="btn login-btn"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              Login
+            </motion.button>
+          </Link>
+
+          <Link to="/signup">
+            <motion.button
+              className="btn signup-btn"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              Sign Up
+            </motion.button>
+          </Link>
+        </motion.div>
+      </motion.div>
     </div>
   );
 };
