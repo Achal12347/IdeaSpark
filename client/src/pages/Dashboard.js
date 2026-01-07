@@ -8,14 +8,18 @@ export default function Dashboard() {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
-    await signOut(auth);
     navigate("/");
+    await signOut(auth);
   };
 
   return (
-    <div>
-      <h1>Dashboard</h1>
-      <button onClick={handleLogout}>Logout</button>
+    <div className="dashboard-container">
+      <div className="dashboard-card">
+        <h1>Dashboard</h1>
+        <div className="dashboard-actions">
+          <button onClick={handleLogout}>Logout</button>
+        </div>
+      </div>
     </div>
   );
 }
