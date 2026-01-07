@@ -1,35 +1,21 @@
-import React, { useEffect, useState } from "react";
+import { signOut } from "firebase/auth";
 import { auth } from "../firebase";
 import { useNavigate } from "react-router-dom";
+import "../styles/Dashboard.css";
 
-const Dashboard = () => {
-  const [userData, setUserData] = useState(null);
+
+export default function Dashboard() {
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      const token = await auth.currentUser.getIdToken();
-      const res = await fetch(
-        `http://localhost:5000/api/users/${auth.currentUser.uid}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      const data = await res.json();
-      setUserData(data);
-    };
-    fetchUser();
-  }, []);
-
   const handleLogout = async () => {
-    await auth.signOut();
-    navigate("/login");
+    await signOut(auth);
+    navigate("/");
   };
 
   return (
-    <div style={{ textAlign: "center", marginTop: "50px" }}>
-      <h1>Welcome, {userData?.name || "User"}</h1>
+    <div>
+      <h1>Dashboard</h1>
       <button onClick={handleLogout}>Logout</button>
     </div>
   );
-};
-
-export default Dashboard;
+}
