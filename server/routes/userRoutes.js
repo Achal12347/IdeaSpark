@@ -21,6 +21,7 @@ router.post("/", verifyFirebaseToken, async (req, res) => {
     name,
     expertise,
     workplace,
+    role: "user",
   });
 
   await user.save();

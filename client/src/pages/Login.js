@@ -15,8 +15,24 @@ const Login = () => {
     setError("");
 
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      navigate("/dashboard");
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const idToken = await userCredential.user.getIdToken();
+
+      const response = await fetch("http://localhost:5000/api/auth/me", {
+        headers: {
+          Authorization: `Bearer ${idToken}`,
+        },
+      });
+
+      const data = await response.json();
+
+      if (!data.exists) {
+        navigate("/profile-setup");
+      } else if (data.role === "admin") {
+        navigate("/admin/dashboard");
+      } else {
+        navigate("/dashboard");
+      }
     } catch (err) {
       setError(err.message);
     }
@@ -44,6 +60,10 @@ const Login = () => {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
+
+        <p className="forgot-link">
+          <Link to="/forgot-password">Forgot password?</Link>
+        </p>
 
         <button type="submit">Login</button>
 
