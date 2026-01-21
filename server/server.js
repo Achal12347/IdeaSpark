@@ -11,7 +11,13 @@ const authRoutes = require("./routes/authRoutes");
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(
+  cors({
+    origin: "https://idea-spark-olive.vercel.app", // 🔁 YOUR REAL FRONTEND URL
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 
 // Routes
