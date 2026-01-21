@@ -21,7 +21,7 @@ export default function AdminRoute({ children }) {
         const token = await user.getIdToken();
 
         // Call backend to fetch user info
-        const res = await fetch("http://localhost:5000/api/auth/me", {
+        const res = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/me`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

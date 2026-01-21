@@ -14,7 +14,7 @@ export default function ProfileSetup() {
 
     const token = await auth.currentUser.getIdToken();
 
-    await fetch("http://localhost:5000/api/users", {
+    await fetch(`${process.env.REACT_APP_API_URL}/api/users`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
