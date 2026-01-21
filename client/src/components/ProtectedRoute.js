@@ -15,7 +15,7 @@ export default function ProtectedRoute({ children }) {
         return;
       }
 
-      const token = await user.getIdToken();
+      const token = await user.getIdToken(true);
       const res = await fetch(
         `${process.env.REACT_APP_API_URL}/api/users/${user.uid}/exists`,
         { headers: { Authorization: `Bearer ${token}` } }

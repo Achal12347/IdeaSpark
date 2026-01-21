@@ -18,7 +18,7 @@ export default function AdminRoute({ children }) {
 
       try {
         // Get Firebase ID token
-        const token = await user.getIdToken();
+        const token = await user.getIdToken(true);
 
         // Call backend to fetch user info
         const res = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/me`, {
