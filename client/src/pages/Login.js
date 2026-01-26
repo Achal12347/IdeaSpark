@@ -17,12 +17,12 @@ const Login = () => {
     try {
       console.log("API_URL:", process.env.REACT_APP_API_URL);
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const idToken = await userCredential.user.getIdToken();
-      console.log("ID Token:", idToken);
+      const token = await userCredential.user.getIdToken();
+      console.log("ID Token:", token);
 
       const response = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/me`, {
         headers: {
-          Authorization: `Bearer ${idToken}`,
+          Authorization: `Bearer ${token}`,
         },
       });
 

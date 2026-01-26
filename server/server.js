@@ -14,7 +14,6 @@ const app = express();
 app.use(
   cors({
     origin: "https://idea-spark-olive.vercel.app", // 🔁 YOUR REAL FRONTEND URL
-    credentials: true,
   })
 );
 
