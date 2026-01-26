@@ -4,37 +4,77 @@ const verifyFirebaseToken = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
-/* Check profile exists */
+/* ================================
+   Check if profile exists
+   GET /api/users/:uid/exists
+================================ */
 router.get("/:uid/exists", verifyFirebaseToken, async (req, res) => {
-  console.log("PROFILE CHECK HIT FOR UID:", req.params.uid);
+  try {
+    // 🔒 Security: users can only check their own profile
+    if (req.user.uid !== req.params.uid) {
+      return res.status(403).json({ error: "Unauthorized" });
+    }
 
-  const user = await User.findOne({ firebaseUID: req.params.uid });
-  res.json({ exists: !!user });
-});
-
-/* Get user data */
-router.get("/:uid", verifyFirebaseToken, async (req, res) => {
-  const user = await User.findOne({ firebaseUID: req.params.uid });
-  if (!user) {
-    return res.status(404).json({ error: "User not found" });
+    const user = await User.findOne({ firebaseUID: req.user.uid });
+    res.json({ exists: !!user });
+  } catch (err) {
+    console.error("Profile exists error:", err);
+    res.status(500).json({ error: "Server error" });
   }
-  res.json(user);
 });
 
-/* Save profile */
+/* ================================
+   Get logged-in user data
+   GET /api/users/me
+================================ */
+router.get("/me", verifyFirebaseToken, async (req, res) => {
+  try {
+    const user = await User.findOne({ firebaseUID: req.user.uid });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.json(user);
+  } catch (err) {
+    console.error("Get user error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+/* ================================
+   Create / Update profile
+   POST /api/users
+================================ */
 router.post("/", verifyFirebaseToken, async (req, res) => {
-  const { name, expertise, workplace } = req.body;
+  try {
+    const { name, expertise, workplace } = req.body;
 
-  const user = new User({
-    firebaseUID: req.user.uid,
-    name,
-    expertise,
-    workplace,
-    role: "user",
-  });
+    if (!name || !expertise || !workplace) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
 
-  await user.save();
-  res.status(201).json({ success: true });
+    // ✅ UPSERT prevents duplicate users
+    const user = await User.findOneAndUpdate(
+      { firebaseUID: req.user.uid },
+      {
+        firebaseUID: req.user.uid,
+        name,
+        expertise,
+        workplace,
+        role: "user", // default role
+      },
+      { new: true, upsert: true }
+    );
+
+    res.status(200).json({
+      success: true,
+      user,
+    });
+  } catch (err) {
+    console.error("Save profile error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
 });
 
 module.exports = router;

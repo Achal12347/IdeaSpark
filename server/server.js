@@ -7,30 +7,51 @@ const cors = require("cors");
 const userRoutes = require("./routes/userRoutes");
 const authRoutes = require("./routes/authRoutes");
 
-// ✅ Create app FIRST
+// Create app FIRST
 const app = express();
 
-// Middleware
+/* =========================
+   Middleware
+========================= */
+
+// CORS (allow frontend + local dev)
 app.use(
   cors({
-    origin: "https://idea-spark-olive.vercel.app", // 🔁 YOUR REAL FRONTEND URL
+    origin: [
+      "http://localhost:3000",
+      "https://idea-spark-olive.vercel.app",
+    ],
   })
 );
 
 app.use(express.json());
 
-// Routes
+/* =========================
+   Routes
+========================= */
+
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 
-// Database
+// Health check (IMPORTANT for Render debugging)
+app.get("/", (req, res) => {
+  res.send("IdeaSpark API is running 🚀");
+});
+
+/* =========================
+   Database
+========================= */
+
 mongoose
   .connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB Atlas connected"))
-  .catch((err) => console.error("MongoDB error:", err));
+  .then(() => console.log("✅ MongoDB Atlas connected"))
+  .catch((err) => console.error("❌ MongoDB error:", err));
 
-// Server
+/* =========================
+   Server
+========================= */
+
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () =>
-  console.log(`Server running on port ${PORT}`)
-);
+app.listen(PORT, () => {
+  console.log(`✅ Server running on port ${PORT}`);
+});
