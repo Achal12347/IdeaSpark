@@ -4,50 +4,57 @@ import { useEffect, useState } from "react";
 
 export default function ProtectedRoute({ children }) {
   const { currentUser, loading: authLoading } = useAuth();
-  const [allowed, setAllowed] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [hasProfile, setHasProfile] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
     if (authLoading) return;
 
+    // Not logged in
     if (!currentUser) {
-      setAllowed(false);
       setLoading(false);
       return;
     }
 
-    const checkUserExists = async () => {
+    const checkProfile = async () => {
       try {
-        console.log("API_URL:", process.env.REACT_APP_API_URL);
         const token = await currentUser.getIdToken(true);
-        console.log("ID Token:", token);
+
         const res = await fetch(
           `${process.env.REACT_APP_API_URL}/api/users/${currentUser.uid}/exists`,
-          { headers: { Authorization: `Bearer ${token}` } }
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
 
-        console.log("Response status:", res.status);
         const data = await res.json();
-        console.log("Response data:", data);
-
-        if (!data.exists && location.pathname !== "/profile-setup") {
-          setAllowed(false);
-        } else {
-          setAllowed(true);
-        }
-      } catch (error) {
-        console.error("Error checking user existence:", error);
-        setAllowed(false);
+        setHasProfile(data.exists);
+      } catch (err) {
+        console.error("Profile check failed:", err);
+        setHasProfile(false);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
-    checkUserExists();
-  }, [currentUser, authLoading, location.pathname]);
+    checkProfile();
+  }, [currentUser, authLoading]);
 
   if (authLoading || loading) return <p>Loading...</p>;
-  if (!allowed) return <Navigate to="/profile-setup" replace />;
 
+  // ❌ Not logged in → login
+  if (!currentUser) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // ❌ Logged in but no profile
+  if (!hasProfile && location.pathname !== "/profile-setup") {
+    return <Navigate to="/profile-setup" replace />;
+  }
+
+  // ✅ Allow access
   return children;
 }
