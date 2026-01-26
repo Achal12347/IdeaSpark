@@ -11,50 +11,44 @@ export default function ProtectedRoute({ children }) {
   useEffect(() => {
     if (authLoading) return;
 
-    // Not logged in
+    // Not logged in → redirect to login
     if (!currentUser) {
       setLoading(false);
+      setHasProfile(false);
       return;
     }
 
-    const checkProfile = async () => {
+    // Check if user has a profile
+    const checkUserExists = async () => {
       try {
         const token = await currentUser.getIdToken(true);
-
         const res = await fetch(
           `${process.env.REACT_APP_API_URL}/api/users/${currentUser.uid}/exists`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
+          { headers: { Authorization: `Bearer ${token}` } }
         );
-
         const data = await res.json();
         setHasProfile(data.exists);
-      } catch (err) {
-        console.error("Profile check failed:", err);
+      } catch (error) {
+        console.error("Profile check failed:", error);
         setHasProfile(false);
       } finally {
         setLoading(false);
       }
     };
 
-    checkProfile();
-  }, [currentUser, authLoading]);
+    checkUserExists();
+  }, [currentUser, authLoading, location.pathname]);
 
   if (authLoading || loading) return <p>Loading...</p>;
 
-  // ❌ Not logged in → login
-  if (!currentUser) {
-    return <Navigate to="/login" replace />;
-  }
+  // ❌ Not logged in
+  if (!currentUser) return <Navigate to="/" replace />;
 
   // ❌ Logged in but no profile
   if (!hasProfile && location.pathname !== "/profile-setup") {
     return <Navigate to="/profile-setup" replace />;
   }
 
-  // ✅ Allow access
+  // ✅ Logged in and has profile
   return children;
 }
