@@ -10,6 +10,7 @@ import ProfileSetup from "./pages/ProfileSetup";
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminRoute from "./components/AdminRoute";
 import AdminDashboard from "./pages/AdminDashboard";
+import AuthRoute from "./components/AuthRoute";
 
 function App() {
   return (
@@ -29,12 +30,12 @@ function App() {
   />
 
   <Route
-    path="/profile-setup"
-    element={
-      <ProtectedRoute>
-        <ProfileSetup />
-      </ProtectedRoute>
-    }
+  path="/profile-setup"
+  element={
+    <AuthRoute>
+      <ProfileSetup />
+    </AuthRoute>
+  }
   />
 
   <Route

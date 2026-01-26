@@ -1,4 +1,4 @@
-import { Navigate, useLocation } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useEffect, useState } from "react";
 
@@ -6,12 +6,9 @@ export default function ProtectedRoute({ children }) {
   const { currentUser, loading: authLoading } = useAuth();
   const [checking, setChecking] = useState(true);
   const [hasProfile, setHasProfile] = useState(false);
-  const location = useLocation();
 
   useEffect(() => {
-    if (authLoading) return;
-
-    if (!currentUser) {
+    if (authLoading || !currentUser) {
       setChecking(false);
       return;
     }
@@ -29,7 +26,7 @@ export default function ProtectedRoute({ children }) {
         const data = await res.json();
         setHasProfile(data.exists);
       } catch (err) {
-        console.error("Profile check failed:", err);
+        console.error(err);
         setHasProfile(false);
       } finally {
         setChecking(false);
@@ -41,22 +38,9 @@ export default function ProtectedRoute({ children }) {
 
   if (authLoading || checking) return <p>Loading...</p>;
 
-  // ❌ Not logged in
-  if (!currentUser) {
-    return <Navigate to="/" replace />;
-  }
+  if (!currentUser) return <Navigate to="/login" replace />;
 
-  // 🚨 IMPORTANT FIX:
-  // Always allow profile setup page
-  if (location.pathname === "/profile-setup") {
-    return children;
-  }
+  if (!hasProfile) return <Navigate to="/profile-setup" replace />;
 
-  // ❌ Logged in but no profile → force profile setup
-  if (!hasProfile) {
-    return <Navigate to="/profile-setup" replace />;
-  }
-
-  // ✅ Logged in + profile exists
   return children;
 }
