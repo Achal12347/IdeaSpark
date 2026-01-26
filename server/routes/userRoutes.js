@@ -12,6 +12,15 @@ router.get("/:uid/exists", verifyFirebaseToken, async (req, res) => {
   res.json({ exists: !!user });
 });
 
+/* Get user data */
+router.get("/:uid", verifyFirebaseToken, async (req, res) => {
+  const user = await User.findOne({ firebaseUID: req.params.uid });
+  if (!user) {
+    return res.status(404).json({ error: "User not found" });
+  }
+  res.json(user);
+});
+
 /* Save profile */
 router.post("/", verifyFirebaseToken, async (req, res) => {
   const { name, expertise, workplace } = req.body;

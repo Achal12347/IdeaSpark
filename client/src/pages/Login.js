@@ -15,8 +15,10 @@ const Login = () => {
     setError("");
 
     try {
+      console.log("API_URL:", process.env.REACT_APP_API_URL);
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const idToken = await userCredential.user.getIdToken();
+      console.log("ID Token:", idToken);
 
       const response = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/me`, {
         headers: {
@@ -24,7 +26,9 @@ const Login = () => {
         },
       });
 
+      console.log("Response status:", response.status);
       const data = await response.json();
+      console.log("Response data:", data);
 
       if (!data.exists) {
         navigate("/profile-setup");
@@ -34,6 +38,7 @@ const Login = () => {
         navigate("/dashboard");
       }
     } catch (err) {
+      console.error("Login error:", err);
       setError(err.message);
     }
   };
