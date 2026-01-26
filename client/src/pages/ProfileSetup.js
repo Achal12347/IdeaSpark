@@ -23,7 +23,8 @@ export default function ProfileSetup() {
       body: JSON.stringify({ name, expertise, workplace }),
     });
 
-    navigate("/dashboard");
+    navigate("/dashboard", { replace: true });
+
   };
 
   return (

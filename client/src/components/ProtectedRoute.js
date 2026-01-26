@@ -4,51 +4,59 @@ import { useEffect, useState } from "react";
 
 export default function ProtectedRoute({ children }) {
   const { currentUser, loading: authLoading } = useAuth();
-  const [loading, setLoading] = useState(true);
+  const [checking, setChecking] = useState(true);
   const [hasProfile, setHasProfile] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
     if (authLoading) return;
 
-    // Not logged in → redirect to login
     if (!currentUser) {
-      setLoading(false);
-      setHasProfile(false);
+      setChecking(false);
       return;
     }
 
-    // Check if user has a profile
-    const checkUserExists = async () => {
+    const checkProfile = async () => {
       try {
         const token = await currentUser.getIdToken(true);
         const res = await fetch(
           `${process.env.REACT_APP_API_URL}/api/users/${currentUser.uid}/exists`,
-          { headers: { Authorization: `Bearer ${token}` } }
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
         );
+
         const data = await res.json();
         setHasProfile(data.exists);
-      } catch (error) {
-        console.error("Profile check failed:", error);
+      } catch (err) {
+        console.error("Profile check failed:", err);
         setHasProfile(false);
       } finally {
-        setLoading(false);
+        setChecking(false);
       }
     };
 
-    checkUserExists();
-  }, [currentUser, authLoading, location.pathname]);
+    checkProfile();
+  }, [currentUser, authLoading]);
 
-  if (authLoading || loading) return <p>Loading...</p>;
+  if (authLoading || checking) return <p>Loading...</p>;
 
   // ❌ Not logged in
-  if (!currentUser) return <Navigate to="/" replace />;
+  if (!currentUser) {
+    return <Navigate to="/" replace />;
+  }
 
-  // ❌ Logged in but no profile
-  if (!hasProfile && location.pathname !== "/profile-setup") {
+  // 🚨 IMPORTANT FIX:
+  // Always allow profile setup page
+  if (location.pathname === "/profile-setup") {
+    return children;
+  }
+
+  // ❌ Logged in but no profile → force profile setup
+  if (!hasProfile) {
     return <Navigate to="/profile-setup" replace />;
   }
 
-  // ✅ Logged in and has profile
+  // ✅ Logged in + profile exists
   return children;
 }
