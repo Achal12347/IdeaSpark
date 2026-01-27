@@ -7,7 +7,7 @@ export default function AuthRoute({ children }) {
   if (loading) return <p>Loading...</p>;
 
   if (!currentUser) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/" replace />;
   }
 
   return children;

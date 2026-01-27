@@ -38,7 +38,7 @@ export default function ProtectedRoute({ children }) {
 
   if (authLoading || checking) return <p>Loading...</p>;
 
-  if (!currentUser) return <Navigate to="/login" replace />;
+  if (!currentUser) return <Navigate to="/" replace />;
 
   if (!hasProfile) return <Navigate to="/profile-setup" replace />;
 
