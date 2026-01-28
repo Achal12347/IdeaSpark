@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { fetchBookmarks } from '../services/bookmarkService';
+import { useAuth } from '../context/AuthContext';
 
 export default function Bookmarks() {
+  const { currentUser, loading: authLoading } = useAuth();
   const [bookmarks, setBookmarks] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (authLoading || !currentUser) return;
+
     const loadBookmarks = async () => {
+      setLoading(true);
       try {
         const data = await fetchBookmarks();
         setBookmarks(data);
@@ -17,7 +22,7 @@ export default function Bookmarks() {
       }
     };
     loadBookmarks();
-  }, []);
+  }, [authLoading, currentUser]);
 
   if (loading) {
     return <div>Loading bookmarks...</div>;

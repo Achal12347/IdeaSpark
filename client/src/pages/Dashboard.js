@@ -3,24 +3,35 @@ import { auth } from "../firebase";
 import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { fetchIdeas } from "../services/ideaService";
+import { useAuth } from "../context/AuthContext";
 import "../styles/Dashboard.css";
 
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { currentUser, loading: authLoading } = useAuth();
   const [ideas, setIdeas] = useState([]);
+  const [loadingIdeas, setLoadingIdeas] = useState(true);
 
   useEffect(() => {
+    if (authLoading || !currentUser) {
+      setLoadingIdeas(false);
+      return;
+    }
+
     const loadIdeas = async () => {
+      setLoadingIdeas(true);
       try {
         const data = await fetchIdeas();
         setIdeas(data);
       } catch (error) {
         console.error("Error fetching ideas:", error);
+      } finally {
+        setLoadingIdeas(false);
       }
     };
     loadIdeas();
-  }, []);
+  }, [authLoading, currentUser]);
 
   const handleLogout = async () => {
     navigate("/");
@@ -65,22 +76,26 @@ export default function Dashboard() {
         <section className="feed">
           <h3>Idea Feed</h3>
 
-          {ideas.map((idea) => (
-            <div key={idea._id} className="idea-card">
-              <h4>{idea.title}</h4>
-              <p>{idea.description}</p>
-              <div className="tags">
-                {idea.tags && idea.tags.map((tag, index) => (
-                  <span key={index}>{tag}</span>
-                ))}
+          {loadingIdeas ? (
+            <p>Loading ideas...</p>
+          ) : (
+            ideas.map((idea) => (
+              <div key={idea._id} className="idea-card">
+                <h4>{idea.title}</h4>
+                <p>{idea.description}</p>
+                <div className="tags">
+                  {idea.tags && idea.tags.map((tag, index) => (
+                    <span key={index}>{tag}</span>
+                  ))}
+                </div>
+                <div className="stats">
+                  <span>👀 {idea.views || 0}</span>
+                  <span>⭐ {idea.likes || 0}</span>
+                  <span>💬 {idea.comments || 0}</span>
+                </div>
               </div>
-              <div className="stats">
-                <span>👀 {idea.views || 0}</span>
-                <span>⭐ {idea.likes || 0}</span>
-                <span>💬 {idea.comments || 0}</span>
-              </div>
-            </div>
-          ))}
+            ))
+          )}
         </section>
       </main>
 

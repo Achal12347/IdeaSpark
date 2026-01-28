@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { fetchTrendingIdeas } from '../services/ideaService';
+import { useAuth } from '../context/AuthContext';
 
 export default function TrendingIdeas() {
+  const { currentUser, loading: authLoading } = useAuth();
   const [trendingIdeas, setTrendingIdeas] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (authLoading || !currentUser) return;
+
     const loadTrendingIdeas = async () => {
+      setLoading(true);
       try {
         const data = await fetchTrendingIdeas();
         setTrendingIdeas(data);
@@ -17,7 +22,7 @@ export default function TrendingIdeas() {
       }
     };
     loadTrendingIdeas();
-  }, []);
+  }, [authLoading, currentUser]);
 
   if (loading) {
     return <div>Loading trending ideas...</div>;

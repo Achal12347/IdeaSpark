@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { fetchUserActivity } from '../services/activityService';
+import { useAuth } from '../context/AuthContext';
 
 export default function Activity() {
+  const { currentUser, loading: authLoading } = useAuth();
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (authLoading || !currentUser) return;
+
     const loadActivity = async () => {
+      setLoading(true);
       try {
         const data = await fetchUserActivity();
         setActivities(data);
@@ -17,7 +22,7 @@ export default function Activity() {
       }
     };
     loadActivity();
-  }, []);
+  }, [authLoading, currentUser]);
 
   if (loading) {
     return <div>Loading activity...</div>;

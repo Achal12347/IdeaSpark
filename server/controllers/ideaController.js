@@ -4,7 +4,10 @@ const Comment = require('../models/Comment');
 exports.createIdea = async (req, res) => {
   try {
     const { title, problemStatement, solutionDescription, targetAudience, marketCategory, monetizationModel, stageOfIdea, lookingFor, estimatedBudget, equityShare, tags } = req.body;
-    const author = req.user.uid; // Assuming auth middleware sets req.user
+    const user = await User.findOne({ firebaseUID: req.user.uid });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
 
     const newIdea = new Idea({
       title,
@@ -14,11 +17,11 @@ exports.createIdea = async (req, res) => {
       marketCategory,
       monetizationModel,
       stageOfIdea,
-      lookingFor,
-      estimatedBudget,
-      equityShare,
+      lookingFor: lookingFor || undefined,
+      estimatedBudget: estimatedBudget ? parseFloat(estimatedBudget) : undefined,
+      equityShare: equityShare ? parseFloat(equityShare) : undefined,
       tags,
-      author,
+      author: user._id,
     });
 
     await newIdea.save();
@@ -39,7 +42,11 @@ exports.getIdeas = async (req, res) => {
 
 exports.getMyIdeas = async (req, res) => {
   try {
-    const ideas = await Idea.find({ author: req.user.uid });
+    const user = await User.findOne({ firebaseUID: req.user.uid });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    const ideas = await Idea.find({ author: user._id });
     res.json(ideas);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching my ideas', error });

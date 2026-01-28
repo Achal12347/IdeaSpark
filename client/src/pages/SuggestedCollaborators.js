@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { fetchSuggestedCollaborators } from '../services/userService';
+import { useAuth } from '../context/AuthContext';
 
 export default function SuggestedCollaborators() {
+  const { currentUser, loading: authLoading } = useAuth();
   const [collaborators, setCollaborators] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (authLoading || !currentUser) return;
+
     const loadCollaborators = async () => {
+      setLoading(true);
       try {
         const data = await fetchSuggestedCollaborators();
         setCollaborators(data);
@@ -17,7 +22,7 @@ export default function SuggestedCollaborators() {
       }
     };
     loadCollaborators();
-  }, []);
+  }, [authLoading, currentUser]);
 
   if (loading) {
     return <div>Loading suggested collaborators...</div>;
