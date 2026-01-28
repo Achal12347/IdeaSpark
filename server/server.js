@@ -7,6 +7,9 @@ const cors = require("cors");
 const userRoutes = require("./routes/userRoutes");
 const authRoutes = require("./routes/authRoutes");
 const ideaRoutes = require("./routes/ideaRoutes");
+const analyticsRoutes = require("./routes/analyticsRoutes");
+const forumRoutes = require("./routes/forumRoutes");
+const hackathonRoutes = require("./routes/hackathonRoutes");
 
 // Create app FIRST
 const app = express();

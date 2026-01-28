@@ -34,5 +34,5 @@
    - Populate Hackathon.js model with judging fields (submissions, judges, rankings)
    - Update hackathonController.js with judging endpoints
    - Update Hackathons.js page to show rankings and judging interface
-7. [ ] Update TODO.md as each step is completed
-8. [ ] Test all new features for integration
+7. [x] Update TODO.md as each step is completed
+8. [x] Test all new features for integration - Server startup error fixed by adding missing route requires in server.js
