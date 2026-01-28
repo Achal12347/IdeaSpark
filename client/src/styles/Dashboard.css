@@ -1,42 +1,147 @@
-.dashboard-container {
-  min-height: 100vh;
-  background: linear-gradient(135deg, #1f4037, #99f2c8);
+* {
+  box-sizing: border-box;
+  font-family: "Segoe UI", sans-serif;
+}
+
+.dashboard {
   display: flex;
-  justify-content: center;
-  align-items: center;
+  height: 100vh;
+  background: #f5f6fa;
 }
 
-.dashboard-card {
-  background: #ffffff;
-  padding: 40px;
-  border-radius: 14px;
-  text-align: center;
-  width: 100%;
-  max-width: 500px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+/* Sidebar */
+.sidebar {
+  width: 220px;
+  background: #0f172a;
+  color: white;
+  padding: 20px;
 }
 
-.dashboard-card h1 {
-  margin-bottom: 15px;
-  color: #1f4037;
-}
-
-.dashboard-card p {
+.logo {
   margin-bottom: 30px;
-  color: #555;
 }
 
-.dashboard-actions button {
-  padding: 12px 30px;
-  border: none;
-  border-radius: 25px;
-  background-color: #1f4037;
-  color: #fff;
-  font-size: 1rem;
+.sidebar ul {
+  list-style: none;
+  padding: 0;
+}
+
+.sidebar li {
+  padding: 12px 10px;
   cursor: pointer;
-  transition: background 0.3s ease;
+  border-radius: 6px;
+  margin-bottom: 5px;
 }
 
-.dashboard-actions button:hover {
-  background-color: #16332c;
+.sidebar li:hover,
+.sidebar li.active {
+  background: #1e293b;
+}
+
+/* Main */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Top Bar */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  background: white;
+  border-bottom: 1px solid #ddd;
+}
+
+.topbar input {
+  width: 300px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.top-actions {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.avatar {
+  background: #2563eb;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 50%;
+}
+
+/* Feed */
+.feed {
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.idea-card {
+  background: white;
+  padding: 16px;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.idea-card h4 {
+  margin: 0 0 8px;
+}
+
+.tags span {
+  background: #e5e7eb;
+  padding: 4px 8px;
+  border-radius: 12px;
+  margin-right: 6px;
+  font-size: 12px;
+}
+
+.stats {
+  margin-top: 10px;
+  display: flex;
+  gap: 15px;
+  font-size: 14px;
+}
+
+/* Right Panel */
+.right-panel {
+  width: 240px;
+  background: white;
+  padding: 20px;
+  border-left: 1px solid #ddd;
+}
+
+.right-panel ul {
+  list-style: none;
+  padding: 0;
+}
+
+.right-panel li {
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+/* Floating Button */
+.fab {
+  position: fixed;
+  bottom: 30px;
+  right: 30px;
+  width: 56px;
+  height: 56px;
+  background: #2563eb;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 28px;
+  cursor: pointer;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+.fab:hover {
+  background: #1d4ed8;
 }
