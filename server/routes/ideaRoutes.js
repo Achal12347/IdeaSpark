@@ -1,5 +1,5 @@
 const express = require('express');
-const { createIdea, getIdeas, getMyIdeas } = require('../controllers/ideaController');
+const { createIdea, getIdeas, getMyIdeas, rateIdea, addComment, getComments, submitPitch, getPitches } = require('../controllers/ideaController');
 const authenticateToken = require('../middleware/authMiddleware');
 
 const router = express.Router();
@@ -12,5 +12,14 @@ router.get('/', getIdeas);
 
 // GET /api/ideas/my - Get user's ideas
 router.get('/my', authenticateToken, getMyIdeas);
+
+// POST /api/ideas/:id/rate - Rate an idea
+router.post('/:id/rate', authenticateToken, rateIdea);
+
+// POST /api/ideas/:id/comments - Add a comment to an idea
+router.post('/:id/comments', authenticateToken, addComment);
+
+// GET /api/ideas/:id/comments - Get comments for an idea
+router.get('/:id/comments', getComments);
 
 module.exports = router;

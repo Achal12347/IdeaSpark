@@ -1,0 +1,106 @@
+/* PostIdea.css - Professional styling for the Post Idea page */
+
+.post-idea-page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f9f9f9;
+  min-height: 100vh;
+}
+
+.post-idea-page h2 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 30px;
+  font-size: 2.5em;
+  font-weight: 300;
+}
+
+.post-idea-page form {
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.post-idea-page h3 {
+  color: #555;
+  margin-top: 30px;
+  margin-bottom: 15px;
+  font-size: 1.4em;
+  font-weight: 500;
+  border-bottom: 2px solid #007bff;
+  padding-bottom: 5px;
+}
+
+.post-idea-page input,
+.post-idea-page textarea,
+.post-idea-page select {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 1em;
+  transition: border-color 0.3s ease;
+  box-sizing: border-box;
+}
+
+.post-idea-page input:focus,
+.post-idea-page textarea:focus,
+.post-idea-page select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+.post-idea-page textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.post-idea-page select {
+  background-color: white;
+}
+
+.post-idea-page button {
+  width: 100%;
+  padding: 15px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 1.2em;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 20px;
+}
+
+.post-idea-page button:hover {
+  background-color: #0056b3;
+}
+
+.post-idea-page button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .post-idea-page {
+    padding: 10px;
+  }
+
+  .post-idea-page form {
+    padding: 20px;
+  }
+
+  .post-idea-page h2 {
+    font-size: 2em;
+  }
+
+  .post-idea-page h3 {
+    font-size: 1.2em;
+  }
+}

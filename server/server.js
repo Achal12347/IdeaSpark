@@ -34,6 +34,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/ideas", ideaRoutes);
+app.use("/api/analytics", analyticsRoutes);
 
 // Health check (IMPORTANT for Render debugging)
 app.get("/", (req, res) => {

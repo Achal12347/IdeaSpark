@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createIdea } from "../services/ideaService";
+import "../styles/PostIdea.css";
 
 export default function PostIdea() {
   const [idea, setIdea] = useState({

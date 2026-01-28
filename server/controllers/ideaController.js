@@ -1,4 +1,5 @@
 const Idea = require('../models/Idea');
+const Comment = require('../models/Comment');
 
 exports.createIdea = async (req, res) => {
   try {
@@ -42,5 +43,72 @@ exports.getMyIdeas = async (req, res) => {
     res.json(ideas);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching my ideas', error });
+  }
+};
+
+exports.rateIdea = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { rating } = req.body;
+    const userId = req.user.id;
+
+    if (rating < 1 || rating > 5) {
+      return res.status(400).json({ message: 'Rating must be between 1 and 5' });
+    }
+
+    const idea = await Idea.findById(id);
+    if (!idea) {
+      return res.status(404).json({ message: 'Idea not found' });
+    }
+
+    // Check if user already rated
+    const existingRating = idea.ratings.find(r => r.user.toString() === userId);
+    if (existingRating) {
+      return res.status(400).json({ message: 'You have already rated this idea' });
+    }
+
+    // Add new rating
+    idea.ratings.push({ user: userId, rating });
+    idea.totalRatings += 1;
+    idea.averageRating = idea.ratings.reduce((sum, r) => sum + r.rating, 0) / idea.totalRatings;
+
+    await idea.save();
+    res.json({ message: 'Rating added successfully', averageRating: idea.averageRating });
+  } catch (error) {
+    res.status(500).json({ message: 'Error rating idea', error });
+  }
+};
+
+exports.addComment = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { content } = req.body;
+    const author = req.user.id;
+
+    const idea = await Idea.findById(id);
+    if (!idea) {
+      return res.status(404).json({ message: 'Idea not found' });
+    }
+
+    const newComment = new Comment({
+      content,
+      idea: id,
+      author,
+    });
+
+    await newComment.save();
+    res.status(201).json(newComment);
+  } catch (error) {
+    res.status(500).json({ message: 'Error adding comment', error });
+  }
+};
+
+exports.getComments = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const comments = await Comment.find({ idea: id }).populate('author', 'name email').sort({ createdAt: -1 });
+    res.json(comments);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching comments', error });
   }
 };
