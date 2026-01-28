@@ -4,7 +4,7 @@ const Comment = require('../models/Comment');
 exports.createIdea = async (req, res) => {
   try {
     const { title, problemStatement, solutionDescription, targetAudience, marketCategory, monetizationModel, stageOfIdea, lookingFor, estimatedBudget, equityShare, tags } = req.body;
-    const author = req.user.id; // Assuming auth middleware sets req.user
+    const author = req.user.uid; // Assuming auth middleware sets req.user
 
     const newIdea = new Idea({
       title,
@@ -39,7 +39,7 @@ exports.getIdeas = async (req, res) => {
 
 exports.getMyIdeas = async (req, res) => {
   try {
-    const ideas = await Idea.find({ author: req.user.id });
+    const ideas = await Idea.find({ author: req.user.uid });
     res.json(ideas);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching my ideas', error });
@@ -50,7 +50,7 @@ exports.rateIdea = async (req, res) => {
   try {
     const { id } = req.params;
     const { rating } = req.body;
-    const userId = req.user.id;
+    const userId = req.user.uid;
 
     if (rating < 1 || rating > 5) {
       return res.status(400).json({ message: 'Rating must be between 1 and 5' });
@@ -83,7 +83,7 @@ exports.addComment = async (req, res) => {
   try {
     const { id } = req.params;
     const { content } = req.body;
-    const author = req.user.id;
+    const author = req.user.uid;
 
     const idea = await Idea.findById(id);
     if (!idea) {
@@ -110,5 +110,38 @@ exports.getComments = async (req, res) => {
     res.json(comments);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching comments', error });
+  }
+};
+
+exports.submitPitch = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { pitchContent } = req.body;
+    const investor = req.user.uid;
+
+    const idea = await Idea.findById(id);
+    if (!idea) {
+      return res.status(404).json({ message: 'Idea not found' });
+    }
+
+    idea.pitches.push({ investor, pitchContent });
+    await idea.save();
+    res.json({ message: 'Pitch submitted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error submitting pitch', error });
+  }
+};
+
+exports.getPitches = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const idea = await Idea.findById(id).populate('pitches.investor', 'name email');
+    if (!idea) {
+      return res.status(404).json({ message: 'Idea not found' });
+    }
+
+    res.json(idea.pitches);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching pitches', error });
   }
 };

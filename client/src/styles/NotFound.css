@@ -1,0 +1,137 @@
+.not-found-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 70vh;
+  padding: 20px;
+  text-align: center;
+}
+
+.not-found-icon {
+  font-size: 8rem;
+  color: #6c757d;
+  margin-bottom: 20px;
+}
+
+.not-found-title {
+  font-size: 3rem;
+  color: #333;
+  margin-bottom: 15px;
+  font-weight: bold;
+}
+
+.not-found-subtitle {
+  font-size: 1.2rem;
+  color: #666;
+  margin-bottom: 30px;
+  max-width: 500px;
+  line-height: 1.5;
+}
+
+.not-found-actions {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.home-btn,
+.back-btn {
+  padding: 12px 24px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all 0.2s;
+  display: inline-block;
+}
+
+.home-btn {
+  background: #007bff;
+  color: white;
+  border: 1px solid #007bff;
+}
+
+.home-btn:hover {
+  background: #0056b3;
+  border-color: #0056b3;
+}
+
+.back-btn {
+  background: white;
+  color: #007bff;
+  border: 1px solid #007bff;
+}
+
+.back-btn:hover {
+  background: #f8f9fa;
+}
+
+.suggestions {
+  margin-top: 40px;
+  max-width: 600px;
+}
+
+.suggestions h3 {
+  color: #333;
+  margin-bottom: 15px;
+  font-size: 1.3rem;
+}
+
+.suggestions-list {
+  list-style: none;
+  padding: 0;
+  text-align: left;
+}
+
+.suggestions-list li {
+  margin-bottom: 10px;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  border-left: 4px solid #007bff;
+}
+
+.suggestions-list a {
+  color: #007bff;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.suggestions-list a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+  .not-found-container {
+    padding: 15px;
+  }
+
+  .not-found-title {
+    font-size: 2rem;
+  }
+
+  .not-found-subtitle {
+    font-size: 1rem;
+  }
+
+  .not-found-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .home-btn,
+  .back-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .suggestions {
+    margin-top: 30px;
+  }
+
+  .suggestions-list {
+    text-align: center;
+  }
+}

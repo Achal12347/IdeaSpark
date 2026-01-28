@@ -2,6 +2,8 @@ require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const http = require('http');
+const socketIo = require('socket.io');
 
 // Routes
 const userRoutes = require("./routes/userRoutes");
@@ -10,9 +12,20 @@ const ideaRoutes = require("./routes/ideaRoutes");
 const analyticsRoutes = require("./routes/analyticsRoutes");
 const forumRoutes = require("./routes/forumRoutes");
 const hackathonRoutes = require("./routes/hackathonRoutes");
+const teamRoutes = require("./routes/teamRoutes");
+const messageRoutes = require("./routes/messageRoutes");
 
 // Create app FIRST
 const app = express();
+const server = http.createServer(app);
+const io = socketIo(server, {
+  cors: {
+    origin: [
+      "http://localhost:3000",
+      "https://idea-spark-olive.vercel.app",
+    ],
+  },
+});
 
 /* =========================
    Middleware
@@ -38,6 +51,10 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/ideas", ideaRoutes);
 app.use("/api/analytics", analyticsRoutes);
+app.use("/api/forums", forumRoutes);
+app.use("/api/hackathons", hackathonRoutes);
+app.use("/api/teams", teamRoutes);
+app.use("/api/messages", messageRoutes);
 
 // Health check (IMPORTANT for Render debugging)
 app.get("/", (req, res) => {
@@ -58,6 +75,37 @@ mongoose
 ========================= */
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`✅ Server running on port ${PORT}`);
+});
+
+// Socket.io for real-time chat
+io.on('connection', (socket) => {
+  console.log('User connected:', socket.id);
+
+  socket.on('joinTeam', (teamId) => {
+    socket.join(teamId);
+    console.log(`User ${socket.id} joined team ${teamId}`);
+  });
+
+  socket.on('sendMessage', async (data) => {
+    const { teamId, content, senderId } = data;
+    try {
+      const Message = require('./models/Message');
+      const message = new Message({
+        content,
+        sender: senderId,
+        team: teamId,
+      });
+      await message.save();
+      await message.populate('sender', 'name');
+      io.to(teamId).emit('newMessage', message);
+    } catch (error) {
+      console.error('Error sending message:', error);
+    }
+  });
+
+  socket.on('disconnect', () => {
+    console.log('User disconnected:', socket.id);
+  });
 });

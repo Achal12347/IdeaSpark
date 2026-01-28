@@ -73,6 +73,16 @@ export default function AdminDashboard() {
             </div>
           </section>
         );
+      case "Hackathons":
+        return (
+          <section className="admin-content">
+            <h3>Hackathon Management</h3>
+            <p>Control hackathon modes, create events, manage submissions, and view rankings.</p>
+            <button>Create New Hackathon</button>
+            <button>Manage Active Hackathons</button>
+            <button>View Rankings</button>
+          </section>
+        );
       default:
         return (
           <section className="admin-content">
@@ -125,6 +135,7 @@ export default function AdminDashboard() {
             Ideas
           </button>
           <button onClick={() => setPageTitle("Investors")}>Investors</button>
+          <button onClick={() => setPageTitle("Hackathons")}>Hackathons</button>
           <button onClick={() => setPageTitle("Analytics")}>Analytics</button>
           <button onClick={() => setPageTitle("Reports")}>Reports</button>
         </nav>

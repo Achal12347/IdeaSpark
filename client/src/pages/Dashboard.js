@@ -39,6 +39,7 @@ export default function Dashboard() {
             <li>Bookmarks</li>
             <li>Members</li>
             <li>Investors</li>
+            <li onClick={() => alert("Hackathon will be announced shortly")}>Hackathons</li>
             <li>Activity</li>
             <li>Settings</li>
           </ul>
