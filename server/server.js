@@ -6,6 +6,7 @@ const cors = require("cors");
 // Routes
 const userRoutes = require("./routes/userRoutes");
 const authRoutes = require("./routes/authRoutes");
+const ideaRoutes = require("./routes/ideaRoutes");
 
 // Create app FIRST
 const app = express();
@@ -32,6 +33,7 @@ app.use(express.json());
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/ideas", ideaRoutes);
 
 // Health check (IMPORTANT for Render debugging)
 app.get("/", (req, res) => {

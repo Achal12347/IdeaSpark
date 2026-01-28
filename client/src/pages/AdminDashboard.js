@@ -1,11 +1,42 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../firebase";
+import { fetchIdeas } from "../services/ideaService";
+import { fetchUserProfile } from "../services/userService";
 import "../styles/AdminDashboard.css";
 
 export default function AdminDashboard() {
   const [pageTitle, setPageTitle] = useState("Dashboard");
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalIdeas: 0,
+    activeToday: 0,
+    pendingReviews: 0,
+  });
+  const [ideas, setIdeas] = useState([]);
+  const [users, setUsers] = useState([]);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const ideasData = await fetchIdeas();
+        setIdeas(ideasData);
+        setStats((prev) => ({ ...prev, totalIdeas: ideasData.length }));
+
+        const usersData = await fetchUserProfile();
+        setUsers(usersData);
+        setStats((prev) => ({ ...prev, totalUsers: usersData.length }));
+
+        // Placeholder for activeToday and pendingReviews
+        setStats((prev) => ({ ...prev, activeToday: 89 })); // Placeholder
+        setStats((prev) => ({ ...prev, pendingReviews: 12 })); // Placeholder
+      } catch (error) {
+        console.error("Error loading admin data:", error);
+      }
+    };
+    loadData();
+  }, []);
 
   // Logout handler
   const handleLogout = async () => {
@@ -13,16 +44,86 @@ export default function AdminDashboard() {
     await auth.signOut();
   };
 
- return (
+  const renderContent = () => {
+    switch (pageTitle) {
+      case "Ideas":
+        return (
+          <section className="admin-content">
+            <h3>All Ideas</h3>
+            {ideas.map((idea) => (
+              <div key={idea._id} className="idea-card">
+                <h4>{idea.title}</h4>
+                <p>{idea.description}</p>
+              </div>
+            ))}
+          </section>
+        );
+      case "Users":
+        return (
+          <section className="admin-content">
+            <h3>All Users</h3>
+            <div className="users-list">
+              {users.map((user) => (
+                <div key={user._id} className="user-card">
+                  <h4>{user.name}</h4>
+                  <p>Expertise: {user.expertise}</p>
+                  <p>Workplace: {user.workplace}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        );
+      default:
+        return (
+          <section className="admin-content">
+            <div className="stats-grid">
+              <div className="stat-card">
+                <h4>Total Users</h4>
+                <p>{stats.totalUsers}</p>
+              </div>
+              <div className="stat-card">
+                <h4>Total Ideas</h4>
+                <p>{stats.totalIdeas}</p>
+              </div>
+              <div className="stat-card">
+                <h4>Active Today</h4>
+                <p>{stats.activeToday}</p>
+              </div>
+              <div className="stat-card highlight">
+                <h4>Pending Reviews</h4>
+                <p>{stats.pendingReviews}</p>
+              </div>
+            </div>
+          </section>
+        );
+    }
+  };
+
+  return (
     <div className="admin-layout">
       {/* SIDEBAR */}
       <aside className="admin-sidebar">
         <h2 className="logo">IdeaSpark</h2>
 
         <nav className="sidebar-nav">
-          <button onClick={() => setPageTitle("Dashboard")} className="active">Dashboard</button>
-          <button onClick={() => setPageTitle("Users")}>Users</button>
-          <button onClick={() => setPageTitle("Ideas")}>Ideas</button>
+          <button
+            onClick={() => setPageTitle("Dashboard")}
+            className={pageTitle === "Dashboard" ? "active" : ""}
+          >
+            Dashboard
+          </button>
+          <button
+            onClick={() => setPageTitle("Users")}
+            className={pageTitle === "Users" ? "active" : ""}
+          >
+            Users
+          </button>
+          <button
+            onClick={() => setPageTitle("Ideas")}
+            className={pageTitle === "Ideas" ? "active" : ""}
+          >
+            Ideas
+          </button>
           <button onClick={() => setPageTitle("Investors")}>Investors</button>
           <button onClick={() => setPageTitle("Analytics")}>Analytics</button>
           <button onClick={() => setPageTitle("Reports")}>Reports</button>
@@ -58,30 +159,7 @@ export default function AdminDashboard() {
           </div>
         </header>
 
-        {/* DASHBOARD CONTENT */}
-        <section className="admin-content">
-          <div className="stats-grid">
-            <div className="stat-card">
-              <h4>Total Users</h4>
-              <p>1,240</p>
-            </div>
-
-            <div className="stat-card">
-              <h4>Total Ideas</h4>
-              <p>342</p>
-            </div>
-
-            <div className="stat-card">
-              <h4>Active Today</h4>
-              <p>89</p>
-            </div>
-
-            <div className="stat-card highlight">
-              <h4>Pending Reviews</h4>
-              <p>12</p>
-            </div>
-          </div>
-        </section>
+        {renderContent()}
       </div>
     </div>
   );

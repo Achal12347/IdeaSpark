@@ -145,3 +145,13 @@
 .fab:hover {
   background: #1d4ed8;
 }
+
+/* Logout Button */
+.logout-btn {
+  padding: 12px;
+  background: #dc2626;
+  border: none;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+}

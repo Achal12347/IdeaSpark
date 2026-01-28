@@ -25,6 +25,11 @@
   margin-bottom: 30px;
 }
 
+.sidebar-nav {
+  display: flex;
+  flex-direction: column;
+}
+
 .sidebar-nav button {
   background: none;
   border: none;

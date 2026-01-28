@@ -1,11 +1,26 @@
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase";
 import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { fetchIdeas } from "../services/ideaService";
 import "../styles/Dashboard.css";
 
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const [ideas, setIdeas] = useState([]);
+
+  useEffect(() => {
+    const loadIdeas = async () => {
+      try {
+        const data = await fetchIdeas();
+        setIdeas(data);
+      } catch (error) {
+        console.error("Error fetching ideas:", error);
+      }
+    };
+    loadIdeas();
+  }, []);
 
   const handleLogout = async () => {
     navigate("/");
@@ -39,7 +54,7 @@ export default function Dashboard() {
             <span className="notification">🔔</span>
             <div className="profile-menu">
               <span className="avatar">A</span>
-              <button onClick={handleLogout}>Logout</button>
+              <button className="logout-btn" onClick={handleLogout}>Logout</button>
             </div>
           </div>
         </header>
@@ -48,41 +63,22 @@ export default function Dashboard() {
         <section className="feed">
           <h3>Idea Feed</h3>
 
-          {/* Idea Card */}
-          <div className="idea-card">
-            <h4>AI Resume Analyzer</h4>
-            <p>
-              An AI-based tool that reviews resumes and suggests improvements
-              based on job descriptions.
-            </p>
-            <div className="tags">
-              <span>AI</span>
-              <span>HR</span>
-              <span>SaaS</span>
+          {ideas.map((idea) => (
+            <div key={idea._id} className="idea-card">
+              <h4>{idea.title}</h4>
+              <p>{idea.description}</p>
+              <div className="tags">
+                {idea.tags && idea.tags.map((tag, index) => (
+                  <span key={index}>{tag}</span>
+                ))}
+              </div>
+              <div className="stats">
+                <span>👀 {idea.views || 0}</span>
+                <span>⭐ {idea.likes || 0}</span>
+                <span>💬 {idea.comments || 0}</span>
+              </div>
             </div>
-            <div className="stats">
-              <span>👀 124</span>
-              <span>⭐ 32</span>
-              <span>💬 8</span>
-            </div>
-          </div>
-
-          <div className="idea-card">
-            <h4>Smart Parking System</h4>
-            <p>
-              IoT-based smart parking solution for urban cities with real-time
-              slot availability.
-            </p>
-            <div className="tags">
-              <span>IoT</span>
-              <span>Smart City</span>
-            </div>
-            <div className="stats">
-              <span>👀 98</span>
-              <span>⭐ 21</span>
-              <span>💬 5</span>
-            </div>
-          </div>
+          ))}
         </section>
       </main>
 
