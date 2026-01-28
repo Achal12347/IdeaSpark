@@ -36,12 +36,13 @@ export default function Dashboard() {
           <ul>
             <li className="active">Feed</li>
             <li onClick={() => navigate("/my-ideas")}>My Ideas</li>
-            <li>Bookmarks</li>
-            <li>Members</li>
-            <li>Investors</li>
+            <li onClick={() => navigate("/bookmarks")}>Bookmarks</li>
+            <li onClick={() => navigate("/members")}>Members</li>
+            <li onClick={() => navigate("/investors")}>Investors</li>
+            <li onClick={() => navigate("/investor-dashboard")}>Investor Dashboard</li>
             <li onClick={() => alert("Hackathon will be announced shortly")}>Hackathons</li>
-            <li>Activity</li>
-            <li>Settings</li>
+            <li onClick={() => navigate("/activity")}>Activity</li>
+            <li onClick={() => navigate("/settings")}>Settings</li>
           </ul>
         </nav>
       </aside>
@@ -87,10 +88,10 @@ export default function Dashboard() {
       <aside className="right-panel">
         <h4>Insights</h4>
         <ul>
-          <li>🔥 Trending Ideas</li>
-          <li>👤 Investors viewed your profile</li>
-          <li>📊 Weekly Stats</li>
-          <li>💡 Suggested Collaborators</li>
+          <li onClick={() => navigate("/trending-ideas")}>🔥 Trending Ideas</li>
+          <li onClick={() => navigate("/investor-views")}>👤 Investors viewed your profile</li>
+          <li onClick={() => navigate("/weekly-stats")}>📊 Weekly Stats</li>
+          <li onClick={() => navigate("/suggested-collaborators")}>💡 Suggested Collaborators</li>
         </ul>
       </aside>
 

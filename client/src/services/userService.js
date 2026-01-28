@@ -14,3 +14,11 @@ export const updateUserProfile = async (profileData) => {
 export const fetchAllUsers = async () => {
   return await apiRequest('/api/users');
 };
+
+export const fetchUserStats = async () => {
+  return await apiRequest('/api/users/stats');
+};
+
+export const fetchSuggestedCollaborators = async () => {
+  return await apiRequest('/api/users/suggested-collaborators');
+};

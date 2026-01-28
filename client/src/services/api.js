@@ -1,5 +1,7 @@
 import { auth } from '../firebase';
 
+const API_BASE_URL = process.env.REACT_APP_API_URL;
+
 const apiRequest = async (url, options = {}) => {
   const user = auth.currentUser;
   if (!user) {
@@ -13,7 +15,7 @@ const apiRequest = async (url, options = {}) => {
     ...options.headers,
   };
 
-  const response = await fetch(url, {
+  const response = await fetch(`${API_BASE_URL}${url}`, {
     ...options,
     headers,
   });

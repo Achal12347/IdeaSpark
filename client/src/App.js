@@ -19,6 +19,14 @@ import Teams from "./pages/Teams";
 import Hackathons from "./pages/Hackathons";
 import InvestorDashboard from "./pages/InvestorDashboard";
 import TeamChat from "./pages/TeamChat";
+import Bookmarks from "./pages/Bookmarks";
+import Activity from "./pages/Activity";
+import Members from "./pages/Members";
+import TrendingIdeas from "./pages/TrendingIdeas";
+import WeeklyStats from "./pages/WeeklyStats";
+import SuggestedCollaborators from "./pages/SuggestedCollaborators";
+import Settings from "./pages/Settings";
+import Reports from "./pages/Reports";  
 
 function App() {
   return (
@@ -114,6 +122,70 @@ function App() {
             <ProtectedRoute>
               <TeamChat />
             </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/bookmarks"
+          element={
+            <ProtectedRoute>
+              <Bookmarks />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/activity"
+          element={
+            <ProtectedRoute>
+              <Activity />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/members"
+          element={
+            <ProtectedRoute>
+              <Members />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/trending-ideas"
+          element={
+            <ProtectedRoute>
+              <TrendingIdeas />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/weekly-stats"
+          element={
+            <ProtectedRoute>
+              <WeeklyStats />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/suggested-collaborators"
+          element={
+            <ProtectedRoute>
+              <SuggestedCollaborators />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <Settings />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/reports"
+          element={
+            <AdminRoute>
+              <Reports />
+            </AdminRoute>
           }
         />
       </Routes>

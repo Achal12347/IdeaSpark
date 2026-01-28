@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { fetchTeams, createTeam } from "../services/teamService";
+import "../styles/Teams.css";
 
 export default function Teams() {
   const [teams, setTeams] = useState([]);

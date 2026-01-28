@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import apiRequest from "../services/api";
+import "../styles/IdeaDetails.css";
 
 export default function IdeaDetails() {
   const { id } = useParams();

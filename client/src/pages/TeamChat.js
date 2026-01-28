@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import io from "socket.io-client";
 import apiRequest from "../services/api";
+import "../styles/TeamChat.css";
 
 export default function TeamChat() {
   const [messages, setMessages] = useState([]);

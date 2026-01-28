@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchIdeas } from "../services/ideaService";
+import "../styles/Ideas.css";
 
 export default function Ideas() {
   const [ideas, setIdeas] = useState([]);

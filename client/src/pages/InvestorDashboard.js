@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import apiRequest from "../services/api";
+import "../styles/InvestorDashboard.css";
 
 export default function InvestorDashboard() {
   const [ideas, setIdeas] = useState([]);

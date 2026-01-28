@@ -136,8 +136,8 @@ export default function AdminDashboard() {
           </button>
           <button onClick={() => setPageTitle("Investors")}>Investors</button>
           <button onClick={() => setPageTitle("Hackathons")}>Hackathons</button>
-          <button onClick={() => setPageTitle("Analytics")}>Analytics</button>
-          <button onClick={() => setPageTitle("Reports")}>Reports</button>
+          <button onClick={() => navigate("/analytics")}>Analytics</button>
+          <button onClick={() => navigate("/reports")}>Reports</button>
         </nav>
 
         <button className="logout-btn" onClick={handleLogout}>

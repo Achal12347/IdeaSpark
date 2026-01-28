@@ -4,6 +4,10 @@ export const fetchIdeas = async () => {
   return await apiRequest('/api/ideas');
 };
 
+export const fetchTrendingIdeas = async () => {
+  return await apiRequest('/api/ideas/trending');
+};
+
 export const createIdea = async (ideaData) => {
   return await apiRequest('/api/ideas', {
     method: 'POST',

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import apiRequest from "../services/api";
+import "../styles/Hackathons.css";
 
 export default function Hackathons() {
   const [hackathons, setHackathons] = useState([]);
