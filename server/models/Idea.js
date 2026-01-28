@@ -34,10 +34,10 @@ const ideaSchema = new mongoose.Schema(
       type: String,
     },
     estimatedBudget: {
-      type: String,
+      type: Number,
     },
     equityShare: {
-      type: String,
+      type: Number,
     },
     tags: [{
       type: String,

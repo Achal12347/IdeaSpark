@@ -1,5 +1,6 @@
 const Idea = require('../models/Idea');
 const Comment = require('../models/Comment');
+const User = require('../models/User');
 
 exports.createIdea = async (req, res) => {
   try {

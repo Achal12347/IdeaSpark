@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { fetchUserProfile, updateUserProfile } from '../services/userService';
+import '../styles/Settings.css';
 
 export default function Settings() {
   const [profile, setProfile] = useState({
