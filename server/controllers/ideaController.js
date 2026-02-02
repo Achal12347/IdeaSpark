@@ -32,6 +32,32 @@ exports.createIdea = async (req, res) => {
   }
 };
 
+exports.getIdea = async (req, res) => {
+  try {
+    const idea = await Idea.findById(req.params.id).populate('author', 'name email');
+    if (!idea) {
+      return res.status(404).json({ message: 'Idea not found' });
+    }
+    res.json(idea);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching idea', error });
+  }
+};
+
+exports.incrementViews = async (req, res) => {
+  try {
+    const idea = await Idea.findById(req.params.id);
+    if (!idea) {
+      return res.status(404).json({ message: 'Idea not found' });
+    }
+    idea.views += 1;
+    await idea.save();
+    res.json({ message: 'Views incremented' });
+  } catch (error) {
+    res.status(500).json({ message: 'Error incrementing views', error });
+  }
+};
+
 exports.getIdeas = async (req, res) => {
   try {
     const ideas = await Idea.find().populate('author', 'name email');

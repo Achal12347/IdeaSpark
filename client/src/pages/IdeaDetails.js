@@ -1,10 +1,13 @@
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import apiRequest from "../services/api";
 import "../styles/IdeaDetails.css";
 
 export default function IdeaDetails() {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { currentUser } = useAuth(); // eslint-disable-line no-unused-vars
   const [idea, setIdea] = useState(null);
   const [rating, setRating] = useState(0);
   const [userRating, setUserRating] = useState(0);
@@ -12,6 +15,13 @@ export default function IdeaDetails() {
   const [newComment, setNewComment] = useState('');
 
   useEffect(() => {
+    const incrementViews = async () => {
+      try {
+        await apiRequest(`/api/ideas/${id}/views`, 'POST');
+      } catch (error) {
+        console.error("Error incrementing views:", error);
+      }
+    };
     const loadIdea = async () => {
       try {
         const ideaData = await apiRequest(`/api/ideas/${id}`);
@@ -29,6 +39,7 @@ export default function IdeaDetails() {
         console.error("Error loading comments:", error);
       }
     };
+    incrementViews();
     loadIdea();
     loadComments();
   }, [id]);
@@ -57,6 +68,10 @@ export default function IdeaDetails() {
     } catch (error) {
       console.error("Error adding comment:", error);
     }
+  };
+
+  const handleCollaborate = () => {
+    navigate('/suggested-collaborators');
   };
 
   if (!idea) return <div>Loading...</div>;
@@ -109,6 +124,11 @@ export default function IdeaDetails() {
             </div>
           ))}
         </div>
+      </div>
+      <div className="collaboration-section">
+        <h3>Collaboration</h3>
+        <p>Interested in collaborating on this idea?</p>
+        <button onClick={handleCollaborate} className="collaborate-btn">Find Collaborators</button>
       </div>
     </div>
   );
