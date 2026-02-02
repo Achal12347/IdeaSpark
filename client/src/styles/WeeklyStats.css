@@ -1,28 +1,22 @@
-.analytics-page {
+.weekly-stats-page {
   padding: 20px;
   max-width: 800px;
   margin: 0 auto;
 }
 
-.analytics-page h2 {
+.weekly-stats-page h1 {
   color: #2563eb;
   margin-bottom: 20px;
 }
 
-.analytics-loading {
-  text-align: center;
-  padding: 40px;
-  font-size: 18px;
-}
-
-.analytics-metrics {
+.stats-overview {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 20px;
   margin-bottom: 30px;
 }
 
-.metric-card {
+.stat-item {
   border: 1px solid #ddd;
   border-radius: 8px;
   padding: 20px;
@@ -31,50 +25,25 @@
   text-align: center;
 }
 
-.metric-card h3 {
+.stat-item h3 {
   margin: 0 0 10px 0;
   color: #2563eb;
   font-size: 16px;
 }
 
-.metric-card p {
+.stat-item p {
   margin: 0;
   font-size: 24px;
   font-weight: bold;
   color: #333;
 }
 
-.analytics-trending {
+.stats-chart {
   border: 1px solid #ddd;
   border-radius: 8px;
   padding: 20px;
   background-color: #fff;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.analytics-trending h3 {
-  margin: 0 0 15px 0;
-  color: #2563eb;
-}
-
-.trending-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.trending-item {
-  padding: 10px 0;
-  border-bottom: 1px solid #eee;
-}
-
-.trending-item:last-child {
-  border-bottom: none;
-}
-
-.no-trending {
   text-align: center;
-  padding: 20px;
   color: #666;
-  font-style: italic;
 }

@@ -1,0 +1,54 @@
+.trending-page {
+  padding: 20px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.trending-page h1 {
+  color: #2563eb;
+  margin-bottom: 20px;
+}
+
+.trending-loading {
+  text-align: center;
+  padding: 40px;
+  font-size: 18px;
+}
+
+.no-trending {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+  font-style: italic;
+}
+
+.trending-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.trending-card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 16px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.trending-card h3 {
+  margin: 0 0 8px 0;
+  color: #2563eb;
+}
+
+.trending-card p {
+  margin: 0 0 12px 0;
+  color: #555;
+}
+
+.trending-stats {
+  display: flex;
+  gap: 16px;
+  font-size: 14px;
+  color: #666;
+}

@@ -30,9 +30,9 @@ const ideaSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    lookingFor: {
+    lookingFor: [{
       type: String,
-    },
+    }],
     estimatedBudget: {
       type: Number,
     },

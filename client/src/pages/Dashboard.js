@@ -45,7 +45,7 @@ export default function Dashboard() {
         <h2 className="logo">IdeaHub</h2>
         <nav>
           <ul>
-            <li className="active">Feed</li>
+            <li className="active" onClick={() => navigate("/dashboard")}>Feed</li>
             <li onClick={() => navigate("/my-ideas")}>My Ideas</li>
             <li onClick={() => navigate("/bookmarks")}>Bookmarks</li>
             <li onClick={() => navigate("/members")}>Members</li>

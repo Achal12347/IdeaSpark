@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { fetchBookmarks } from '../services/bookmarkService';
 import { useAuth } from '../context/AuthContext';
+import '../styles/Bookmarks.css';
 
 export default function Bookmarks() {
   const { currentUser, loading: authLoading } = useAuth();
@@ -25,27 +26,21 @@ export default function Bookmarks() {
   }, [authLoading, currentUser]);
 
   if (loading) {
-    return <div>Loading bookmarks...</div>;
+    return <div className="bookmarks-loading">Loading bookmarks...</div>;
   }
 
   return (
-    <div style={{ padding: '20px' }}>
+    <div className="bookmarks-page">
       <h1>Bookmarks</h1>
       {bookmarks.length === 0 ? (
-        <p>You haven't bookmarked any ideas yet.</p>
+        <p className="no-bookmarks">You haven't bookmarked any ideas yet.</p>
       ) : (
-        <div>
+        <div className="bookmarks-list">
           {bookmarks.map((bookmark) => (
-            <div key={bookmark._id} style={{
-              border: '1px solid #ddd',
-              borderRadius: '8px',
-              padding: '16px',
-              marginBottom: '16px',
-              backgroundColor: '#fff'
-            }}>
+            <div key={bookmark._id} className="bookmark-card">
               <h3>{bookmark.title}</h3>
               <p>{bookmark.description}</p>
-              <div style={{ display: 'flex', gap: '16px', marginTop: '8px' }}>
+              <div className="bookmark-stats">
                 <span>👀 {bookmark.views || 0}</span>
                 <span>⭐ {bookmark.likes || 0}</span>
                 <span>💬 {bookmark.comments || 0}</span>

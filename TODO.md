@@ -1,39 +1,46 @@
-# TODO: Implement State Management for Login Persistence and Data Fetching
+# TODO: Fix UI Issues in AdminDashboard and Dashboard
 
-## Objective
-Ensure that logged-in users remain authenticated after page refresh, and pages fetch data appropriately without logging out.
+## Phase 1: Analyze and Identify Issues
+- [x] Read AdminDashboard.js and Dashboard.js to understand current structure
+- [x] Identify non-clickable elements (e.g., "Feed" in Dashboard sidebar)
+- [x] Identify elements redirecting to white/poor UI pages (e.g., Investors, Hackathons in AdminDashboard; various navigations in Dashboard)
+- [x] Check related pages (Analytics, Reports, TrendingIdeas, etc.) for UI quality
 
-## Information Gathered
-- **AuthContext.js**: Uses Firebase `onAuthStateChanged` to manage user state, which should persist across refreshes.
-- **firebase.js**: Configured with `browserLocalPersistence` for auth persistence.
-- **ProtectedRoute.js**: Waits for auth loading and checks user profile before rendering protected pages.
-- **Dashboard.js**: Fetches ideas on component mount, but does not check if user is authenticated before fetching.
-- Other pages (e.g., Bookmarks, Activity) likely have similar data fetching patterns.
+## Phase 2: Fix AdminDashboard Issues
+- [ ] Add renderContent cases for "Investors" and "Hackathons" in AdminDashboard.js (currently show default dashboard)
+- [ ] Improve UI for Analytics and Reports pages if needed (add proper styling)
+- [ ] Ensure all sidebar buttons are functional
 
-## Plan
-1. **Update AuthContext**: Ensure loading state is properly handled and user data is available immediately on refresh. ✅ Already properly implemented with onAuthStateChanged and loading state.
-2. **Modify Data Fetching in Pages**: Update pages to fetch data only when `currentUser` is available from `useAuth`. ✅ Updated Dashboard.js, Bookmarks.js, Activity.js, TrendingIdeas.js, SuggestedCollaborators.js.
-3. **Add Loading States**: Implement loading indicators in pages while auth is loading or data is fetching. ✅ Added loading states in updated pages.
-4. **Ensure API Calls Include Auth**: Verify that all API services use the user's ID token for authenticated requests. ✅ Verified api.js includes auth tokens.
-5. **Test Refresh Behavior**: Manually test login persistence and data fetching after refresh. ⏳ Requires manual testing.
+## Phase 3: Fix Dashboard Issues
+- [x] Make "Feed" in sidebar clickable (currently no onclick)
+- [x] Improve UI for pages like Bookmarks.js, TrendingIdeas.js, SuggestedCollaborators.js (add CSS classes instead of inline styles)
+- [x] Enhance basic pages like WeeklyStats.js and Reports.js with better content and styling
+- [x] Ensure all right-panel links navigate properly and have good UI
 
-## Dependent Files to Edit
-- `client/src/context/AuthContext.js` (minor updates if needed)
-- `client/src/pages/Dashboard.js`
-- `client/src/pages/Bookmarks.js`
-- `client/src/pages/Activity.js`
-- `client/src/pages/TrendingIdeas.js`
-- `client/src/pages/Members.js`
-- `client/src/pages/WeeklyStats.js`
-- `client/src/pages/SuggestedCollaborators.js`
-- `client/src/pages/Settings.js`
-- `client/src/pages/Reports.js`
-- `client/src/services/ideaService.js`
-- `client/src/services/bookmarkService.js`
-- `client/src/services/activityService.js`
-- `client/src/services/userService.js`
+## Phase 4: General UI Improvements
+- [x] Add consistent styling across all updated pages
+- [ ] Test all onclick functionalities
+- [ ] Ensure no white pages remain
 
-## Followup Steps
-- Run the app and test login/refresh cycle.
-- Check browser console for any auth or API errors.
-- If issues persist, investigate Firebase configuration or token expiration.
+## Phase 5: Testing and Finalization
+- [ ] Run the app and test all sidebar/topbar options
+- [ ] Fix any remaining issues
+- [ ] Update this TODO as tasks are completed
+
+# TODO: Update PostIdea.js for Multiple Collaborators/Investors Selection
+
+## Phase 1: Update Database Model
+- [x] Modify server/models/Idea.js to change "lookingFor" from String to [String] (array of strings)
+
+## Phase 2: Update Server Controller
+- [x] Update server/controllers/ideaController.js to handle "lookingFor" as an array in createIdea function
+
+## Phase 3: Update Frontend Component
+- [x] Modify client/src/pages/PostIdea.js to replace the single select dropdown for "lookingFor" with checkboxes allowing multiple selections
+- [x] Update state management to handle an array for "lookingFor"
+- [x] Ensure the form submits the selected options as an array
+
+## Phase 4: Testing
+- [ ] Test posting an idea with multiple "lookingFor" selections
+- [ ] Verify data is saved correctly in the database
+- [ ] Check that the idea displays the multiple selections properly

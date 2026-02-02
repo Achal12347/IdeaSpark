@@ -18,7 +18,7 @@ exports.createIdea = async (req, res) => {
       marketCategory,
       monetizationModel,
       stageOfIdea,
-      lookingFor: lookingFor || undefined,
+      lookingFor: lookingFor || [],
       estimatedBudget: estimatedBudget ? parseFloat(estimatedBudget) : undefined,
       equityShare: equityShare ? parseFloat(equityShare) : undefined,
       tags,

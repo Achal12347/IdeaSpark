@@ -78,9 +78,23 @@ export default function AdminDashboard() {
           <section className="admin-content">
             <h3>Hackathon Management</h3>
             <p>Control hackathon modes, create events, manage submissions, and view rankings.</p>
-            <button>Create New Hackathon</button>
-            <button>Manage Active Hackathons</button>
-            <button>View Rankings</button>
+            <div className="hackathon-actions">
+              <button className="admin-btn">Create New Hackathon</button>
+              <button className="admin-btn">Manage Active Hackathons</button>
+              <button className="admin-btn">View Rankings</button>
+            </div>
+          </section>
+        );
+      case "Investors":
+        return (
+          <section className="admin-content">
+            <h3>Investor Management</h3>
+            <p>Manage investor profiles, view pitches, and track investments.</p>
+            <div className="investor-actions">
+              <button className="admin-btn">View All Investors</button>
+              <button className="admin-btn">Manage Pitches</button>
+              <button className="admin-btn">Investment Tracking</button>
+            </div>
           </section>
         );
       default:
@@ -134,8 +148,18 @@ export default function AdminDashboard() {
           >
             Ideas
           </button>
-          <button onClick={() => setPageTitle("Investors")}>Investors</button>
-          <button onClick={() => setPageTitle("Hackathons")}>Hackathons</button>
+          <button
+            onClick={() => setPageTitle("Investors")}
+            className={pageTitle === "Investors" ? "active" : ""}
+          >
+            Investors
+          </button>
+          <button
+            onClick={() => setPageTitle("Hackathons")}
+            className={pageTitle === "Hackathons" ? "active" : ""}
+          >
+            Hackathons
+          </button>
           <button onClick={() => navigate("/analytics")}>Analytics</button>
           <button onClick={() => navigate("/reports")}>Reports</button>
         </nav>

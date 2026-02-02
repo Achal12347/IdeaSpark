@@ -12,7 +12,7 @@ export default function PostIdea() {
     marketCategory: "",
     monetizationModel: "",
     stageOfIdea: "",
-    lookingFor: "",
+    lookingFor: [],
     estimatedBudget: "",
     equityShare: "",
     tags: "",
@@ -21,6 +21,16 @@ export default function PostIdea() {
 
   const handleChange = (e) => {
     setIdea({ ...idea, [e.target.name]: e.target.value });
+  };
+
+  const handleCheckboxChange = (e) => {
+    const { value, checked } = e.target;
+    setIdea((prevIdea) => ({
+      ...prevIdea,
+      lookingFor: checked
+        ? [...prevIdea.lookingFor, value]
+        : prevIdea.lookingFor.filter((item) => item !== value),
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -106,15 +116,63 @@ export default function PostIdea() {
 
         {/* Collaboration & Investment */}
         <h3>🔹 Collaboration & Investment</h3>
-        <select name="lookingFor" value={idea.lookingFor} onChange={handleChange}>
-          <option value="">What are you looking for?</option>
-          <option value="Co-founder">Co-founder</option>
-          <option value="Developer">Developer</option>
-          <option value="Designer">Designer</option>
-          <option value="Investor">Investor</option>
-          <option value="Mentor">Mentor</option>
-          <option value="Other">Other</option>
-        </select>
+        <p>What are you looking for? (Select all that apply)</p>
+        <div className="checkbox-group">
+          <label>
+            <input
+              type="checkbox"
+              value="Co-founder"
+              checked={idea.lookingFor.includes("Co-founder")}
+              onChange={handleCheckboxChange}
+            />
+            Co-founder
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              value="Developer"
+              checked={idea.lookingFor.includes("Developer")}
+              onChange={handleCheckboxChange}
+            />
+            Developer
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              value="Designer"
+              checked={idea.lookingFor.includes("Designer")}
+              onChange={handleCheckboxChange}
+            />
+            Designer
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              value="Investor"
+              checked={idea.lookingFor.includes("Investor")}
+              onChange={handleCheckboxChange}
+            />
+            Investor
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              value="Mentor"
+              checked={idea.lookingFor.includes("Mentor")}
+              onChange={handleCheckboxChange}
+            />
+            Mentor
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              value="Other"
+              checked={idea.lookingFor.includes("Other")}
+              onChange={handleCheckboxChange}
+            />
+            Other
+          </label>
+        </div>
         <input
           type="text"
           name="estimatedBudget"
