@@ -80,9 +80,9 @@ export default function Dashboard() {
             <p>Loading ideas...</p>
           ) : (
             ideas.map((idea) => (
-              <div key={idea._id} className="idea-card">
+              <div key={idea._id} className="idea-card" onClick={() => navigate(`/idea/${idea._id}`)}>
                 <h4>{idea.title}</h4>
-                <p>{idea.description}</p>
+                <p>{idea.solutionDescription}</p>
                 <div className="tags">
                   {idea.tags && idea.tags.map((tag, index) => (
                     <span key={index}>{tag}</span>

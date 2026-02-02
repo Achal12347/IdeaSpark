@@ -72,6 +72,11 @@ export default function IdeaDetails() {
         ))}
       </div>
       <p>Posted by: {idea.author?.name}</p>
+      <div className="idea-stats">
+        <span>👀 {idea.views || 0} views</span>
+        <span>⭐ {idea.likes || 0} likes</span>
+        <span>💬 {idea.comments?.length || 0} comments</span>
+      </div>
       <div className="rating-section">
         <h3>Rating: {rating.toFixed(1)} ({idea.totalRatings} ratings)</h3>
         <div className="star-rating">

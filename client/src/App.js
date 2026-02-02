@@ -26,7 +26,8 @@ import TrendingIdeas from "./pages/TrendingIdeas";
 import WeeklyStats from "./pages/WeeklyStats";
 import SuggestedCollaborators from "./pages/SuggestedCollaborators";
 import Settings from "./pages/Settings";
-import Reports from "./pages/Reports";  
+import Reports from "./pages/Reports";
+import MyIdeas from "./pages/MyIdeas";
 
 function App() {
   return (
@@ -65,6 +66,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Ideas />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/my-ideas"
+          element={
+            <ProtectedRoute>
+              <MyIdeas />
             </ProtectedRoute>
           }
         />

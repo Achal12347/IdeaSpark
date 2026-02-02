@@ -41,7 +41,7 @@ export default function PostIdea() {
         tags: idea.tags.split(",").map(tag => tag.trim()),
       });
       alert("Idea posted successfully!");
-      navigate("/ideas");
+      navigate("/dashboard");
     } catch (error) {
       console.error("Error posting idea:", error);
       alert("Error posting idea: " + error.message);
