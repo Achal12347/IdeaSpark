@@ -1,37 +1,22 @@
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
-import { fetchIdeas } from "../services/ideaService";
 import { useAuth } from "../context/AuthContext";
+import { useGetIdeasQuery } from "../store/apiSlice";
 import "../styles/dashboardTheme.css";
 import "../styles/Dashboard.css";
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const { currentUser, loading: authLoading } = useAuth();
-  const [ideas, setIdeas] = useState([]);
-  const [loadingIdeas, setLoadingIdeas] = useState(true);
-
-  useEffect(() => {
-    if (authLoading || !currentUser) {
-      setLoadingIdeas(false);
-      return;
+  const { data: ideas = [], isLoading: loadingIdeas } = useGetIdeasQuery(
+    undefined,
+    {
+      skip: authLoading || !currentUser,
+      refetchOnFocus: true,
+      refetchOnReconnect: true,
     }
-
-    const loadIdeas = async () => {
-      setLoadingIdeas(true);
-      try {
-        const data = await fetchIdeas();
-        setIdeas(data);
-      } catch (error) {
-        console.error("Error fetching ideas:", error);
-      } finally {
-        setLoadingIdeas(false);
-      }
-    };
-    loadIdeas();
-  }, [authLoading, currentUser]);
+  );
 
   const handleLogout = async () => {
     navigate("/");

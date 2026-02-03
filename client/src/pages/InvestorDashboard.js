@@ -1,6 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import apiRequest from "../services/api";
-import { fetchUserProfile } from "../services/userService";
+import {
+  useGetIdeasQuery,
+  useGetInvestorOffersQuery,
+  useGetUserProfileQuery,
+} from "../store/apiSlice";
 import "../styles/dashboardTheme.css";
 import "../styles/InvestorDashboard.css";
 
@@ -22,8 +26,6 @@ const statusCopy = (status) => {
 };
 
 export default function InvestorDashboard() {
-  const [ideas, setIdeas] = useState([]);
-  const [offers, setOffers] = useState([]);
   const [selectedIdea, setSelectedIdea] = useState(null);
   const [offerForm, setOfferForm] = useState({
     pitchContent: "",
@@ -31,49 +33,36 @@ export default function InvestorDashboard() {
     equity: "",
   });
   const [status, setStatus] = useState({ type: "", message: "" });
-  const [canInvest, setCanInvest] = useState(true);
-  const [loading, setLoading] = useState(true);
+  const {
+    data: ideasData = [],
+    isLoading: ideasLoading,
+    refetch: refetchIdeas,
+  } = useGetIdeasQuery(undefined, {
+    refetchOnFocus: true,
+    refetchOnReconnect: true,
+  });
+  const {
+    data: profile,
+    isLoading: profileLoading,
+  } = useGetUserProfileQuery(undefined, {
+    refetchOnFocus: true,
+    refetchOnReconnect: true,
+  });
+  const canInvest = profile?.roles?.includes("Investor");
+  const {
+    data: offers = [],
+    isLoading: offersLoading,
+    refetch: refetchOffers,
+  } = useGetInvestorOffersQuery(undefined, {
+    skip: !canInvest,
+    refetchOnFocus: true,
+    refetchOnReconnect: true,
+  });
 
-  const loadIdeas = async () => {
-    const ideasData = await apiRequest("/api/ideas");
-    const seekingIdeas = ideasData.filter(
-      (idea) => (idea.fundingStatus || "seeking") !== "funded"
-    );
-    setIdeas(seekingIdeas);
-  };
-
-  const loadOffers = async () => {
-    const offersData = await apiRequest("/api/ideas/investor/offers");
-    setOffers(offersData);
-  };
-
-  const loadProfile = async () => {
-    const profile = await fetchUserProfile();
-    const hasInvestorRole = profile?.roles?.includes("Investor");
-    setCanInvest(Boolean(hasInvestorRole));
-    return Boolean(hasInvestorRole);
-  };
-
-  useEffect(() => {
-    const loadAll = async () => {
-      setLoading(true);
-      setStatus({ type: "", message: "" });
-      try {
-        const [, investorRole] = await Promise.all([loadIdeas(), loadProfile()]);
-        if (investorRole) {
-          await loadOffers();
-        } else {
-          setOffers([]);
-        }
-      } catch (error) {
-        console.error("Error loading investor dashboard:", error);
-        setStatus({ type: "error", message: "Unable to load investor data." });
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadAll();
-  }, []);
+  const ideas = ideasData.filter(
+    (idea) => (idea.fundingStatus || "seeking") !== "funded"
+  );
+  const loading = ideasLoading || profileLoading || (canInvest && offersLoading);
 
   const handleOfferChange = (event) => {
     const { name, value } = event.target;
@@ -104,7 +93,7 @@ export default function InvestorDashboard() {
       });
       setStatus({ type: "success", message: "Offer sent successfully." });
       setOfferForm({ pitchContent: "", amount: "", equity: "" });
-      await loadOffers();
+      refetchOffers();
     } catch (error) {
       setStatus({ type: "error", message: error.message || "Unable to send offer." });
     }
@@ -116,8 +105,8 @@ export default function InvestorDashboard() {
         `/api/ideas/${offerItem.ideaId}/pitches/${offerItem.offer._id}/confirm`,
         { method: "POST" }
       );
-      await loadIdeas();
-      await loadOffers();
+      refetchIdeas();
+      refetchOffers();
     } catch (error) {
       setStatus({ type: "error", message: error.message || "Unable to confirm offer." });
     }

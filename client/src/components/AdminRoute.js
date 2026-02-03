@@ -1,26 +1,24 @@
 import { Navigate } from "react-router-dom";
-import { auth } from "../firebase";
 import { useEffect, useState } from "react";
+import { useAuth } from "../context/AuthContext";
 
 export default function AdminRoute({ children }) {
   const [allowed, setAllowed] = useState(null); // null = still checking
   const [loading, setLoading] = useState(true);
+  const { currentUser, loading: authLoading } = useAuth();
 
   useEffect(() => {
     const verifyAdmin = async () => {
-      const user = auth.currentUser;
+      if (authLoading) return;
 
-      if (!user) {
+      if (!currentUser) {
         setAllowed(false);
         setLoading(false);
         return;
       }
 
       try {
-        // Get Firebase ID token
-        const token = await user.getIdToken(true);
-
-        // Call backend to fetch user info
+        const token = await currentUser.getIdToken(true);
         const res = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/me`, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -51,7 +49,7 @@ export default function AdminRoute({ children }) {
     };
 
     verifyAdmin();
-  }, []);
+  }, [currentUser, authLoading]);
 
   // Show loading while checking
   if (loading || allowed === null) return <p>Loading...</p>;
