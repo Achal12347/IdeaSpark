@@ -1,14 +1,14 @@
 @import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Sora:wght@400;500;600;700&display=swap");
 
 :root {
-  --profile-bg: #eef2f6;
-  --profile-surface: #ffffff;
-  --profile-ink: #111827;
-  --profile-muted: #6b7280;
-  --profile-border: #e5e7eb;
-  --profile-accent: #111827;
-  --profile-accent-soft: #f3f4f6;
-  --profile-shadow: 0 22px 50px rgba(15, 23, 42, 0.08);
+  --profile-bg: var(--app-bg, #eef2f6);
+  --profile-surface: var(--app-surface, #ffffff);
+  --profile-ink: var(--app-ink, #111827);
+  --profile-muted: var(--app-muted, #6b7280);
+  --profile-border: var(--app-border, #e5e7eb);
+  --profile-accent: var(--app-accent, #111827);
+  --profile-accent-soft: var(--app-accent-soft, #f3f4f6);
+  --profile-shadow: var(--app-shadow, 0 22px 50px rgba(15, 23, 42, 0.08));
   --profile-radius-xl: 28px;
   --profile-radius-lg: 18px;
   --profile-radius-md: 12px;
@@ -16,12 +16,27 @@
   --profile-font-body: "Manrope", "Segoe UI", sans-serif;
 }
 
+[data-theme="dark"] {
+  --profile-bg: #0f172a;
+  --profile-surface: #111827;
+  --profile-ink: #f9fafb;
+  --profile-muted: #94a3b8;
+  --profile-border: #1f2937;
+  --profile-accent: #f9fafb;
+  --profile-accent-soft: #1f2937;
+  --profile-shadow: 0 22px 50px rgba(2, 6, 23, 0.4);
+}
+
 .profile-shell {
   min-height: 100vh;
-  background: radial-gradient(circle at top, #f8fafc 0%, var(--profile-bg) 50%, #e8eef5 100%);
+  background: radial-gradient(circle at top, #f7f9fc 0%, var(--profile-bg) 55%, #e8eef5 100%);
   padding: 40px 24px 60px;
   font-family: var(--profile-font-body);
   color: var(--profile-ink);
+}
+
+[data-theme="dark"] .profile-shell {
+  background: radial-gradient(circle at top, #111827 0%, var(--profile-bg) 55%, #0b1120 100%);
 }
 
 .profile-card {
@@ -68,7 +83,7 @@
   height: 84px;
   border-radius: 22px;
   background: var(--profile-accent);
-  color: #ffffff;
+  color: var(--profile-surface);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -137,6 +152,8 @@
   padding: 12px 14px;
   font-family: var(--profile-font-body);
   font-size: 14px;
+  background: var(--profile-surface);
+  color: var(--profile-ink);
 }
 
 .field textarea {
@@ -168,7 +185,7 @@
 
 .chip.active {
   background: var(--profile-accent);
-  color: #ffffff;
+  color: var(--profile-surface);
   border-color: var(--profile-accent);
 }
 
@@ -185,13 +202,13 @@
   font-size: 14px;
   border: 1px solid var(--profile-border);
   background: var(--profile-accent);
-  color: #ffffff;
+  color: var(--profile-surface);
   cursor: pointer;
   text-decoration: none;
 }
 
 .ghost-btn {
-  background: #ffffff;
+  background: var(--profile-surface);
   color: var(--profile-ink);
 }
 
@@ -222,6 +239,19 @@
 
 .status.error {
   color: #b91c1c;
+}
+
+.profile-toast {
+  position: sticky;
+  bottom: 16px;
+  align-self: flex-end;
+  background: var(--profile-accent);
+  color: var(--profile-surface);
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: var(--profile-shadow);
 }
 
 @media (max-width: 720px) {

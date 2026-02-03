@@ -58,6 +58,18 @@ const userSchema = new mongoose.Schema(
       portfolio: { type: String },
       linkedin: { type: String },
     },
+    notificationSettings: {
+      ideaComments: { type: Boolean, default: true },
+      teamInvites: { type: Boolean, default: true },
+      hackathonUpdates: { type: Boolean, default: true },
+      investorInterest: { type: Boolean, default: true },
+      emailNotifications: { type: Boolean, default: false },
+      inAppNotifications: { type: Boolean, default: true },
+    },
+    appearanceSettings: {
+      theme: { type: String, enum: ["light", "dark"], default: "light" },
+      density: { type: String, enum: ["comfortable", "compact"], default: "comfortable" },
+    },
 
     bookmarks: [
       {

@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
+import { useAuth } from "./context/AuthContext";
+import { fetchUserProfile } from "./services/userService";
 import LandingPage from "./pages/LandingPage";
 import AboutUs from "./pages/AboutUs";
 import FeaturesPage from "./pages/FeaturesPage";
@@ -35,10 +37,36 @@ import SuggestedCollaborators from "./pages/SuggestedCollaborators";
 import Settings from "./pages/Settings";
 import Reports from "./pages/Reports";
 import MyIdeas from "./pages/MyIdeas";
+import Privacy from "./pages/Privacy";
+
+function ThemeSync() {
+  const { currentUser, loading } = useAuth();
+
+  useEffect(() => {
+    const syncTheme = async () => {
+      if (loading) return;
+      if (!currentUser) {
+        document.documentElement.removeAttribute("data-theme");
+        return;
+      }
+      try {
+        const profile = await fetchUserProfile();
+        const theme = profile?.appearanceSettings?.theme || "light";
+        document.documentElement.setAttribute("data-theme", theme);
+      } catch (error) {
+        console.error("Unable to sync theme:", error);
+      }
+    };
+    syncTheme();
+  }, [currentUser, loading]);
+
+  return null;
+}
 
 function App() {
   return (
     <AuthProvider>
+      <ThemeSync />
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/about" element={<AboutUs />} />
@@ -238,6 +266,7 @@ function App() {
             </AdminRoute>
           }
         />
+        <Route path="/privacy" element={<Privacy />} />
       </Routes>
     </AuthProvider>
   );

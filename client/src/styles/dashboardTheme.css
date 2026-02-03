@@ -20,6 +20,20 @@
   --dash-font: "Manrope", "Segoe UI", sans-serif;
 }
 
+[data-theme="dark"] {
+  --dash-bg: #0f172a;
+  --dash-surface: #111827;
+  --dash-panel: #1f2937;
+  --dash-border: #2b3445;
+  --dash-text: #f9fafb;
+  --dash-muted: #94a3b8;
+  --dash-accent: #f9fafb;
+  --dash-success: #34d399;
+  --dash-warning: #f59e0b;
+  --dash-shadow: 0 24px 60px rgba(2, 6, 23, 0.5);
+  --dash-soft-shadow: 0 12px 24px rgba(2, 6, 23, 0.4);
+}
+
 .dashboard-shell,
 .dashboard-shell * {
   box-sizing: border-box;
@@ -31,6 +45,10 @@
   background: var(--dash-bg);
   color: var(--dash-text);
   font-family: var(--dash-font);
+}
+
+[data-theme="dark"] .dashboard-shell {
+  background: var(--dash-bg);
 }
 
 .dashboard-frame {
@@ -276,6 +294,16 @@
   opacity: 1;
   pointer-events: auto;
   transform: translateY(0);
+}
+
+.profile-dropdown button {
+  width: 100%;
+  justify-content: flex-start;
+  border-radius: 10px;
+}
+
+.profile-dropdown .dropdown-item {
+  margin-bottom: 6px;
 }
 
 .profile-dropdown .logout-btn {

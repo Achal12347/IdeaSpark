@@ -36,6 +36,8 @@ export default function IdeaDetails() {
   const [userRating, setUserRating] = useState(0);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
+  const [commentError, setCommentError] = useState("");
+  const [commentPosting, setCommentPosting] = useState(false);
   const [offers, setOffers] = useState([]);
   const [offersAllowed, setOffersAllowed] = useState(false);
   const [offersLoading, setOffersLoading] = useState(false);
@@ -148,6 +150,8 @@ export default function IdeaDetails() {
 
   const handleAddComment = async () => {
     if (!newComment.trim()) return;
+    setCommentError("");
+    setCommentPosting(true);
     try {
       await apiRequest(`/api/ideas/${id}/comments`, {
         method: "POST",
@@ -158,6 +162,9 @@ export default function IdeaDetails() {
       setComments(commentsData);
     } catch (error) {
       console.error("Error adding comment:", error);
+      setCommentError("Unable to post comment. Please try again.");
+    } finally {
+      setCommentPosting(false);
     }
   };
 
@@ -453,10 +460,15 @@ export default function IdeaDetails() {
               placeholder="Write a comment..."
               className="app-textarea"
             />
-            <button className="app-button" onClick={handleAddComment}>
-              Post Comment
+            <button
+              className="app-button"
+              onClick={handleAddComment}
+              disabled={commentPosting}
+            >
+              {commentPosting ? "Posting..." : "Post Comment"}
             </button>
           </div>
+          {commentError ? <p className="comment-error">{commentError}</p> : null}
           <div className="comments-list">
             {comments.map((comment) => (
               <div key={comment._id} className="comment-card">

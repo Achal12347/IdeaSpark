@@ -398,6 +398,12 @@ export default function AdminDashboard() {
                   <span className="chevron">v</span>
                 </button>
                 <div className="profile-dropdown">
+                  <button
+                    className="dropdown-item"
+                    onClick={() => navigate("/profile")}
+                  >
+                    Profile
+                  </button>
                   <button className="logout-btn btn-danger" onClick={handleLogout}>
                     Logout
                   </button>

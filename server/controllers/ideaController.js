@@ -274,7 +274,11 @@ exports.addComment = async (req, res) => {
   try {
     const { id } = req.params;
     const { content } = req.body;
-    const author = req.user.uid;
+    const user = await getUserByFirebaseUid(req.user.uid);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
 
     const idea = await Idea.findById(id);
     if (!idea) {
@@ -284,7 +288,7 @@ exports.addComment = async (req, res) => {
     const newComment = new Comment({
       content,
       idea: id,
-      author,
+      author: user._id,
     });
 
     await newComment.save();

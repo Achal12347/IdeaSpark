@@ -144,6 +144,8 @@ router.post("/", verifyFirebaseToken, async (req, res) => {
       collaborationPreferences,
       availability,
       links,
+      notificationSettings,
+      appearanceSettings,
       expertise,
       workplace,
     } = req.body;
@@ -179,6 +181,8 @@ router.post("/", verifyFirebaseToken, async (req, res) => {
       collaborationPreferences,
       availability,
       links,
+      notificationSettings,
+      appearanceSettings,
       expertise,
       workplace,
       role: existingUser?.role || "user",
