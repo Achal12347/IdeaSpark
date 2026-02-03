@@ -5,6 +5,90 @@ const verifyFirebaseToken = require("../middleware/authMiddleware");
 const router = express.Router();
 
 /* ================================
+   Admin: list all users
+   GET /api/users
+================================ */
+router.get("/", verifyFirebaseToken, async (req, res) => {
+  try {
+    const requester = await User.findOne({ firebaseUID: req.user.uid });
+    if (!requester || requester.role !== "admin") {
+      return res.status(403).json({ error: "Unauthorized" });
+    }
+
+    const users = await User.find().select("-firebaseUID");
+    res.json(users);
+  } catch (err) {
+    console.error("Get users error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+/* ================================
+   Bookmarks
+   GET /api/users/bookmarks
+   POST /api/users/bookmarks
+   DELETE /api/users/bookmarks/:ideaId
+================================ */
+router.get("/bookmarks", verifyFirebaseToken, async (req, res) => {
+  try {
+    const user = await User.findOne({ firebaseUID: req.user.uid }).populate("bookmarks");
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    res.json(user.bookmarks || []);
+  } catch (err) {
+    console.error("Get bookmarks error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+router.post("/bookmarks", verifyFirebaseToken, async (req, res) => {
+  try {
+    const { ideaId } = req.body;
+    if (!ideaId) {
+      return res.status(400).json({ error: "Idea ID is required." });
+    }
+
+    const user = await User.findOne({ firebaseUID: req.user.uid });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const exists = user.bookmarks?.some((id) => id.toString() === ideaId);
+    if (!exists) {
+      user.bookmarks = user.bookmarks || [];
+      user.bookmarks.push(ideaId);
+      await user.save();
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Add bookmark error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+router.delete("/bookmarks/:ideaId", verifyFirebaseToken, async (req, res) => {
+  try {
+    const { ideaId } = req.params;
+    const user = await User.findOne({ firebaseUID: req.user.uid });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    user.bookmarks = (user.bookmarks || []).filter(
+      (bookmarkId) => bookmarkId.toString() !== ideaId
+    );
+    await user.save();
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Remove bookmark error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+/* ================================
    Check if profile exists
    GET /api/users/:uid/exists
 ================================ */

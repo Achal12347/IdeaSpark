@@ -356,3 +356,37 @@ exports.confirmPitch = async (req, res) => {
     res.status(500).json({ message: 'Error confirming offer.' });
   }
 };
+
+exports.showInterest = async (req, res) => {
+  try {
+    const user = await getUserByFirebaseUid(req.user.uid);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const idea = await Idea.findById(req.params.id);
+    if (!idea) {
+      return res.status(404).json({ message: 'Idea not found' });
+    }
+
+    if (!idea.interestedUsers) {
+      idea.interestedUsers = [];
+    }
+
+    const alreadyInterested = idea.interestedUsers.find(
+      (userId) => userId.toString() === user._id.toString()
+    );
+
+    if (!alreadyInterested) {
+      idea.interestedUsers.push(user._id);
+      await idea.save();
+    }
+
+    res.json({
+      message: 'Interest recorded',
+      interestCount: idea.interestedUsers.length,
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Error recording interest.' });
+  }
+};

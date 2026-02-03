@@ -1,11 +1,14 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { fetchBookmarks } from "../services/bookmarkService";
 import { useAuth } from "../context/AuthContext";
+import IdeaCard from "../components/IdeaCard";
 import "../styles/appPageTheme.css";
 import "../styles/Bookmarks.css";
 
 export default function Bookmarks() {
   const { currentUser, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
   const [bookmarks, setBookmarks] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -43,15 +46,13 @@ export default function Bookmarks() {
         ) : (
           <div className="bookmarks-list">
             {bookmarks.map((bookmark) => (
-              <div key={bookmark._id} className="bookmark-card app-card">
-                <h3>{bookmark.title}</h3>
-                <p>{bookmark.description}</p>
-                <div className="bookmark-stats">
-                  <span>Views {bookmark.views || 0}</span>
-                  <span>Likes {bookmark.likes || 0}</span>
-                  <span>Comments {bookmark.comments || 0}</span>
-                </div>
-              </div>
+              <IdeaCard
+                key={bookmark._id}
+                idea={bookmark}
+                variant="user"
+                className="app-card"
+                onClick={() => navigate(`/idea/${bookmark._id}`)}
+              />
             ))}
           </div>
         )}
@@ -59,4 +60,3 @@ export default function Bookmarks() {
     </div>
   );
 }
-

@@ -18,7 +18,7 @@ export default function ForgotPassword() {
 
     try {
       await sendPasswordResetEmail(auth, email);
-      setMessage("We’ve sent a password reset link to your email.");
+      setMessage("Weâ€™ve sent a password reset link to your email.");
     } catch (err) {
       setError("Unable to send reset email. Please check your email address.");
     }
@@ -31,7 +31,7 @@ export default function ForgotPassword() {
       <form className="fp-card" onSubmit={handleReset}>
         <h1>Forgot Password</h1>
         <p className="subtitle">
-          Enter your registered email and we’ll send you a reset link.
+          Enter your registered email and weâ€™ll send you a reset link.
         </p>
 
         {message && <div className="fp-success">{message}</div>}
@@ -50,7 +50,7 @@ export default function ForgotPassword() {
         </button>
 
         <div className="fp-footer">
-          <Link to="/login">← Back to Login</Link>
+          <Link to="/login">â† Back to Login</Link>
         </div>
       </form>
     </div>

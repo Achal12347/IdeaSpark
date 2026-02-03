@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import "../styles/appPageTheme.css";
 import "../styles/Reports.css";
 
@@ -33,4 +33,5 @@ export default function Reports() {
     </div>
   );
 }
+
 

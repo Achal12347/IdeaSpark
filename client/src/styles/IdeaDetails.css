@@ -69,6 +69,18 @@
   color: var(--app-muted);
 }
 
+.action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.action-message {
+  margin: 10px 0 0;
+  color: var(--app-muted);
+  font-size: 13px;
+}
+
 .comments-section {
   display: flex;
   flex-direction: column;
@@ -255,5 +267,10 @@
   .comments-header {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .action-buttons {
+    flex-direction: column;
+    align-items: stretch;
   }
 }

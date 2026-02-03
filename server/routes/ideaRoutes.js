@@ -13,6 +13,7 @@ const {
   respondToPitch,
   confirmPitch,
   incrementViews,
+  showInterest,
 } = require('../controllers/ideaController');
 const authenticateToken = require('../middleware/authMiddleware');
 
@@ -56,5 +57,8 @@ router.post('/:id/pitches/:pitchId/confirm', authenticateToken, confirmPitch);
 
 // POST /api/ideas/:id/views - Increment views for an idea
 router.post('/:id/views', incrementViews);
+
+// POST /api/ideas/:id/interest - Record interest in an idea
+router.post('/:id/interest', authenticateToken, showInterest);
 
 module.exports = router;

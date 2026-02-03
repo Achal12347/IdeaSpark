@@ -3,6 +3,7 @@ import { auth } from "../firebase";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useGetIdeasQuery } from "../store/apiSlice";
+import IdeaCard from "../components/IdeaCard";
 import "../styles/dashboardTheme.css";
 import "../styles/Dashboard.css";
 
@@ -97,25 +98,12 @@ export default function Dashboard() {
               <p>Loading ideas...</p>
             ) : (
               ideas.map((idea) => (
-                <div
+                <IdeaCard
                   key={idea._id}
-                  className="idea-card"
+                  idea={idea}
+                  variant="user"
                   onClick={() => navigate(`/idea/${idea._id}`)}
-                >
-                  <h4>{idea.title}</h4>
-                  <p>{idea.solutionDescription}</p>
-                  <div className="tags">
-                    {idea.tags &&
-                      idea.tags.map((tag, index) => (
-                        <span key={index}>{tag}</span>
-                      ))}
-                  </div>
-                  <div className="stats">
-                    <span>Views {idea.views || 0}</span>
-                    <span>Likes {idea.likes || 0}</span>
-                    <span>Comments {idea.comments || 0}</span>
-                  </div>
-                </div>
+                />
               ))
             )}
           </section>

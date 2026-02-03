@@ -1,6 +1,11 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import apiRequest from "../services/api";
+import {
+  addBookmark,
+  removeBookmark,
+  fetchBookmarks,
+} from "../services/bookmarkService";
 import "../styles/appPageTheme.css";
 import "../styles/IdeaDetails.css";
 
@@ -34,6 +39,12 @@ export default function IdeaDetails() {
   const [offersLoading, setOffersLoading] = useState(false);
   const [offersError, setOffersError] = useState("");
   const [counterDrafts, setCounterDrafts] = useState({});
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [bookmarkLoading, setBookmarkLoading] = useState(false);
+  const [bookmarkMessage, setBookmarkMessage] = useState("");
+  const [interestCount, setInterestCount] = useState(0);
+  const [interestLoading, setInterestLoading] = useState(false);
+  const [interestMessage, setInterestMessage] = useState("");
 
   useEffect(() => {
     const incrementViews = async () => {
@@ -49,6 +60,7 @@ export default function IdeaDetails() {
         const ideaData = await apiRequest(`/api/ideas/${id}`);
         setIdea(ideaData);
         setRating(ideaData.averageRating || 0);
+        setInterestCount(ideaData.interestedUsers?.length || 0);
       } catch (error) {
         console.error("Error loading idea:", error);
       }
@@ -83,10 +95,21 @@ export default function IdeaDetails() {
       }
     };
 
+    const loadBookmarks = async () => {
+      try {
+        const bookmarks = await fetchBookmarks();
+        const alreadySaved = bookmarks.some((bookmark) => bookmark._id === id);
+        setIsBookmarked(alreadySaved);
+      } catch (error) {
+        console.error("Error loading bookmarks:", error);
+      }
+    };
+
     incrementViews();
     loadIdea();
     loadComments();
     loadOffers();
+    loadBookmarks();
   }, [id]);
 
   const handleRate = async (newRating) => {
@@ -156,6 +179,44 @@ export default function IdeaDetails() {
     navigate("/suggested-collaborators");
   };
 
+  const handleBookmarkToggle = async () => {
+    setBookmarkLoading(true);
+    setBookmarkMessage("");
+    try {
+      if (isBookmarked) {
+        await removeBookmark(id);
+        setIsBookmarked(false);
+        setBookmarkMessage("Removed from bookmarks.");
+      } else {
+        await addBookmark(id);
+        setIsBookmarked(true);
+        setBookmarkMessage("Saved to bookmarks.");
+      }
+    } catch (error) {
+      setBookmarkMessage("Unable to update bookmark.");
+    } finally {
+      setBookmarkLoading(false);
+    }
+  };
+
+  const handleShowInterest = async () => {
+    setInterestLoading(true);
+    setInterestMessage("");
+    try {
+      const response = await apiRequest(`/api/ideas/${id}/interest`, {
+        method: "POST",
+      });
+      if (response?.interestCount !== undefined) {
+        setInterestCount(response.interestCount);
+      }
+      setInterestMessage("Interest recorded.");
+    } catch (error) {
+      setInterestMessage("Unable to record interest.");
+    } finally {
+      setInterestLoading(false);
+    }
+  };
+
   if (!idea) {
     return (
       <div className="app-page idea-details-page">
@@ -179,7 +240,7 @@ export default function IdeaDetails() {
             <h2 className="app-title">{idea.title}</h2>
             <p className="app-subtitle">
               Posted by {postedBy}
-              {postedDate ? ` · ${postedDate}` : ""}
+              {postedDate ? ` Â· ${postedDate}` : ""}
             </p>
           </div>
         </div>
@@ -202,8 +263,8 @@ export default function IdeaDetails() {
           </div>
           <div className="idea-details-stats">
             <span className="app-pill">Views {idea.views || 0}</span>
-            <span className="app-pill">Likes {idea.likes || 0}</span>
-            <span className="app-pill">Comments {idea.comments?.length || 0}</span>
+            <span className="app-pill">Rating {rating.toFixed(1)}</span>
+            <span className="app-pill">Interest {interestCount}</span>
           </div>
         </section>
 
@@ -226,11 +287,33 @@ export default function IdeaDetails() {
           </section>
 
           <section className="collaboration-section app-card">
-            <h3>Collaboration</h3>
-            <p>Interested in collaborating on this idea?</p>
-            <button onClick={handleCollaborate} className="app-button">
-              Find Collaborators
-            </button>
+            <h3>Actions</h3>
+            <p>Save, collaborate, or show interest in this idea.</p>
+            <div className="action-buttons">
+              <button
+                onClick={handleBookmarkToggle}
+                className="app-button-secondary"
+                disabled={bookmarkLoading}
+              >
+                {isBookmarked ? "Remove Bookmark" : "Add to Bookmarks"}
+              </button>
+              <button
+                onClick={handleShowInterest}
+                className="app-button"
+                disabled={interestLoading}
+              >
+                Show Interest
+              </button>
+              <button onClick={handleCollaborate} className="app-button-secondary">
+                Request Collaboration
+              </button>
+            </div>
+            {bookmarkMessage ? (
+              <p className="action-message">{bookmarkMessage}</p>
+            ) : null}
+            {interestMessage ? (
+              <p className="action-message">{interestMessage}</p>
+            ) : null}
           </section>
         </div>
 
@@ -243,7 +326,7 @@ export default function IdeaDetails() {
             <textarea
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
-              placeholder="Add a comment..."
+              placeholder="Write a comment..."
               className="app-textarea"
             />
             <button className="app-button" onClick={handleAddComment}>
@@ -255,7 +338,7 @@ export default function IdeaDetails() {
               <div key={comment._id} className="comment-card">
                 <p>{comment.content}</p>
                 <small>
-                  By {comment.author?.name} on {" "}
+                  By {comment.author?.name} on{" "}
                   {new Date(comment.createdAt).toLocaleDateString()}
                 </small>
               </div>
@@ -286,19 +369,19 @@ export default function IdeaDetails() {
                   </div>
                   <p className="offer-message">{offer.pitchContent}</p>
                   <div className="offer-meta">
-                    <span>Amount: {offer.amount ? `$${offer.amount}` : "—"}</span>
-                    <span>Equity: {offer.equity ? `${offer.equity}%` : "—"}</span>
+                    <span>Amount: {offer.amount ? `$${offer.amount}` : "N/A"}</span>
+                    <span>Equity: {offer.equity ? `${offer.equity}%` : "N/A"}</span>
                   </div>
                   {offer.counterOffer ? (
                     <div className="counter-block">
                       <p className="counter-title">Counter offer</p>
-                      <p>{offer.counterOffer.message || "—"}</p>
+                      <p>{offer.counterOffer.message || "N/A"}</p>
                       <div className="offer-meta">
                         <span>
-                          Amount: {offer.counterOffer.amount ? `$${offer.counterOffer.amount}` : "—"}
+                          Amount: {offer.counterOffer.amount ? `$${offer.counterOffer.amount}` : "N/A"}
                         </span>
                         <span>
-                          Equity: {offer.counterOffer.equity ? `${offer.counterOffer.equity}%` : "—"}
+                          Equity: {offer.counterOffer.equity ? `${offer.counterOffer.equity}%` : "N/A"}
                         </span>
                       </div>
                     </div>
@@ -363,4 +446,3 @@ export default function IdeaDetails() {
     </div>
   );
 }
-

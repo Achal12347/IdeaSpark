@@ -1,11 +1,14 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { fetchTrendingIdeas } from "../services/ideaService";
 import { useAuth } from "../context/AuthContext";
+import IdeaCard from "../components/IdeaCard";
 import "../styles/appPageTheme.css";
 import "../styles/TrendingIdeas.css";
 
 export default function TrendingIdeas() {
   const { currentUser, loading: authLoading } = useAuth();
+  const navigate = useNavigate();
   const [trendingIdeas, setTrendingIdeas] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -43,15 +46,13 @@ export default function TrendingIdeas() {
         ) : (
           <div className="trending-list">
             {trendingIdeas.map((idea) => (
-              <div key={idea._id} className="trending-card app-card">
-                <h3>{idea.title}</h3>
-                <p>{idea.description}</p>
-                <div className="trending-stats">
-                  <span>Views {idea.views || 0}</span>
-                  <span>Likes {idea.likes || 0}</span>
-                  <span>Comments {idea.comments || 0}</span>
-                </div>
-              </div>
+              <IdeaCard
+                key={idea._id}
+                idea={idea}
+                variant="user"
+                className="app-card"
+                onClick={() => navigate(`/idea/${idea._id}`)}
+              />
             ))}
           </div>
         )}
@@ -59,4 +60,5 @@ export default function TrendingIdeas() {
     </div>
   );
 }
+
 

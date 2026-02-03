@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { fetchUserProfile, updateUserProfile } from "../services/userService";
 import "../styles/appPageTheme.css";
 import "../styles/Settings.css";
@@ -144,4 +144,5 @@ export default function Settings() {
     </div>
   );
 }
+
 

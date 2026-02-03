@@ -27,18 +27,18 @@
   box-shadow: var(--app-shadow);
 }
 
-.idea-card h3 {
+.idea-card h4 {
   margin: 0;
   font-size: 18px;
 }
 
-.idea-description {
+.idea-card-description {
   margin: 0;
   color: var(--app-muted);
   line-height: 1.5;
 }
 
-.idea-tags {
+.idea-card-tags {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;

@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { useGetIdeasQuery } from "../store/apiSlice";
+import IdeaCard from "../components/IdeaCard";
 import "../styles/appPageTheme.css";
 import "../styles/Ideas.css";
 
@@ -36,25 +37,13 @@ export default function Ideas() {
         ) : (
           <div className="ideas-grid app-grid">
             {ideas.map((idea) => (
-              <div
+              <IdeaCard
                 key={idea._id}
-                className="idea-card app-card"
+                idea={idea}
+                variant="user"
+                className="app-card"
                 onClick={() => navigate(`/idea/${idea._id}`)}
-              >
-                <div className="idea-card-header">
-                  <h3>{idea.title}</h3>
-                </div>
-                <p className="idea-description">
-                  {idea.description || idea.solutionDescription || idea.problemStatement}
-                </p>
-                <div className="idea-tags">
-                  {idea.tags?.map((tag, index) => (
-                    <span key={index} className="app-pill">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
+              />
             ))}
           </div>
         )}

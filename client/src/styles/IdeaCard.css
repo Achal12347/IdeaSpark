@@ -1,0 +1,106 @@
+.idea-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.idea-card[role="button"] {
+  cursor: pointer;
+}
+
+.idea-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.idea-card-header h4 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.idea-card-description {
+  margin: 0;
+  color: var(--app-muted, var(--dash-muted, #6b7280));
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.idea-card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.idea-card-tag {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  border: 1px solid var(--app-border, var(--dash-border, #e5e7eb));
+  background: var(--app-accent-soft, #f3f4f6);
+  color: var(--app-ink, var(--dash-text, #111827));
+}
+
+.idea-card-meta,
+.idea-card-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--app-muted, var(--dash-muted, #6b7280));
+}
+
+.idea-card-badge {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: capitalize;
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.idea-card-badge.status-funded {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.idea-card-badge.status-seeking {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.idea-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--app-muted, var(--dash-muted, #6b7280));
+}
+
+.idea-card-link {
+  font-weight: 600;
+}
+
+.idea-card-action {
+  border: 1px solid var(--app-border, var(--dash-border, #e5e7eb));
+  background: var(--app-ink, var(--dash-accent, #111827));
+  color: #ffffff;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.idea-card-action:hover {
+  opacity: 0.9;
+}
+
+@media (max-width: 720px) {
+  .idea-card-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

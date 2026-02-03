@@ -1,21 +1,55 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../firebase";
+import apiRequest from "../services/api";
 import { fetchIdeas } from "../services/ideaService";
-import { fetchUserProfile } from "../services/userService";
+import { fetchAllUsers } from "../services/userService";
+import IdeaCard from "../components/IdeaCard";
 import "../styles/dashboardTheme.css";
 import "../styles/AdminDashboard.css";
+
+const buildMonthlySeries = (items, dateKey, monthsCount = 6) => {
+  const now = new Date();
+  const buckets = [];
+
+  for (let i = monthsCount - 1; i >= 0; i -= 1) {
+    const monthDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    buckets.push({
+      key: `${monthDate.getFullYear()}-${monthDate.getMonth()}`,
+      label: monthDate.toLocaleString("en-US", { month: "short" }),
+      count: 0,
+    });
+  }
+
+  items.forEach((item) => {
+    const rawDate = item?.[dateKey] || item?.createdAt || item?.updatedAt;
+    if (!rawDate) return;
+    const parsed = new Date(rawDate);
+    if (Number.isNaN(parsed.getTime())) return;
+    const key = `${parsed.getFullYear()}-${parsed.getMonth()}`;
+    const bucket = buckets.find((entry) => entry.key === key);
+    if (bucket) {
+      bucket.count += 1;
+    }
+  });
+
+  return buckets;
+};
 
 export default function AdminDashboard() {
   const [pageTitle, setPageTitle] = useState("Dashboard");
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalIdeas: 0,
+    totalComments: 0,
+    avgIdeasPerUser: 0,
     activeToday: 0,
     pendingReviews: 0,
   });
   const [ideas, setIdeas] = useState([]);
   const [users, setUsers] = useState([]);
+  const [analytics, setAnalytics] = useState(null);
+  const [growthData, setGrowthData] = useState([]);
   const [contactMessages, setContactMessages] = useState([]);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [messagesError, setMessagesError] = useState("");
@@ -25,16 +59,47 @@ export default function AdminDashboard() {
     const loadData = async () => {
       try {
         setMessagesError("");
-        const ideasData = await fetchIdeas();
-        setIdeas(ideasData);
-        setStats((prev) => ({ ...prev, totalIdeas: ideasData.length }));
+        const [ideasData, usersData] = await Promise.all([
+          fetchIdeas(),
+          fetchAllUsers(),
+        ]);
+        const analyticsData = await apiRequest("/api/analytics").catch(() => null);
 
-        const usersData = await fetchUserProfile();
-        setUsers(usersData);
-        setStats((prev) => ({ ...prev, totalUsers: usersData.length }));
+        const safeIdeas = Array.isArray(ideasData) ? ideasData : [];
+        const safeUsers = Array.isArray(usersData) ? usersData : [];
 
-        setStats((prev) => ({ ...prev, activeToday: 89 }));
-        setStats((prev) => ({ ...prev, pendingReviews: 12 }));
+        setIdeas(safeIdeas);
+        setUsers(safeUsers);
+        setAnalytics(analyticsData || null);
+
+        const todayLabel = new Date().toDateString();
+        const activeToday = safeUsers.filter((user) => {
+          const activityDate = new Date(user.updatedAt || user.createdAt || Date.now());
+          return activityDate.toDateString() === todayLabel;
+        }).length;
+        const pendingReviews = safeIdeas.filter(
+          (idea) => (idea.fundingStatus || "seeking") !== "funded"
+        ).length;
+
+        setStats({
+          totalUsers: safeUsers.length,
+          totalIdeas: safeIdeas.length,
+          totalComments: analyticsData?.totalComments || 0,
+          avgIdeasPerUser: analyticsData?.avgIdeasPerUser
+            ? Number(analyticsData.avgIdeasPerUser.toFixed(1))
+            : 0,
+          activeToday,
+          pendingReviews,
+        });
+
+        const userSeries = buildMonthlySeries(safeUsers, "createdAt");
+        const ideaSeries = buildMonthlySeries(safeIdeas, "createdAt");
+        const combined = userSeries.map((entry, index) => ({
+          label: entry.label,
+          users: entry.count,
+          ideas: ideaSeries[index]?.count || 0,
+        }));
+        setGrowthData(combined);
 
         const apiBaseUrl = process.env.REACT_APP_API_URL;
         if (apiBaseUrl && auth.currentUser) {
@@ -66,6 +131,10 @@ export default function AdminDashboard() {
     await auth.signOut();
   };
 
+  const maxGrowth = growthData.reduce((maxValue, entry) => {
+    return Math.max(maxValue, entry.users || 0, entry.ideas || 0);
+  }, 1);
+
   const renderContent = () => {
     switch (pageTitle) {
       case "Ideas":
@@ -73,12 +142,19 @@ export default function AdminDashboard() {
           <section className="admin-content">
             <h3>All Ideas</h3>
             <div className="admin-grid">
-              {ideas.map((idea) => (
-                <div key={idea._id} className="idea-card card">
-                  <h4>{idea.title}</h4>
-                  <p>{idea.description}</p>
-                </div>
-              ))}
+              {ideas.length === 0 ? (
+                <p>No ideas found yet.</p>
+              ) : (
+                ideas.map((idea) => (
+                  <IdeaCard
+                    key={idea._id}
+                    idea={idea}
+                    variant="admin"
+                    className="card"
+                    onClick={() => navigate(`/idea/${idea._id}`)}
+                  />
+                ))
+              )}
             </div>
           </section>
         );
@@ -87,16 +163,21 @@ export default function AdminDashboard() {
           <section className="admin-content">
             <h3>All Users</h3>
             <div className="admin-grid">
-              {users.map((user) => (
-                <div key={user._id} className="user-card card">
-                  <h4>{user.name}</h4>
-                  <p>Roles: {user.roles?.length ? user.roles.join(", ") : "—"}</p>
-                  <p>
-                    Skills:{" "}
-                    {user.skills?.length ? user.skills.slice(0, 3).join(", ") : "—"}
-                  </p>
-                </div>
-              ))}
+              {users.length === 0 ? (
+                <p>No users found yet.</p>
+              ) : (
+                users.map((user) => (
+                  <div key={user._id} className="user-card card">
+                    <h4>{user.name || user.email || "User"}</h4>
+                    <p>Roles: {user.roles?.length ? user.roles.join(", ") : "N/A"}</p>
+                    <p>
+                      Skills:{" "}
+                      {user.skills?.length ? user.skills.slice(0, 3).join(", ") : "N/A"}
+                    </p>
+                    <p>Joined: {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "N/A"}</p>
+                  </div>
+                ))
+              )}
             </div>
           </section>
         );
@@ -128,9 +209,7 @@ export default function AdminDashboard() {
         return (
           <section className="admin-content">
             <h3>Contact Messages</h3>
-            {messagesError ? (
-              <p className="admin-error">{messagesError}</p>
-            ) : null}
+            {messagesError ? <p className="admin-error">{messagesError}</p> : null}
             {loadingMessages ? (
               <p>Loading messages...</p>
             ) : (
@@ -170,12 +249,77 @@ export default function AdminDashboard() {
                 <p>{stats.totalIdeas}</p>
               </div>
               <div className="stat-card card">
+                <h4>Total Comments</h4>
+                <p>{stats.totalComments}</p>
+              </div>
+              <div className="stat-card card">
+                <h4>Avg Ideas / User</h4>
+                <p>{stats.avgIdeasPerUser}</p>
+              </div>
+              <div className="stat-card card">
                 <h4>Active Today</h4>
                 <p>{stats.activeToday}</p>
               </div>
               <div className="stat-card card highlight">
-                <h4>Pending Reviews</h4>
+                <h4>Ideas Seeking Funding</h4>
                 <p>{stats.pendingReviews}</p>
+              </div>
+            </div>
+
+            <div className="admin-analytics">
+              <div className="chart-card card">
+                <div className="chart-header">
+                  <h4>User + Idea Growth</h4>
+                  <p>Last 6 months activity</p>
+                </div>
+                <div className="chart-legend">
+                  <span className="legend-item">
+                    <span className="legend-dot users" /> Users
+                  </span>
+                  <span className="legend-item">
+                    <span className="legend-dot ideas" /> Ideas
+                  </span>
+                </div>
+                {growthData.length === 0 ? (
+                  <p className="chart-empty">Not enough data yet.</p>
+                ) : (
+                  <div className="chart-grid">
+                    {growthData.map((entry) => (
+                      <div key={entry.label} className="chart-column">
+                        <div className="chart-bars">
+                          <span
+                            className="chart-bar users"
+                            style={{ height: `${(entry.users / maxGrowth) * 100}%` }}
+                          />
+                          <span
+                            className="chart-bar ideas"
+                            style={{ height: `${(entry.ideas / maxGrowth) * 100}%` }}
+                          />
+                        </div>
+                        <span className="chart-label">{entry.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="analytics-card card">
+                <h4>Analytics Snapshot</h4>
+                <p>Top categories and engagement highlights.</p>
+                <div className="analytics-list">
+                  {(analytics?.ideasByCategory || []).slice(0, 4).map((category) => (
+                    <div key={category._id || "unknown"} className="analytics-row">
+                      <span>{category._id || "Uncategorized"}</span>
+                      <span>{category.count} ideas</span>
+                    </div>
+                  ))}
+                </div>
+                {analytics?.trendingIdeas?.length ? (
+                  <div className="analytics-trending">
+                    <p>Top trending idea</p>
+                    <strong>{analytics.trendingIdeas[0].title}</strong>
+                  </div>
+                ) : null}
               </div>
             </div>
           </section>
@@ -244,7 +388,7 @@ export default function AdminDashboard() {
             </div>
 
             <div className="top-actions">
-              <button className="btn-primary" onClick={() => navigate("/add-idea")}>
+              <button className="btn-primary" onClick={() => navigate("/add-idea")}> 
                 Create Post
               </button>
               <div className="profile-menu">

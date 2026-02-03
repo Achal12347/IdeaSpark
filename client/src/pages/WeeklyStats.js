@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import "../styles/appPageTheme.css";
 import "../styles/WeeklyStats.css";
 
@@ -38,4 +38,5 @@ export default function WeeklyStats() {
     </div>
   );
 }
+
 

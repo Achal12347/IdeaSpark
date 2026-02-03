@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { fetchSuggestedCollaborators } from "../services/userService";
 import { useAuth } from "../context/AuthContext";
 import "../styles/appPageTheme.css";
@@ -49,8 +49,8 @@ export default function SuggestedCollaborators() {
                 </div>
                 <div className="collaborator-info">
                   <h3>{user.name}</h3>
-                  <p>Expertise: {user.expertise || "—"}</p>
-                  <p>Workplace: {user.workplace || "—"}</p>
+                  <p>Expertise: {user.expertise || "â€”"}</p>
+                  <p>Workplace: {user.workplace || "â€”"}</p>
                 </div>
                 <button className="connect-btn">Connect</button>
               </div>
@@ -61,4 +61,5 @@ export default function SuggestedCollaborators() {
     </div>
   );
 }
+
 

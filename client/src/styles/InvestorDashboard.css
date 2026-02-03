@@ -109,6 +109,10 @@
   cursor: pointer;
 }
 
+.investor-card .idea-card-footer {
+  margin-top: auto;
+}
+
 .offer-panel {
   margin-top: 16px;
   display: flex;

@@ -59,6 +59,13 @@ const userSchema = new mongoose.Schema(
       linkedin: { type: String },
     },
 
+    bookmarks: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Idea",
+      },
+    ],
+
     expertise: {
       type: String,
     },

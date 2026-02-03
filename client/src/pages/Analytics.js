@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import apiRequest from "../services/api";
 import "../styles/appPageTheme.css";
 import "../styles/Analytics.css";

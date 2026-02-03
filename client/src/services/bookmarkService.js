@@ -1,31 +1,18 @@
-import api from './api';
+import apiRequest from "./api";
 
 export const fetchBookmarks = async () => {
-  try {
-    const response = await api.get('/bookmarks');
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching bookmarks:', error);
-    throw error;
-  }
+  return await apiRequest("/api/users/bookmarks");
 };
 
 export const addBookmark = async (ideaId) => {
-  try {
-    const response = await api.post('/bookmarks', { ideaId });
-    return response.data;
-  } catch (error) {
-    console.error('Error adding bookmark:', error);
-    throw error;
-  }
+  return await apiRequest("/api/users/bookmarks", {
+    method: "POST",
+    body: JSON.stringify({ ideaId }),
+  });
 };
 
 export const removeBookmark = async (ideaId) => {
-  try {
-    const response = await api.delete(`/bookmarks/${ideaId}`);
-    return response.data;
-  } catch (error) {
-    console.error('Error removing bookmark:', error);
-    throw error;
-  }
+  return await apiRequest(`/api/users/bookmarks/${ideaId}`, {
+    method: "DELETE",
+  });
 };

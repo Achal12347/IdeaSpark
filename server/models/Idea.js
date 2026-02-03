@@ -100,6 +100,10 @@ const ideaSchema = new mongoose.Schema(
       enum: ['seeking', 'funded'],
       default: 'seeking',
     },
+    interestedUsers: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    }],
     collaborators: [{
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',

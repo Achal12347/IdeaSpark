@@ -91,7 +91,7 @@ export default function Hackathons() {
                     {submission.team?.name || "Unknown team"}
                   </span>
                   <span className="rankings-score">
-                    Score: {submission.averageScore?.toFixed(1) ?? "—"}
+                    Score: {submission.averageScore?.toFixed(1) ?? "â€”"}
                   </span>
                 </li>
               ))}

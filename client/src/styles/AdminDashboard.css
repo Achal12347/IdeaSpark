@@ -99,3 +99,142 @@
   font-size: 14px;
   line-height: 1.6;
 }
+
+.admin-analytics {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 16px;
+}
+
+.chart-card h4,
+.analytics-card h4 {
+  margin: 0 0 6px;
+  font-size: 16px;
+}
+
+.chart-card p,
+.analytics-card p {
+  margin: 0;
+  color: var(--dash-muted);
+  font-size: 13px;
+}
+
+.chart-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.chart-legend {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 12px;
+  color: var(--dash-muted);
+  font-size: 12px;
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.legend-dot.users {
+  background: #111827;
+}
+
+.legend-dot.ideas {
+  background: #e07a5f;
+}
+
+.chart-grid {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  height: 180px;
+}
+
+.chart-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.chart-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 140px;
+}
+
+.chart-bar {
+  width: 12px;
+  border-radius: 12px 12px 0 0;
+}
+
+.chart-bar.users {
+  background: #111827;
+}
+
+.chart-bar.ideas {
+  background: #e07a5f;
+}
+
+.chart-label {
+  font-size: 11px;
+  color: var(--dash-muted);
+}
+
+.chart-empty {
+  margin: 0;
+  color: var(--dash-muted);
+  font-size: 13px;
+}
+
+.analytics-list {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.analytics-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--dash-text);
+}
+
+.analytics-row span:last-child {
+  color: var(--dash-muted);
+}
+
+.analytics-trending {
+  margin-top: 16px;
+  padding: 12px;
+  border-radius: 12px;
+  background: #f9fafb;
+  border: 1px solid var(--dash-border);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+}
+
+@media (max-width: 1000px) {
+  .admin-analytics {
+    grid-template-columns: 1fr;
+  }
+}

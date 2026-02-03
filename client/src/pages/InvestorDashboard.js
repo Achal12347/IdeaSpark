@@ -1,10 +1,12 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import apiRequest from "../services/api";
 import {
   useGetIdeasQuery,
   useGetInvestorOffersQuery,
   useGetUserProfileQuery,
 } from "../store/apiSlice";
+import IdeaCard from "../components/IdeaCard";
 import "../styles/dashboardTheme.css";
 import "../styles/InvestorDashboard.css";
 
@@ -26,6 +28,7 @@ const statusCopy = (status) => {
 };
 
 export default function InvestorDashboard() {
+  const navigate = useNavigate();
   const [selectedIdea, setSelectedIdea] = useState(null);
   const [offerForm, setOfferForm] = useState({
     pitchContent: "",
@@ -142,13 +145,15 @@ export default function InvestorDashboard() {
           ) : (
             <div className="investor-grid">
               {ideas.map((idea) => (
-                <div key={idea._id} className="investor-card">
-                  <h4>{idea.title}</h4>
-                  <p>{idea.problemStatement}</p>
-                  <button onClick={() => handleSelectIdea(idea)} disabled={!canInvest}>
-                    Make offer
-                  </button>
-                </div>
+                <IdeaCard
+                  key={idea._id}
+                  idea={idea}
+                  variant="investor"
+                  className="investor-card"
+                  onClick={() => navigate(`/idea/${idea._id}`)}
+                  onAction={() => handleSelectIdea(idea)}
+                  actionLabel="Make offer"
+                />
               ))}
             </div>
           )}
@@ -221,20 +226,20 @@ export default function InvestorDashboard() {
                   <div className="offer-meta">
                     <span>{statusCopy(item.offer.status)}</span>
                     <span>
-                      Amount: {item.offer.amount ? `$${item.offer.amount}` : "—"}
+                      Amount: {item.offer.amount ? `$${item.offer.amount}` : "â€”"}
                     </span>
                     <span>
-                      Equity: {item.offer.equity ? `${item.offer.equity}%` : "—"}
+                      Equity: {item.offer.equity ? `${item.offer.equity}%` : "â€”"}
                     </span>
                   </div>
                   {item.offer.counterOffer ? (
                     <div className="counter-summary">
                       <p>Counter offer</p>
                       <span>
-                        Amount: {item.offer.counterOffer.amount ? `$${item.offer.counterOffer.amount}` : "—"}
+                        Amount: {item.offer.counterOffer.amount ? `$${item.offer.counterOffer.amount}` : "â€”"}
                       </span>
                       <span>
-                        Equity: {item.offer.counterOffer.equity ? `${item.offer.counterOffer.equity}%` : "—"}
+                        Equity: {item.offer.counterOffer.equity ? `${item.offer.counterOffer.equity}%` : "â€”"}
                       </span>
                       <span>{item.offer.counterOffer.message}</span>
                     </div>
