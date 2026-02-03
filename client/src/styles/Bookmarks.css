@@ -1,25 +1,13 @@
-.bookmarks-page {
-  padding: 20px;
-  max-width: 800px;
-  margin: 0 auto;
-}
+﻿@import "./appPageTheme.css";
 
-.bookmarks-page h1 {
-  color: #2563eb;
-  margin-bottom: 20px;
-}
-
-.bookmarks-loading {
-  text-align: center;
-  padding: 40px;
-  font-size: 18px;
-}
-
+.bookmarks-loading,
 .no-bookmarks {
+  padding: 20px;
+  border-radius: var(--app-radius-lg);
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
   text-align: center;
-  padding: 40px;
-  color: #666;
-  font-style: italic;
+  color: var(--app-muted);
 }
 
 .bookmarks-list {
@@ -28,27 +16,21 @@
   gap: 16px;
 }
 
-.bookmark-card {
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 16px;
-  background-color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
 .bookmark-card h3 {
-  margin: 0 0 8px 0;
-  color: #2563eb;
+  margin: 0 0 6px;
+  font-size: 16px;
 }
 
 .bookmark-card p {
-  margin: 0 0 12px 0;
-  color: #555;
+  margin: 0 0 12px;
+  color: var(--app-muted);
+  font-size: 14px;
 }
 
 .bookmark-stats {
   display: flex;
-  gap: 16px;
-  font-size: 14px;
-  color: #666;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 13px;
+  color: var(--app-muted);
 }

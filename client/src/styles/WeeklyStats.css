@@ -1,49 +1,22 @@
-.weekly-stats-page {
-  padding: 20px;
-  max-width: 800px;
-  margin: 0 auto;
-}
+﻿@import "./appPageTheme.css";
 
-.weekly-stats-page h1 {
-  color: #2563eb;
+.stats-overview {
   margin-bottom: 20px;
 }
 
-.stats-overview {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-  margin-bottom: 30px;
-}
-
-.stat-item {
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 20px;
-  background-color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  text-align: center;
-}
-
 .stat-item h3 {
-  margin: 0 0 10px 0;
-  color: #2563eb;
-  font-size: 16px;
+  margin: 0 0 6px;
+  font-size: 14px;
+  color: var(--app-muted);
 }
 
 .stat-item p {
   margin: 0;
   font-size: 24px;
-  font-weight: bold;
-  color: #333;
+  font-weight: 700;
 }
 
 .stats-chart {
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 20px;
-  background-color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   text-align: center;
-  color: #666;
+  color: var(--app-muted);
 }

@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { fetchUserActivity } from '../services/activityService';
-import { useAuth } from '../context/AuthContext';
+﻿import React, { useState, useEffect } from "react";
+import { fetchUserActivity } from "../services/activityService";
+import { useAuth } from "../context/AuthContext";
+import "../styles/appPageTheme.css";
+import "../styles/Activity.css";
 
 export default function Activity() {
   const { currentUser, loading: authLoading } = useAuth();
@@ -16,7 +18,7 @@ export default function Activity() {
         const data = await fetchUserActivity();
         setActivities(data);
       } catch (error) {
-        console.error('Error loading activity:', error);
+        console.error("Error loading activity:", error);
       } finally {
         setLoading(false);
       }
@@ -24,31 +26,34 @@ export default function Activity() {
     loadActivity();
   }, [authLoading, currentUser]);
 
-  if (loading) {
-    return <div>Loading activity...</div>;
-  }
-
   return (
-    <div style={{ padding: '20px' }}>
-      <h1>Activity</h1>
-      {activities.length === 0 ? (
-        <p>No recent activity.</p>
-      ) : (
-        <div>
-          {activities.map((activity, index) => (
-            <div key={index} style={{
-              border: '1px solid #ddd',
-              borderRadius: '8px',
-              padding: '16px',
-              marginBottom: '16px',
-              backgroundColor: '#fff'
-            }}>
-              <p>{activity.description}</p>
-              <small style={{ color: '#666' }}>{new Date(activity.timestamp).toLocaleString()}</small>
-            </div>
-          ))}
+    <div className="app-page activity-page">
+      <div className="app-container">
+        <div className="app-header">
+          <div>
+            <h1 className="app-title">Activity</h1>
+            <p className="app-subtitle">Recent updates and interactions.</p>
+          </div>
         </div>
-      )}
+
+        {loading ? (
+          <div className="activity-state">Loading activity...</div>
+        ) : activities.length === 0 ? (
+          <div className="activity-state">No recent activity.</div>
+        ) : (
+          <div className="app-list">
+            {activities.map((activity, index) => (
+              <div key={index} className="app-card activity-card">
+                <p className="activity-text">{activity.description}</p>
+                <span className="activity-time">
+                  {new Date(activity.timestamp).toLocaleString()}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
+

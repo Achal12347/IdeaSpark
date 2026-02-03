@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { fetchTrendingIdeas } from '../services/ideaService';
-import { useAuth } from '../context/AuthContext';
-import '../styles/TrendingIdeas.css';
+﻿import React, { useState, useEffect } from "react";
+import { fetchTrendingIdeas } from "../services/ideaService";
+import { useAuth } from "../context/AuthContext";
+import "../styles/appPageTheme.css";
+import "../styles/TrendingIdeas.css";
 
 export default function TrendingIdeas() {
   const { currentUser, loading: authLoading } = useAuth();
@@ -17,7 +18,7 @@ export default function TrendingIdeas() {
         const data = await fetchTrendingIdeas();
         setTrendingIdeas(data);
       } catch (error) {
-        console.error('Error loading trending ideas:', error);
+        console.error("Error loading trending ideas:", error);
       } finally {
         setLoading(false);
       }
@@ -25,30 +26,37 @@ export default function TrendingIdeas() {
     loadTrendingIdeas();
   }, [authLoading, currentUser]);
 
-  if (loading) {
-    return <div className="trending-loading">Loading trending ideas...</div>;
-  }
-
   return (
-    <div className="trending-page">
-      <h1>🔥 Trending Ideas</h1>
-      {trendingIdeas.length === 0 ? (
-        <p className="no-trending">No trending ideas at the moment.</p>
-      ) : (
-        <div className="trending-list">
-          {trendingIdeas.map((idea) => (
-            <div key={idea._id} className="trending-card">
-              <h3>{idea.title}</h3>
-              <p>{idea.description}</p>
-              <div className="trending-stats">
-                <span>👀 {idea.views || 0}</span>
-                <span>⭐ {idea.likes || 0}</span>
-                <span>💬 {idea.comments || 0}</span>
-              </div>
-            </div>
-          ))}
+    <div className="app-page trending-page">
+      <div className="app-container">
+        <div className="app-header">
+          <div>
+            <h1 className="app-title">Trending Ideas</h1>
+            <p className="app-subtitle">Ideas gaining the most momentum.</p>
+          </div>
         </div>
-      )}
+
+        {loading ? (
+          <div className="trending-loading">Loading trending ideas...</div>
+        ) : trendingIdeas.length === 0 ? (
+          <div className="no-trending">No trending ideas at the moment.</div>
+        ) : (
+          <div className="trending-list">
+            {trendingIdeas.map((idea) => (
+              <div key={idea._id} className="trending-card app-card">
+                <h3>{idea.title}</h3>
+                <p>{idea.description}</p>
+                <div className="trending-stats">
+                  <span>Views {idea.views || 0}</span>
+                  <span>Likes {idea.likes || 0}</span>
+                  <span>Comments {idea.comments || 0}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
+

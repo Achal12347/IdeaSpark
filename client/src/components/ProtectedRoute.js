@@ -5,7 +5,10 @@ import { useEffect, useState } from "react";
 export default function ProtectedRoute({ children }) {
   const { currentUser, loading: authLoading } = useAuth();
   const [checking, setChecking] = useState(true);
-  const [hasProfile, setHasProfile] = useState(false);
+  const [hasProfile, setHasProfile] = useState(() => {
+    const cached = localStorage.getItem("ideaspark_hasProfile");
+    return cached === "true";
+  });
 
   useEffect(() => {
     if (authLoading || !currentUser) {
@@ -24,10 +27,16 @@ export default function ProtectedRoute({ children }) {
         );
 
         const data = await res.json();
-        setHasProfile(data.exists);
+        const exists = Boolean(data.exists);
+        setHasProfile(exists);
+        localStorage.setItem("ideaspark_hasProfile", exists ? "true" : "false");
       } catch (err) {
         console.error(err);
-        setHasProfile(false);
+        // If the check fails, keep the user on the current page
+        // and rely on cached profile state if available.
+        if (!localStorage.getItem("ideaspark_hasProfile")) {
+          setHasProfile(true);
+        }
       } finally {
         setChecking(false);
       }

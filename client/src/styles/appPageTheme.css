@@ -1,0 +1,144 @@
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Sora:wght@500;600;700&display=swap");
+
+:root {
+  --app-bg: #eef2f6;
+  --app-surface: #ffffff;
+  --app-ink: #111827;
+  --app-muted: #6b7280;
+  --app-border: #e5e7eb;
+  --app-accent: #111827;
+  --app-accent-soft: #f3f4f6;
+  --app-shadow: 0 22px 50px rgba(15, 23, 42, 0.08);
+  --app-radius-xl: 24px;
+  --app-radius-lg: 18px;
+  --app-radius-md: 12px;
+  --app-radius-sm: 10px;
+}
+
+.app-page {
+  min-height: 100vh;
+  background: radial-gradient(circle at top, #f7f9fc 0%, var(--app-bg) 55%, #e8eef5 100%);
+  padding: 32px 24px 60px;
+  font-family: "Manrope", "Segoe UI", sans-serif;
+  color: var(--app-ink);
+}
+
+.app-page,
+.app-page * {
+  box-sizing: border-box;
+}
+
+.app-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.app-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.app-title {
+  margin: 0 0 6px;
+  font-family: "Sora", "Segoe UI", sans-serif;
+  font-size: 26px;
+}
+
+.app-subtitle {
+  margin: 0;
+  color: var(--app-muted);
+  font-size: 14px;
+}
+
+.app-card {
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-lg);
+  padding: 18px;
+  box-shadow: var(--app-shadow);
+}
+
+.app-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.app-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.app-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--app-accent-soft);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--app-ink);
+}
+
+.app-button,
+.app-button-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: 1px solid var(--app-border);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.app-button {
+  background: var(--app-accent);
+  color: #ffffff;
+  border-color: var(--app-accent);
+}
+
+.app-button-secondary {
+  background: #ffffff;
+  color: var(--app-ink);
+}
+
+.app-input,
+.app-textarea,
+.app-select {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: var(--app-radius-md);
+  border: 1px solid var(--app-border);
+  font-size: 14px;
+  font-family: "Manrope", "Segoe UI", sans-serif;
+}
+
+.app-textarea {
+  min-height: 110px;
+  resize: vertical;
+}
+
+.app-input:focus,
+.app-textarea:focus,
+.app-select:focus {
+  outline: none;
+  border-color: #c7c2bc;
+  box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.08);
+}
+
+@media (max-width: 720px) {
+  .app-page {
+    padding: 24px 16px 48px;
+  }
+}

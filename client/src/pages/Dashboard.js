@@ -32,7 +32,7 @@ export default function Dashboard() {
       <div className="dashboard-frame">
         {/* Sidebar */}
         <aside className="sidebar">
-          <h2 className="logo">IdeaHub</h2>
+          <h2 className="logo">IdeaSpark</h2>
           <nav>
             <ul>
               <li className="active" onClick={() => navigate("/dashboard")}>

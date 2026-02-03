@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import io from "socket.io-client";
 import apiRequest from "../services/api";
+import "../styles/appPageTheme.css";
 import "../styles/TeamChat.css";
 
 export default function TeamChat() {
@@ -49,23 +50,41 @@ export default function TeamChat() {
   };
 
   return (
-    <div className="team-chat-page">
-      <h2>Team Chat</h2>
-      <div className="chat-messages">
-        {messages.map((message) => (
-          <div key={message._id} className="message">
-            <strong>{message.sender?.name}:</strong> {message.content}
+    <div className="app-page team-chat-page">
+      <div className="app-container">
+        <div className="app-header">
+          <div>
+            <h2 className="app-title">Team Chat</h2>
+            <p className="app-subtitle">Stay in sync with your collaborators.</p>
           </div>
-        ))}
-      </div>
-      <div className="chat-input">
-        <input
-          type="text"
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          placeholder="Type a message..."
-        />
-        <button onClick={handleSendMessage}>Send</button>
+        </div>
+
+        <div className="team-chat-shell app-card">
+          <div className="chat-messages">
+            {messages.length === 0 ? (
+              <p className="chat-empty">No messages yet. Start the conversation.</p>
+            ) : (
+              messages.map((message) => (
+                <div key={message._id} className="message">
+                  <span className="message-author">{message.sender?.name || "Member"}</span>
+                  <span className="message-text">{message.content}</span>
+                </div>
+              ))
+            )}
+          </div>
+          <div className="chat-input-row">
+            <input
+              type="text"
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              placeholder="Type a message..."
+              className="app-input"
+            />
+            <button className="app-button" onClick={handleSendMessage}>
+              Send
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

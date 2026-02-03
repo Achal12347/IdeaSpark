@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+ï»¿import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import apiRequest from "../services/api";
+import "../styles/appPageTheme.css";
 import "../styles/IdeaDetails.css";
 
 const statusLabel = (status) => {
@@ -155,137 +156,211 @@ export default function IdeaDetails() {
     navigate("/suggested-collaborators");
   };
 
-  if (!idea) return <div>Loading...</div>;
+  if (!idea) {
+    return (
+      <div className="app-page idea-details-page">
+        <div className="app-container">
+          <div className="idea-details-loading">Loading...</div>
+        </div>
+      </div>
+    );
+  }
+
+  const postedBy = idea.author?.name || idea.author?.email || "Anonymous";
+  const postedDate = idea.createdAt
+    ? new Date(idea.createdAt).toLocaleDateString()
+    : null;
 
   return (
-    <div className="idea-details-page">
-      <h2>{idea.title}</h2>
-      <p>{idea.problemStatement}</p>
-      <p>{idea.solutionDescription}</p>
-      <div className="tags">
-        {idea.tags?.map((tag, index) => (
-          <span key={index}>{tag}</span>
-        ))}
-      </div>
-      <p>Posted by: {idea.author?.name}</p>
-      <div className="idea-stats">
-        <span>Views {idea.views || 0}</span>
-        <span>Likes {idea.likes || 0}</span>
-        <span>Comments {idea.comments?.length || 0}</span>
-      </div>
-      <div className="rating-section">
-        <h3>
-          Rating: {rating.toFixed(1)} ({idea.totalRatings} ratings)
-        </h3>
-        <div className="star-rating">
-          {[1, 2, 3, 4, 5].map((star) => (
-            <span
-              key={star}
-              onClick={() => handleRate(star)}
-              style={{ cursor: "pointer", color: star <= userRating ? "gold" : "gray" }}
-            >
-              *
-            </span>
-          ))}
+    <div className="app-page idea-details-page">
+      <div className="app-container">
+        <div className="app-header idea-details-header">
+          <div>
+            <h2 className="app-title">{idea.title}</h2>
+            <p className="app-subtitle">
+              Posted by {postedBy}
+              {postedDate ? ` Â· ${postedDate}` : ""}
+            </p>
+          </div>
         </div>
-      </div>
-      <div className="comments-section">
-        <h3>Comments</h3>
-        <div className="add-comment">
-          <textarea
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            placeholder="Add a comment..."
-          />
-          <button onClick={handleAddComment}>Post Comment</button>
-        </div>
-        <div className="comments-list">
-          {comments.map((comment) => (
-            <div key={comment._id} className="comment">
-              <p>{comment.content}</p>
-              <small>
-                By {comment.author?.name} on {new Date(comment.createdAt).toLocaleDateString()}
-              </small>
+
+        <section className="idea-details-overview app-card">
+          <div className="idea-details-block">
+            <h3>Problem</h3>
+            <p>{idea.problemStatement}</p>
+          </div>
+          <div className="idea-details-block">
+            <h3>Solution</h3>
+            <p>{idea.solutionDescription}</p>
+          </div>
+          <div className="idea-details-tags">
+            {idea.tags?.map((tag, index) => (
+              <span key={index} className="app-pill">
+                {tag}
+              </span>
+            ))}
+          </div>
+          <div className="idea-details-stats">
+            <span className="app-pill">Views {idea.views || 0}</span>
+            <span className="app-pill">Likes {idea.likes || 0}</span>
+            <span className="app-pill">Comments {idea.comments?.length || 0}</span>
+          </div>
+        </section>
+
+        <div className="idea-details-grid">
+          <section className="rating-section app-card">
+            <h3>
+              Rating: {rating.toFixed(1)} ({idea.totalRatings || 0} ratings)
+            </h3>
+            <div className="star-rating">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <span
+                  key={star}
+                  onClick={() => handleRate(star)}
+                  className={star <= userRating ? "star active" : "star"}
+                >
+                  *
+                </span>
+              ))}
             </div>
-          ))}
+          </section>
+
+          <section className="collaboration-section app-card">
+            <h3>Collaboration</h3>
+            <p>Interested in collaborating on this idea?</p>
+            <button onClick={handleCollaborate} className="app-button">
+              Find Collaborators
+            </button>
+          </section>
         </div>
-      </div>
-      {offersAllowed ? (
-        <div className="funding-section">
-          <h3>Funding offers</h3>
-          {offersLoading ? <p>Loading offers...</p> : null}
-          {offersError ? <p className="offer-error">{offersError}</p> : null}
-          {!offersLoading && offers.length === 0 ? <p>No offers yet.</p> : null}
-          <div className="offer-list">
-            {offers.map((offer) => (
-              <div key={offer._id} className="offer-card">
-                <div className="offer-header">
-                  <div>
-                    <h4>{offer.investor?.name || "Investor"}</h4>
-                    <p>{offer.investor?.email}</p>
-                  </div>
-                  <span className={`offer-status status-${offer.status}`}>
-                    {statusLabel(offer.status)}
-                  </span>
-                </div>
-                <p className="offer-message">{offer.pitchContent}</p>
-                <div className="offer-meta">
-                  <span>Amount: {offer.amount ? `$${offer.amount}` : "—"}</span>
-                  <span>Equity: {offer.equity ? `${offer.equity}%` : "—"}</span>
-                </div>
-                {offer.counterOffer ? (
-                  <div className="counter-block">
-                    <p className="counter-title">Counter offer</p>
-                    <p>{offer.counterOffer.message || "—"}</p>
-                    <div className="offer-meta">
-                      <span>
-                        Amount: {offer.counterOffer.amount ? `$${offer.counterOffer.amount}` : "—"}
-                      </span>
-                      <span>
-                        Equity: {offer.counterOffer.equity ? `${offer.counterOffer.equity}%` : "—"}
-                      </span>
-                    </div>
-                  </div>
-                ) : null}
-                {offer.status === "pending" ? (
-                  <div className="offer-actions">
-                    <button onClick={() => handleOfferAction(offer._id, "accept")}>Accept</button>
-                    <button onClick={() => handleOfferAction(offer._id, "reject")}>Reject</button>
-                    <div className="counter-form">
-                      <input
-                        type="number"
-                        placeholder="Counter amount"
-                        value={counterDrafts[offer._id]?.amount || ""}
-                        onChange={(e) => updateCounterDraft(offer._id, "amount", e.target.value)}
-                      />
-                      <input
-                        type="number"
-                        placeholder="Counter equity %"
-                        value={counterDrafts[offer._id]?.equity || ""}
-                        onChange={(e) => updateCounterDraft(offer._id, "equity", e.target.value)}
-                      />
-                      <input
-                        type="text"
-                        placeholder="Counter message"
-                        value={counterDrafts[offer._id]?.message || ""}
-                        onChange={(e) => updateCounterDraft(offer._id, "message", e.target.value)}
-                      />
-                      <button onClick={() => handleOfferAction(offer._id, "counter")}>Send counter</button>
-                    </div>
-                  </div>
-                ) : null}
+
+        <section className="comments-section app-card">
+          <div className="comments-header">
+            <h3>Comments</h3>
+            <span>{comments.length} total</span>
+          </div>
+          <div className="add-comment">
+            <textarea
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              placeholder="Add a comment..."
+              className="app-textarea"
+            />
+            <button className="app-button" onClick={handleAddComment}>
+              Post Comment
+            </button>
+          </div>
+          <div className="comments-list">
+            {comments.map((comment) => (
+              <div key={comment._id} className="comment-card">
+                <p>{comment.content}</p>
+                <small>
+                  By {comment.author?.name} on {" "}
+                  {new Date(comment.createdAt).toLocaleDateString()}
+                </small>
               </div>
             ))}
           </div>
-        </div>
-      ) : null}
-      <div className="collaboration-section">
-        <h3>Collaboration</h3>
-        <p>Interested in collaborating on this idea?</p>
-        <button onClick={handleCollaborate} className="collaborate-btn">
-          Find Collaborators
-        </button>
+        </section>
+
+        {offersAllowed ? (
+          <section className="funding-section app-card">
+            <div className="funding-header">
+              <h3>Funding offers</h3>
+              <p>Review funding interest from investors.</p>
+            </div>
+            {offersLoading ? <p>Loading offers...</p> : null}
+            {offersError ? <p className="offer-error">{offersError}</p> : null}
+            {!offersLoading && offers.length === 0 ? <p>No offers yet.</p> : null}
+            <div className="offer-list">
+              {offers.map((offer) => (
+                <div key={offer._id} className="offer-card">
+                  <div className="offer-header">
+                    <div>
+                      <h4>{offer.investor?.name || "Investor"}</h4>
+                      <p>{offer.investor?.email}</p>
+                    </div>
+                    <span className={`offer-status status-${offer.status}`}>
+                      {statusLabel(offer.status)}
+                    </span>
+                  </div>
+                  <p className="offer-message">{offer.pitchContent}</p>
+                  <div className="offer-meta">
+                    <span>Amount: {offer.amount ? `$${offer.amount}` : "â€”"}</span>
+                    <span>Equity: {offer.equity ? `${offer.equity}%` : "â€”"}</span>
+                  </div>
+                  {offer.counterOffer ? (
+                    <div className="counter-block">
+                      <p className="counter-title">Counter offer</p>
+                      <p>{offer.counterOffer.message || "â€”"}</p>
+                      <div className="offer-meta">
+                        <span>
+                          Amount: {offer.counterOffer.amount ? `$${offer.counterOffer.amount}` : "â€”"}
+                        </span>
+                        <span>
+                          Equity: {offer.counterOffer.equity ? `${offer.counterOffer.equity}%` : "â€”"}
+                        </span>
+                      </div>
+                    </div>
+                  ) : null}
+                  {offer.status === "pending" ? (
+                    <div className="offer-actions">
+                      <button
+                        className="app-button"
+                        onClick={() => handleOfferAction(offer._id, "accept")}
+                      >
+                        Accept
+                      </button>
+                      <button
+                        className="app-button-secondary offer-reject"
+                        onClick={() => handleOfferAction(offer._id, "reject")}
+                      >
+                        Reject
+                      </button>
+                      <div className="counter-form">
+                        <input
+                          type="number"
+                          placeholder="Counter amount"
+                          value={counterDrafts[offer._id]?.amount || ""}
+                          onChange={(e) =>
+                            updateCounterDraft(offer._id, "amount", e.target.value)
+                          }
+                          className="app-input"
+                        />
+                        <input
+                          type="number"
+                          placeholder="Counter equity %"
+                          value={counterDrafts[offer._id]?.equity || ""}
+                          onChange={(e) =>
+                            updateCounterDraft(offer._id, "equity", e.target.value)
+                          }
+                          className="app-input"
+                        />
+                        <input
+                          type="text"
+                          placeholder="Counter message"
+                          value={counterDrafts[offer._id]?.message || ""}
+                          onChange={(e) =>
+                            updateCounterDraft(offer._id, "message", e.target.value)
+                          }
+                          className="app-input"
+                        />
+                        <button
+                          className="app-button-secondary"
+                          onClick={() => handleOfferAction(offer._id, "counter")}
+                        >
+                          Send counter
+                        </button>
+                      </div>
+                    </div>
+                  ) : null}
+                </div>
+              ))}
+            </div>
+          </section>
+        ) : null}
       </div>
     </div>
   );
 }
+

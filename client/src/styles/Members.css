@@ -1,0 +1,10 @@
+@import "./appPageTheme.css";
+
+.members-card {
+  text-align: center;
+}
+
+.members-empty {
+  margin: 0;
+  color: var(--app-muted);
+}

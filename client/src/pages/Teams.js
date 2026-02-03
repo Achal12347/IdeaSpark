@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { fetchTeams, createTeam } from "../services/teamService";
+import "../styles/appPageTheme.css";
 import "../styles/Teams.css";
 
 export default function Teams() {
@@ -31,24 +32,49 @@ export default function Teams() {
   };
 
   return (
-    <div className="teams-page">
-      <h2>My Teams</h2>
-      <div className="create-team">
-        <input
-          type="text"
-          value={newTeamName}
-          onChange={(e) => setNewTeamName(e.target.value)}
-          placeholder="Team name"
-        />
-        <button onClick={handleCreateTeam}>Create Team</button>
-      </div>
-      <div className="teams-list">
-        {teams.map((team) => (
-          <div key={team._id} className="team-card">
-            <h3>{team.name}</h3>
-            <p>Members: {team.members?.length || 0}</p>
+    <div className="app-page teams-page">
+      <div className="app-container">
+        <div className="app-header">
+          <div>
+            <h2 className="app-title">My Teams</h2>
+            <p className="app-subtitle">Create and manage teams for your ideas.</p>
           </div>
-        ))}
+        </div>
+
+        <div className="team-create app-card">
+          <div className="team-create-fields">
+            <input
+              type="text"
+              value={newTeamName}
+              onChange={(e) => setNewTeamName(e.target.value)}
+              placeholder="Team name"
+              className="app-input"
+            />
+            <button
+              className="app-button"
+              onClick={handleCreateTeam}
+              disabled={!newTeamName.trim()}
+            >
+              Create Team
+            </button>
+          </div>
+        </div>
+
+        {teams.length === 0 ? (
+          <div className="teams-empty app-card">
+            <h3>No teams yet</h3>
+            <p>Create your first team to start collaborating.</p>
+          </div>
+        ) : (
+          <div className="teams-list app-grid">
+            {teams.map((team) => (
+              <div key={team._id} className="team-card app-card">
+                <h3>{team.name}</h3>
+                <p>Members: {team.members?.length || 0}</p>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
