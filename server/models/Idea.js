@@ -70,15 +70,39 @@ const ideaSchema = new mongoose.Schema(
         type: String,
         required: true,
       },
+      amount: {
+        type: Number,
+      },
+      equity: {
+        type: Number,
+      },
       status: {
         type: String,
-        enum: ['pending', 'accepted', 'rejected'],
+        enum: ['pending', 'owner_accepted', 'countered', 'rejected', 'funded'],
         default: 'pending',
+      },
+      counterOffer: {
+        amount: Number,
+        equity: Number,
+        message: String,
+        createdAt: Date,
       },
       createdAt: {
         type: Date,
         default: Date.now,
       },
+      updatedAt: {
+        type: Date,
+      },
+    }],
+    fundingStatus: {
+      type: String,
+      enum: ['seeking', 'funded'],
+      default: 'seeking',
+    },
+    collaborators: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
     }],
     views: {
       type: Number,

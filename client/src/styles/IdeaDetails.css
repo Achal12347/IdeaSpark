@@ -340,3 +340,125 @@
     gap: 10px;
   }
 }
+
+.funding-section {
+  background: #fff;
+  border-radius: 8px;
+  padding: 24px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  margin-top: 24px;
+}
+
+.offer-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.offer-card {
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.offer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.offer-status {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.status-pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status-owner_accepted {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.status-countered {
+  background: #e0f2fe;
+  color: #075985;
+}
+
+.status-rejected {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.status-funded {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.offer-message {
+  margin: 12px 0;
+  color: #333;
+}
+
+.offer-meta {
+  display: flex;
+  gap: 16px;
+  font-size: 13px;
+  color: #666;
+}
+
+.offer-actions {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.offer-actions button {
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  background: #111827;
+  color: #fff;
+  cursor: pointer;
+}
+
+.offer-actions button:nth-child(2) {
+  background: #dc2626;
+}
+
+.counter-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 8px;
+}
+
+.counter-form input {
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+
+.counter-block {
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: #f9fafb;
+  border-radius: 6px;
+}
+
+.counter-title {
+  font-weight: 600;
+  margin: 0 0 6px;
+}
+
+.offer-error {
+  color: #b91c1c;
+  font-weight: 600;
+}

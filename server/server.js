@@ -14,6 +14,7 @@ const forumRoutes = require("./routes/forumRoutes");
 const hackathonRoutes = require("./routes/hackathonRoutes");
 const teamRoutes = require("./routes/teamRoutes");
 const messageRoutes = require("./routes/messageRoutes");
+const contactRoutes = require("./routes/contactRoutes");
 
 // Create app FIRST
 const app = express();
@@ -55,6 +56,7 @@ app.use("/api/forums", forumRoutes);
 app.use("/api/hackathons", hackathonRoutes);
 app.use("/api/teams", teamRoutes);
 app.use("/api/messages", messageRoutes);
+app.use("/api/contact", contactRoutes);
 
 // Health check (IMPORTANT for Render debugging)
 app.get("/", (req, res) => {

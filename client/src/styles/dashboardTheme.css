@@ -1,0 +1,336 @@
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap");
+
+:root {
+  --dash-bg: #e9e7e4;
+  --dash-surface: #ffffff;
+  --dash-panel: #f4f2ef;
+  --dash-border: #e1ddd8;
+  --dash-text: #1f1e1c;
+  --dash-muted: #7a756b;
+  --dash-accent: #1a1a1a;
+  --dash-success: #2a9d6f;
+  --dash-warning: #e07a5f;
+  --dash-shadow: 0 24px 60px rgba(17, 17, 17, 0.08);
+  --dash-soft-shadow: 0 12px 24px rgba(17, 17, 17, 0.06);
+  --dash-radius-lg: 26px;
+  --dash-radius-md: 18px;
+  --dash-radius-sm: 12px;
+  --dash-side-width: 240px;
+  --dash-right-width: 300px;
+  --dash-font: "Manrope", "Segoe UI", sans-serif;
+}
+
+.dashboard-shell,
+.dashboard-shell * {
+  box-sizing: border-box;
+}
+
+.dashboard-shell {
+  min-height: 100vh;
+  padding: 24px;
+  background: var(--dash-bg);
+  color: var(--dash-text);
+  font-family: var(--dash-font);
+}
+
+.dashboard-frame {
+  background: var(--dash-surface);
+  border-radius: var(--dash-radius-lg);
+  box-shadow: var(--dash-shadow);
+  min-height: calc(100vh - 48px);
+  display: grid;
+  grid-template-columns: var(--dash-side-width) minmax(0, 1fr) var(--dash-right-width);
+  overflow: hidden;
+}
+
+.dashboard-frame.admin-frame {
+  grid-template-columns: var(--dash-side-width) minmax(0, 1fr);
+}
+
+.sidebar {
+  background: var(--dash-panel);
+  padding: 24px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  border-right: 1px solid var(--dash-border);
+}
+
+.sidebar .logo {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  margin: 0;
+}
+
+.sidebar nav ul,
+.sidebar-nav {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sidebar nav li,
+.sidebar-nav button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  color: var(--dash-muted);
+  border: 1px solid transparent;
+  background: transparent;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+.sidebar nav li:hover,
+.sidebar nav li.active,
+.sidebar-nav button:hover,
+.sidebar-nav button.active {
+  color: var(--dash-text);
+  background: var(--dash-surface);
+  border-color: var(--dash-border);
+  box-shadow: var(--dash-soft-shadow);
+}
+
+.main,
+.admin-main {
+  padding: 20px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  min-width: 0;
+  background: var(--dash-surface);
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  background: var(--dash-panel);
+  padding: 12px 16px;
+  border-radius: var(--dash-radius-md);
+  border: 1px solid var(--dash-border);
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+.topbar-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.search-field {
+  display: flex;
+  align-items: center;
+}
+
+.search-field input {
+  width: 260px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--dash-border);
+  background: #ffffff;
+  font-size: 14px;
+  color: var(--dash-text);
+}
+
+.search-field input:focus {
+  outline: none;
+  border-color: #c7c2bc;
+  box-shadow: 0 0 0 3px rgba(26, 26, 26, 0.08);
+}
+
+.top-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.dashboard-shell button {
+  font-family: var(--dash-font);
+  border: 1px solid var(--dash-border);
+  background: #ffffff;
+  color: var(--dash-text);
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dashboard-shell button:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--dash-soft-shadow);
+}
+
+.dashboard-shell button:active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.btn-primary {
+  background: var(--dash-accent);
+  color: #ffffff;
+  border-color: var(--dash-accent);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 12px 20px rgba(26, 26, 26, 0.2);
+}
+
+.btn-danger {
+  background: #fff1f1;
+  color: #b91c1c;
+  border-color: #fecaca;
+}
+
+.icon-btn {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-btn svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+.profile-menu {
+  position: relative;
+}
+
+.profile-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px 4px 4px;
+}
+
+.profile-name {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--dash-accent);
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.chevron {
+  font-size: 12px;
+  color: var(--dash-muted);
+}
+
+.profile-dropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  min-width: 160px;
+  background: #ffffff;
+  border: 1px solid var(--dash-border);
+  border-radius: var(--dash-radius-sm);
+  box-shadow: var(--dash-soft-shadow);
+  padding: 8px;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-4px);
+  transition: all 0.2s ease;
+  z-index: 20;
+}
+
+.profile-menu:focus-within .profile-dropdown,
+.profile-menu:hover .profile-dropdown {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.profile-dropdown .logout-btn {
+  width: 100%;
+}
+
+.right-panel {
+  background: var(--dash-panel);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  border-left: 1px solid var(--dash-border);
+}
+
+.panel-card,
+.card {
+  background: #ffffff;
+  border: 1px solid var(--dash-border);
+  border-radius: var(--dash-radius-md);
+  padding: 16px;
+  box-shadow: var(--dash-soft-shadow);
+}
+
+@media (max-width: 1100px) {
+  .dashboard-frame {
+    grid-template-columns: var(--dash-side-width) minmax(0, 1fr);
+  }
+
+  .right-panel {
+    display: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .dashboard-shell {
+    padding: 0;
+  }
+
+  .dashboard-frame {
+    grid-template-columns: 1fr;
+    border-radius: 0;
+  }
+
+  .sidebar {
+    display: none;
+  }
+
+  .topbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .topbar-left {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search-field input {
+    width: 100%;
+  }
+}

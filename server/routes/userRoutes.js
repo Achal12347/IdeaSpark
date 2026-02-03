@@ -48,22 +48,68 @@ router.get("/me", verifyFirebaseToken, async (req, res) => {
 ================================ */
 router.post("/", verifyFirebaseToken, async (req, res) => {
   try {
-    const { name, expertise, workplace } = req.body;
+    const {
+      name,
+      username,
+      profilePhoto,
+      bio,
+      roles,
+      skills,
+      interests,
+      experienceLevel,
+      collaborationPreferences,
+      availability,
+      links,
+      expertise,
+      workplace,
+    } = req.body;
 
-    if (!name || !expertise || !workplace) {
-      return res.status(400).json({ error: "All fields are required" });
+    const existingUser = await User.findOne({ firebaseUID: req.user.uid });
+
+    if (!existingUser) {
+      if (!name || !username || !Array.isArray(roles) || roles.length === 0) {
+        return res.status(400).json({
+          error: "Name, username, and at least one role are required.",
+        });
+      }
     }
+
+    if (username) {
+      const normalizedUsername = username.toLowerCase().trim();
+      const usernameOwner = await User.findOne({ username: normalizedUsername });
+      if (usernameOwner && usernameOwner.firebaseUID !== req.user.uid) {
+        return res.status(400).json({ error: "Username already taken." });
+      }
+    }
+
+    const update = {
+      firebaseUID: req.user.uid,
+      name,
+      username: username ? username.toLowerCase().trim() : undefined,
+      profilePhoto,
+      bio,
+      roles,
+      skills,
+      interests,
+      experienceLevel,
+      collaborationPreferences,
+      availability,
+      links,
+      expertise,
+      workplace,
+      role: existingUser?.role || "user",
+    };
+
+    Object.keys(update).forEach((key) => {
+      if (update[key] === undefined) {
+        delete update[key];
+      }
+    });
 
     // ✅ UPSERT prevents duplicate users
     const user = await User.findOneAndUpdate(
       { firebaseUID: req.user.uid },
-      {
-        firebaseUID: req.user.uid,
-        name,
-        expertise,
-        workplace,
-        role: "user", // default role
-      },
+      update,
       { new: true, upsert: true }
     );
 
