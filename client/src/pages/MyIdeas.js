@@ -4,6 +4,7 @@ import io from "socket.io-client";
 import { fetchMyIdeas, fetchCollaboratorIdeas } from "../services/ideaService";
 import apiRequest from "../services/api";
 import IdeaCard from "../components/IdeaCard";
+import { useAuth } from "../context/AuthContext";
 import "../styles/appPageTheme.css";
 import "../styles/MyIdeas.css";
 
@@ -11,6 +12,20 @@ const socketUrl = (process.env.REACT_APP_API_URL || "http://localhost:5000").rep
   /\/api\/?$/,
   ""
 );
+
+const buildChatIdeas = (ownedIdeas, collaboratorIdeas) => {
+  const combined = [
+    ...ownedIdeas.map((idea) => ({ ...idea, chatRole: "Owner" })),
+    ...collaboratorIdeas.map((idea) => ({ ...idea, chatRole: "Collaborator" })),
+  ];
+  const unique = new Map();
+  combined.forEach((idea) => {
+    if (!unique.has(idea._id)) {
+      unique.set(idea._id, idea);
+    }
+  });
+  return Array.from(unique.values());
+};
 
 export default function MyIdeas() {
   const [ideas, setIdeas] = useState([]);
@@ -24,6 +39,7 @@ export default function MyIdeas() {
   const [messageError, setMessageError] = useState("");
   const [socket, setSocket] = useState(null);
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
 
   useEffect(() => {
     const newSocket = io(socketUrl, {
@@ -120,6 +136,11 @@ export default function MyIdeas() {
     }
   };
 
+  const chatIdeas = buildChatIdeas(ideas, collaboratorIdeas);
+  const isOwnMessage = (message) =>
+    Boolean(message?.sender?.email && currentUser?.email)
+    && message.sender.email === currentUser.email;
+
   return (
     <div className="app-page ideas-page">
       <div className="app-container">
@@ -128,7 +149,7 @@ export default function MyIdeas() {
             <h2 className="app-title">My Ideas</h2>
             <p className="app-subtitle">Track the ideas you have shared so far.</p>
           </div>
-          <button className="app-button" onClick={() => navigate("/add-idea")}> 
+          <button className="app-button" onClick={() => navigate("/add-idea")}>
             Create Post
           </button>
         </div>
@@ -139,7 +160,7 @@ export default function MyIdeas() {
           <div className="ideas-empty app-card">
             <h3>No ideas yet</h3>
             <p>Start by creating your first idea.</p>
-            <button className="app-button" onClick={() => navigate("/add-idea")}> 
+            <button className="app-button" onClick={() => navigate("/add-idea")}>
               Create Post
             </button>
           </div>
@@ -160,28 +181,32 @@ export default function MyIdeas() {
         <section className="collaboration-section">
           <div className="app-header">
             <div>
-              <h2 className="app-title">Collaborations</h2>
-              <p className="app-subtitle">Ideas where you are a collaborator.</p>
+              <h2 className="app-title">Collaboration Chat</h2>
+              <p className="app-subtitle">Message collaborators on your ideas.</p>
             </div>
           </div>
 
           {collabLoading ? (
             <div className="ideas-loading">Loading collaborations...</div>
-          ) : collaboratorIdeas.length === 0 ? (
+          ) : chatIdeas.length === 0 ? (
             <div className="ideas-empty app-card">
               <p>No collaborations yet.</p>
             </div>
           ) : (
             <div className="collaboration-grid">
               <div className="collaboration-list">
-                {collaboratorIdeas.map((idea) => (
-                  <IdeaCard
-                    key={idea._id}
-                    idea={idea}
-                    variant="user"
-                    className={`app-card ${selectedIdea?._id === idea._id ? "is-selected" : ""}`}
-                    onClick={() => handleSelectIdea(idea)}
-                  />
+                {chatIdeas.map((idea) => (
+                  <div key={idea._id} className="chat-idea">
+                    <IdeaCard
+                      idea={idea}
+                      variant="user"
+                      className={`app-card ${selectedIdea?._id === idea._id ? "is-selected" : ""}`}
+                      onClick={() => handleSelectIdea(idea)}
+                    />
+                    <span className={`chat-badge ${idea.chatRole.toLowerCase()}`}>
+                      {idea.chatRole}
+                    </span>
+                  </div>
                 ))}
               </div>
 
@@ -202,7 +227,10 @@ export default function MyIdeas() {
                           <p className="messages-state">No messages yet.</p>
                         ) : (
                           messages.map((message) => (
-                            <div key={message._id} className="message-item">
+                            <div
+                              key={message._id}
+                              className={`message-item ${isOwnMessage(message) ? "own" : ""}`}
+                            >
                               <div>
                                 <strong>{message.sender?.name || "User"}</strong>
                                 <p>{message.content}</p>

@@ -6,6 +6,23 @@ import IdeaCard from "../components/IdeaCard";
 import "../styles/appPageTheme.css";
 import "../styles/Investors.css";
 
+const statusLabel = (status) => {
+  switch (status) {
+    case "pending":
+      return "Pending";
+    case "owner_accepted":
+      return "Owner accepted";
+    case "countered":
+      return "Countered";
+    case "funded":
+      return "Funded";
+    case "rejected":
+      return "Rejected";
+    default:
+      return "Unknown";
+  }
+};
+
 export default function Investors() {
   const navigate = useNavigate();
   const [ideas, setIdeas] = useState([]);
@@ -16,6 +33,10 @@ export default function Investors() {
     estimatedBudget: "",
     equityShare: "",
   });
+  const [offers, setOffers] = useState([]);
+  const [offersLoading, setOffersLoading] = useState(false);
+  const [offersError, setOffersError] = useState("");
+  const [counterDrafts, setCounterDrafts] = useState({});
   const [status, setStatus] = useState({ type: "", message: "" });
 
   useEffect(() => {
@@ -41,6 +62,9 @@ export default function Investors() {
       equityShare: idea.equityShare ?? "",
     });
     setStatus({ type: "", message: "" });
+    setOffers([]);
+    setOffersError("");
+    loadOffers(idea._id);
   };
 
   const handleChange = (event) => {
@@ -73,6 +97,49 @@ export default function Investors() {
       setStatus({ type: "success", message: "Idea pitched to investors." });
     } catch (error) {
       setStatus({ type: "error", message: error.message || "Pitch failed." });
+    }
+  };
+
+  const loadOffers = async (ideaId) => {
+    setOffersLoading(true);
+    setOffersError("");
+    try {
+      const data = await apiRequest(`/api/ideas/${ideaId}/pitches`);
+      setOffers(data || []);
+    } catch (error) {
+      setOffersError("Unable to load offers.");
+    } finally {
+      setOffersLoading(false);
+    }
+  };
+
+  const updateCounterDraft = (offerId, field, value) => {
+    setCounterDrafts((prev) => ({
+      ...prev,
+      [offerId]: {
+        ...prev[offerId],
+        [field]: value,
+      },
+    }));
+  };
+
+  const handleOfferAction = async (offerId, action) => {
+    if (!selectedIdea) return;
+    const payload = { action };
+    if (action === "counter") {
+      const draft = counterDrafts[offerId] || {};
+      payload.counterAmount = draft.amount;
+      payload.counterEquity = draft.equity;
+      payload.counterMessage = draft.message;
+    }
+    try {
+      await apiRequest(`/api/ideas/${selectedIdea._id}/pitches/${offerId}/respond`, {
+        method: "POST",
+        body: JSON.stringify(payload),
+      });
+      await loadOffers(selectedIdea._id);
+    } catch (error) {
+      setOffersError("Unable to update offer.");
     }
   };
 
@@ -181,6 +248,106 @@ export default function Investors() {
                     >
                       View Idea Details
                     </button>
+                  </div>
+
+                  <div className="offers-panel">
+                    <div className="offers-header">
+                      <h3>Offers</h3>
+                      <p>Investors who showed interest in this idea.</p>
+                    </div>
+                    {offersLoading ? (
+                      <p className="offers-state">Loading offers...</p>
+                    ) : offersError ? (
+                      <p className="offers-state error">{offersError}</p>
+                    ) : offers.length === 0 ? (
+                      <p className="offers-state">No offers yet.</p>
+                    ) : (
+                      <div className="offer-list">
+                        {offers.map((offer) => (
+                          <div key={offer._id} className="offer-card">
+                            <div className="offer-header">
+                              <div>
+                                <h4>{offer.investor?.name || "Investor"}</h4>
+                                <p>{offer.investor?.email}</p>
+                              </div>
+                              <span className={`offer-status status-${offer.status}`}>
+                                {statusLabel(offer.status)}
+                              </span>
+                            </div>
+                            <p className="offer-message">{offer.pitchContent}</p>
+                            <div className="offer-meta">
+                              <span>Amount: {offer.amount ? `$${offer.amount}` : "N/A"}</span>
+                              <span>Equity: {offer.equity ? `${offer.equity}%` : "N/A"}</span>
+                            </div>
+                            {offer.counterOffer ? (
+                              <div className="counter-block">
+                                <p className="counter-title">Counter offer</p>
+                                <p>{offer.counterOffer.message || "N/A"}</p>
+                                <div className="offer-meta">
+                                  <span>
+                                    Amount: {offer.counterOffer.amount ? `$${offer.counterOffer.amount}` : "N/A"}
+                                  </span>
+                                  <span>
+                                    Equity: {offer.counterOffer.equity ? `${offer.counterOffer.equity}%` : "N/A"}
+                                  </span>
+                                </div>
+                              </div>
+                            ) : null}
+                            {offer.status === "pending" ? (
+                              <div className="offer-actions">
+                                <button
+                                  className="app-button"
+                                  onClick={() => handleOfferAction(offer._id, "accept")}
+                                >
+                                  Accept
+                                </button>
+                                <button
+                                  className="app-button-secondary"
+                                  onClick={() => handleOfferAction(offer._id, "reject")}
+                                >
+                                  Reject
+                                </button>
+                                <div className="counter-form">
+                                  <input
+                                    type="number"
+                                    placeholder="Counter amount"
+                                    value={counterDrafts[offer._id]?.amount || ""}
+                                    onChange={(event) =>
+                                      updateCounterDraft(offer._id, "amount", event.target.value)
+                                    }
+                                    className="app-input"
+                                  />
+                                  <input
+                                    type="number"
+                                    placeholder="Counter equity %"
+                                    value={counterDrafts[offer._id]?.equity || ""}
+                                    onChange={(event) =>
+                                      updateCounterDraft(offer._id, "equity", event.target.value)
+                                    }
+                                    className="app-input"
+                                  />
+                                  <input
+                                    type="text"
+                                    placeholder="Counter message"
+                                    value={counterDrafts[offer._id]?.message || ""}
+                                    onChange={(event) =>
+                                      updateCounterDraft(offer._id, "message", event.target.value)
+                                    }
+                                    className="app-input"
+                                  />
+                                  <button
+                                    className="app-button-secondary"
+                                    onClick={() => handleOfferAction(offer._id, "counter")}
+                                  >
+                                    Send counter
+                                  </button>
+                                </div>
+                              </div>
+                            ) : null}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </>
               ) : (

@@ -3,6 +3,7 @@ const {
   createIdea,
   getIdea,
   getIdeas,
+  getTrendingIdeas,
   getMyIdeas,
   getCollaboratorIdeas,
   getIdeaMessages,
@@ -28,6 +29,9 @@ router.post('/', authenticateToken, createIdea);
 
 // GET /api/ideas - Get all ideas
 router.get('/', getIdeas);
+
+// GET /api/ideas/trending - Trending ideas by rating
+router.get('/trending', getTrendingIdeas);
 
 // GET /api/ideas/investor/offers - Investor offers
 router.get('/investor/offers', authenticateToken, getInvestorOffers);

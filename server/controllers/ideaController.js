@@ -77,6 +77,18 @@ exports.getIdeas = async (req, res) => {
   }
 };
 
+exports.getTrendingIdeas = async (req, res) => {
+  try {
+    const ideas = await Idea.find()
+      .populate('author', 'name email')
+      .sort({ averageRating: -1, totalRatings: -1, views: -1, updatedAt: -1 })
+      .limit(20);
+    res.json(ideas);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching trending ideas', error });
+  }
+};
+
 exports.getMyIdeas = async (req, res) => {
   try {
     const user = await User.findOne({ firebaseUID: req.user.uid });
@@ -217,9 +229,14 @@ exports.rateIdea = async (req, res) => {
   try {
     const { id } = req.params;
     const { rating } = req.body;
-    const userId = req.user.uid;
+    const user = await getUserByFirebaseUid(req.user.uid);
 
-    if (rating < 1 || rating > 5) {
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const normalizedRating = Number(rating);
+    if (normalizedRating < 1 || normalizedRating > 5) {
       return res.status(400).json({ message: 'Rating must be between 1 and 5' });
     }
 
@@ -228,19 +245,26 @@ exports.rateIdea = async (req, res) => {
       return res.status(404).json({ message: 'Idea not found' });
     }
 
-    // Check if user already rated
-    const existingRating = idea.ratings.find(r => r.user.toString() === userId);
+    const existingRating = idea.ratings.find(
+      (r) => r.user?.toString() === user._id.toString()
+    );
     if (existingRating) {
-      return res.status(400).json({ message: 'You have already rated this idea' });
+      existingRating.rating = normalizedRating;
+    } else {
+      idea.ratings.push({ user: user._id, rating: normalizedRating });
     }
-
-    // Add new rating
-    idea.ratings.push({ user: userId, rating });
-    idea.totalRatings += 1;
-    idea.averageRating = idea.ratings.reduce((sum, r) => sum + r.rating, 0) / idea.totalRatings;
+    idea.totalRatings = idea.ratings.length;
+    idea.averageRating =
+      idea.totalRatings > 0
+        ? idea.ratings.reduce((sum, r) => sum + r.rating, 0) / idea.totalRatings
+        : 0;
 
     await idea.save();
-    res.json({ message: 'Rating added successfully', averageRating: idea.averageRating });
+    res.json({
+      message: 'Rating saved successfully',
+      averageRating: idea.averageRating,
+      totalRatings: idea.totalRatings,
+    });
   } catch (error) {
     res.status(500).json({ message: 'Error rating idea', error });
   }

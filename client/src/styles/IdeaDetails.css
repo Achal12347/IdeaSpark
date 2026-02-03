@@ -32,6 +32,42 @@
   gap: 8px;
 }
 
+.idea-details-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  border-radius: var(--app-radius-md);
+  border: 1px solid var(--app-border);
+  background: #fff;
+}
+
+.meta-label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--app-muted);
+}
+
+.meta-value {
+  font-size: 14px;
+  color: var(--app-ink);
+  margin: 0;
+}
+
+.idea-details-looking {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
 .idea-details-stats {
   display: flex;
   flex-wrap: wrap;

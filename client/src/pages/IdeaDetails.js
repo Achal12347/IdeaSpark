@@ -296,6 +296,16 @@ export default function IdeaDetails() {
     : null;
   const isOwner =
     currentUser?.email && idea.author?.email && currentUser.email === idea.author.email;
+  const formatCurrency = (value) =>
+    value !== null && value !== undefined && value !== ""
+      ? `$${Number(value).toLocaleString()}`
+      : "Not specified";
+  const formatPercent = (value) =>
+    value !== null && value !== undefined && value !== ""
+      ? `${Number(value)}%`
+      : "Not specified";
+  const listOrFallback = (value) =>
+    Array.isArray(value) && value.length > 0 ? value : null;
 
   return (
     <div className="app-page idea-details-page">
@@ -305,7 +315,7 @@ export default function IdeaDetails() {
             <h2 className="app-title">{idea.title}</h2>
             <p className="app-subtitle">
               Posted by {postedBy}
-              {postedDate ? ` ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· ${postedDate}` : ""}
+              {postedDate ? ` On· ${postedDate}` : ""}
             </p>
           </div>
         </div>
@@ -318,6 +328,46 @@ export default function IdeaDetails() {
           <div className="idea-details-block">
             <h3>Solution</h3>
             <p>{idea.solutionDescription}</p>
+          </div>
+          <div className="idea-details-meta">
+            <div className="meta-item">
+              <span className="meta-label">Target audience</span>
+              <span className="meta-value">{idea.targetAudience || "Not specified"}</span>
+            </div>
+            <div className="meta-item">
+              <span className="meta-label">Market category</span>
+              <span className="meta-value">{idea.marketCategory || "Not specified"}</span>
+            </div>
+            <div className="meta-item">
+              <span className="meta-label">Monetization model</span>
+              <span className="meta-value">{idea.monetizationModel || "Not specified"}</span>
+            </div>
+            <div className="meta-item">
+              <span className="meta-label">Stage of idea</span>
+              <span className="meta-value">{idea.stageOfIdea || "Not specified"}</span>
+            </div>
+            <div className="meta-item">
+              <span className="meta-label">Estimated budget</span>
+              <span className="meta-value">{formatCurrency(idea.estimatedBudget)}</span>
+            </div>
+            <div className="meta-item">
+              <span className="meta-label">Equity share</span>
+              <span className="meta-value">{formatPercent(idea.equityShare)}</span>
+            </div>
+          </div>
+          <div className="idea-details-looking">
+            <span className="meta-label">Looking for</span>
+            {listOrFallback(idea.lookingFor) ? (
+              <div className="idea-details-tags">
+                {idea.lookingFor.map((role, index) => (
+                  <span key={`${role}-${index}`} className="app-pill">
+                    {role}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <p className="meta-value">Not specified</p>
+            )}
           </div>
           <div className="idea-details-tags">
             {idea.tags?.map((tag, index) => (

@@ -1,4 +1,4 @@
-﻿.ideas-page {
+.ideas-page {
   color: var(--app-ink);
 }
 
@@ -82,6 +82,32 @@
   gap: 16px;
 }
 
+.chat-idea {
+  position: relative;
+}
+
+.chat-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.chat-badge.owner {
+  background: #111827;
+  color: #ffffff;
+}
+
+.chat-badge.collaborator {
+  background: #e0f2fe;
+  color: #075985;
+}
+
 .collaboration-panel {
   display: flex;
   flex-direction: column;
@@ -95,6 +121,7 @@
   max-height: 320px;
   overflow-y: auto;
   padding-right: 6px;
+  align-items: flex-start;
 }
 
 .message-item {
@@ -106,6 +133,7 @@
   border: 1px solid var(--app-border);
   background: #fff;
   font-size: 13px;
+  max-width: 90%;
 }
 
 .message-item p {
@@ -117,6 +145,18 @@
   font-size: 11px;
   color: var(--app-muted);
   white-space: nowrap;
+}
+
+.message-item.own {
+  align-self: flex-end;
+  background: #111827;
+  border-color: transparent;
+  color: #ffffff;
+}
+
+.message-item.own p,
+.message-item.own span {
+  color: rgba(255, 255, 255, 0.8);
 }
 
 .messages-state {
