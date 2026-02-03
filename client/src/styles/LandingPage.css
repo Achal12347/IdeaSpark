@@ -31,13 +31,14 @@
 .landing-shell::before,
 .landing-shell::after {
   content: "";
-  position: absolute;
+  position: fixed;
   width: 480px;
   height: 480px;
   border-radius: 50%;
   background: rgba(17, 24, 39, 0.04);
   filter: blur(0);
   z-index: 0;
+  pointer-events: none;
 }
 
 .landing-shell::before {

@@ -1,146 +1,202 @@
-/* PostIdea.css - Professional styling for the Post Idea page */
+﻿@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Sora:wght@500;600;700&display=swap");
+
+:root {
+  --post-bg: #eef2f6;
+  --post-surface: #ffffff;
+  --post-ink: #111827;
+  --post-muted: #6b7280;
+  --post-border: #e5e7eb;
+  --post-accent: #111827;
+  --post-accent-soft: #f3f4f6;
+  --post-shadow: 0 22px 50px rgba(15, 23, 42, 0.08);
+  --post-radius-xl: 24px;
+  --post-radius-lg: 18px;
+  --post-radius-md: 12px;
+}
 
 .post-idea-page {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f9f9f9;
   min-height: 100vh;
+  background: radial-gradient(circle at top, #f7f9fc 0%, var(--post-bg) 55%, #e8eef5 100%);
+  padding: 40px 24px 60px;
+  font-family: "Manrope", "Segoe UI", sans-serif;
+  color: var(--post-ink);
 }
 
-.post-idea-page h2 {
-  text-align: center;
-  color: #333;
-  margin-bottom: 30px;
-  font-size: 2.5em;
-  font-weight: 300;
-}
-
-.post-idea-page form {
-  background: white;
-  padding: 30px;
-  border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.post-idea-page h3 {
-  color: #555;
-  margin-top: 30px;
-  margin-bottom: 15px;
-  font-size: 1.4em;
-  font-weight: 500;
-  border-bottom: 2px solid #007bff;
-  padding-bottom: 5px;
-}
-
-.post-idea-page input,
-.post-idea-page textarea,
-.post-idea-page select {
-  width: 100%;
-  padding: 12px;
-  margin-bottom: 15px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  font-size: 1em;
-  transition: border-color 0.3s ease;
+.post-idea-page,
+.post-idea-page * {
   box-sizing: border-box;
 }
 
-.post-idea-page input:focus,
-.post-idea-page textarea:focus,
-.post-idea-page select:focus {
-  outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+.post-idea-shell {
+  max-width: 980px;
+  margin: 0 auto;
+  background: var(--post-surface);
+  border: 1px solid var(--post-border);
+  border-radius: var(--post-radius-xl);
+  box-shadow: var(--post-shadow);
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
 }
 
-.post-idea-page textarea {
+.post-idea-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.post-idea-header h2 {
+  margin: 0 0 6px;
+  font-family: "Sora", "Segoe UI", sans-serif;
+  font-size: 28px;
+}
+
+.post-idea-header p {
+  margin: 0;
+  color: var(--post-muted);
+}
+
+.post-idea-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-section {
+  padding-top: 10px;
+  border-top: 1px solid var(--post-border);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.form-section h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.form-section p {
+  margin: 0;
+  color: var(--post-muted);
+  font-size: 14px;
+}
+
+.field-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.field input,
+.field textarea,
+.field select {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: var(--post-radius-md);
+  border: 1px solid var(--post-border);
+  font-size: 14px;
+  font-family: "Manrope", "Segoe UI", sans-serif;
+}
+
+.field textarea {
+  min-height: 120px;
   resize: vertical;
-  min-height: 100px;
 }
 
-.post-idea-page select {
-  background-color: white;
+.field input:focus,
+.field textarea:focus,
+.field select:focus {
+  outline: none;
+  border-color: #c7c2bc;
+  box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.08);
 }
 
-/* Checkbox group styling for collaborators */
-.checkbox-group {
+.chip-grid {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  margin-bottom: 15px;
 }
 
-.checkbox-group label {
-  display: flex;
+.chip {
+  border: 1px solid var(--post-border);
+  background: var(--post-accent-soft);
+  color: var(--post-ink);
+  padding: 8px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 15px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  background-color: #f9f9f9;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 1em;
-  color: #333;
-  box-sizing: border-box;
-  min-width: 120px;
-  justify-content: center;
 }
 
-.checkbox-group label:hover {
-  background-color: #e9ecef;
-  border-color: #007bff;
-}
-
-.checkbox-group input[type="checkbox"] {
+.chip input {
   margin: 0;
-  accent-color: #007bff;
 }
 
-.checkbox-group input[type="checkbox"]:focus {
-  outline: none;
-  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+.post-idea-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
-.post-idea-page button {
-  width: 100%;
-  padding: 15px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  font-size: 1.2em;
+.primary-btn,
+.ghost-btn {
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: 1px solid var(--post-border);
+  font-weight: 600;
+  font-size: 14px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
-  margin-top: 20px;
 }
 
-.post-idea-page button:hover {
-  background-color: #0056b3;
+.primary-btn {
+  background: var(--post-accent);
+  color: #ffffff;
+  border-color: var(--post-accent);
 }
 
-.post-idea-page button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
+.primary-btn:hover {
+  box-shadow: 0 12px 20px rgba(17, 24, 39, 0.2);
 }
 
-/* Responsive design */
-@media (max-width: 768px) {
-  .post-idea-page {
-    padding: 10px;
+.ghost-btn {
+  background: #ffffff;
+  color: var(--post-ink);
+}
+
+.helper-text {
+  font-size: 12px;
+  color: var(--post-muted);
+}
+
+@media (max-width: 720px) {
+  .post-idea-shell {
+    padding: 24px;
   }
 
-  .post-idea-page form {
-    padding: 20px;
+  .post-idea-actions {
+    justify-content: stretch;
   }
 
-  .post-idea-page h2 {
-    font-size: 2em;
-  }
-
-  .post-idea-page h3 {
-    font-size: 1.2em;
+  .post-idea-actions button {
+    width: 100%;
   }
 }

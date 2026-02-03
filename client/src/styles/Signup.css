@@ -21,6 +21,11 @@
   font-family: "Manrope", "Segoe UI", sans-serif;
 }
 
+.signup-container,
+.signup-container * {
+  box-sizing: border-box;
+}
+
 .signup-card {
   width: 100%;
   max-width: 440px;

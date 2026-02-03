@@ -21,6 +21,11 @@
   font-family: "Manrope", "Segoe UI", sans-serif;
 }
 
+.login-container,
+.login-container * {
+  box-sizing: border-box;
+}
+
 .login-card {
   width: 100%;
   max-width: 420px;

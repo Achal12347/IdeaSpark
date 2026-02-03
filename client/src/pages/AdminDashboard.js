@@ -6,53 +6,6 @@ import { fetchUserProfile } from "../services/userService";
 import "../styles/dashboardTheme.css";
 import "../styles/AdminDashboard.css";
 
-const MenuIcon = () => (
-  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-    <path
-      d="M4 7h16M4 12h16M4 17h16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-
-const MessageIcon = () => (
-  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-    <path
-      d="M7 17l-3 3V6a2 2 0 012-2h12a2 2 0 012 2v8a2 2 0 01-2 2H7z"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-    <path
-      d="M8 9h8M8 12h5"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-
-const BellIcon = () => (
-  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-    <path
-      d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2a2 2 0 01-.6 1.4L4 17h5m6 0a3 3 0 01-6 0"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    />
-  </svg>
-);
-
 export default function AdminDashboard() {
   const [pageTitle, setPageTitle] = useState("Dashboard");
   const [stats, setStats] = useState({
@@ -284,9 +237,6 @@ export default function AdminDashboard() {
           {/* TOP BAR */}
           <header className="topbar admin-topbar">
             <div className="topbar-left">
-              <button className="icon-btn" aria-label="Menu">
-                <MenuIcon />
-              </button>
               <h3 className="topbar-title">{pageTitle}</h3>
               <div className="search-field">
                 <input type="text" placeholder="Search..." className="search-input" />
@@ -296,12 +246,6 @@ export default function AdminDashboard() {
             <div className="top-actions">
               <button className="btn-primary" onClick={() => navigate("/add-idea")}>
                 Create Post
-              </button>
-              <button className="icon-btn" aria-label="Messages">
-                <MessageIcon />
-              </button>
-              <button className="icon-btn" aria-label="Notifications">
-                <BellIcon />
               </button>
               <div className="profile-menu">
                 <button className="profile-trigger" type="button">

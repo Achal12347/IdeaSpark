@@ -38,6 +38,7 @@
   border-radius: var(--dash-radius-lg);
   box-shadow: var(--dash-shadow);
   min-height: calc(100vh - 48px);
+  height: calc(100vh - 48px);
   display: grid;
   grid-template-columns: var(--dash-side-width) minmax(0, 1fr) var(--dash-right-width);
   overflow: hidden;
@@ -108,6 +109,9 @@
   gap: 20px;
   min-width: 0;
   background: var(--dash-surface);
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
 }
 
 .topbar {
@@ -285,6 +289,8 @@
   flex-direction: column;
   gap: 16px;
   border-left: 1px solid var(--dash-border);
+  height: 100%;
+  overflow-y: auto;
 }
 
 .panel-card,

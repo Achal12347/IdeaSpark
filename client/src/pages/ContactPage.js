@@ -70,7 +70,7 @@ const ContactPage = () => {
           <div className="contact-card">
             <h3>Headquarters</h3>
             <p>IdeaSpark Labs</p>
-            <p>San Francisco, CA</p>
+            <p>Mumbai, MH</p>
             <p>hello@ideaspark.com</p>
           </div>
           <div className="contact-card">
