@@ -1,11 +1,13 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import apiRequest from "../services/api";
 import {
   addBookmark,
   removeBookmark,
   fetchBookmarks,
 } from "../services/bookmarkService";
+import { createCollaborationRequest } from "../services/collaborationService";
 import "../styles/appPageTheme.css";
 import "../styles/IdeaDetails.css";
 
@@ -28,7 +30,7 @@ const statusLabel = (status) => {
 
 export default function IdeaDetails() {
   const { id } = useParams();
-  const navigate = useNavigate();
+  const { currentUser } = useAuth();
   const [idea, setIdea] = useState(null);
   const [rating, setRating] = useState(0);
   const [userRating, setUserRating] = useState(0);
@@ -45,6 +47,14 @@ export default function IdeaDetails() {
   const [interestCount, setInterestCount] = useState(0);
   const [interestLoading, setInterestLoading] = useState(false);
   const [interestMessage, setInterestMessage] = useState("");
+  const [collabStatus, setCollabStatus] = useState({ type: "", message: "" });
+  const [pitchForm, setPitchForm] = useState({
+    pitchMessage: "",
+    estimatedBudget: "",
+    equityShare: "",
+  });
+  const [pitchStatus, setPitchStatus] = useState({ type: "", message: "" });
+  const [pitchLoading, setPitchLoading] = useState(false);
 
   useEffect(() => {
     const incrementViews = async () => {
@@ -112,6 +122,15 @@ export default function IdeaDetails() {
     loadBookmarks();
   }, [id]);
 
+  useEffect(() => {
+    if (!idea) return;
+    setPitchForm({
+      pitchMessage: idea.pitchMessage || "",
+      estimatedBudget: idea.estimatedBudget ?? "",
+      equityShare: idea.equityShare ?? "",
+    });
+  }, [idea]);
+
   const handleRate = async (newRating) => {
     try {
       await apiRequest(`/api/ideas/${id}/rate`, {
@@ -175,8 +194,19 @@ export default function IdeaDetails() {
     }));
   };
 
-  const handleCollaborate = () => {
-    navigate("/suggested-collaborators");
+  const handleCollaborate = async () => {
+    if (!idea?.author?._id) return;
+    setCollabStatus({ type: "", message: "" });
+    try {
+      await createCollaborationRequest({
+        recipientId: idea.author._id,
+        ideaId: idea._id,
+        message: `I'd like to collaborate on ${idea.title}.`,
+      });
+      setCollabStatus({ type: "success", message: "Collaboration request sent." });
+    } catch (error) {
+      setCollabStatus({ type: "error", message: "Unable to send request." });
+    }
   };
 
   const handleBookmarkToggle = async () => {
@@ -217,6 +247,39 @@ export default function IdeaDetails() {
     }
   };
 
+  const handlePitchChange = (event) => {
+    const { name, value } = event.target;
+    setPitchForm((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handlePitchSubmit = async () => {
+    if (!pitchForm.pitchMessage.trim()) {
+      setPitchStatus({ type: "error", message: "Pitch message is required." });
+      return;
+    }
+
+    setPitchLoading(true);
+    setPitchStatus({ type: "", message: "" });
+    try {
+      const response = await apiRequest(`/api/ideas/${id}/pitch`, {
+        method: "POST",
+        body: JSON.stringify({
+          pitchMessage: pitchForm.pitchMessage,
+          estimatedBudget: pitchForm.estimatedBudget,
+          equityShare: pitchForm.equityShare,
+        }),
+      });
+      if (response?.idea) {
+        setIdea(response.idea);
+      }
+      setPitchStatus({ type: "success", message: "Pitch sent to investors." });
+    } catch (error) {
+      setPitchStatus({ type: "error", message: "Unable to pitch this idea." });
+    } finally {
+      setPitchLoading(false);
+    }
+  };
+
   if (!idea) {
     return (
       <div className="app-page idea-details-page">
@@ -231,6 +294,8 @@ export default function IdeaDetails() {
   const postedDate = idea.createdAt
     ? new Date(idea.createdAt).toLocaleDateString()
     : null;
+  const isOwner =
+    currentUser?.email && idea.author?.email && currentUser.email === idea.author.email;
 
   return (
     <div className="app-page idea-details-page">
@@ -240,7 +305,7 @@ export default function IdeaDetails() {
             <h2 className="app-title">{idea.title}</h2>
             <p className="app-subtitle">
               Posted by {postedBy}
-              {postedDate ? ` Â· ${postedDate}` : ""}
+              {postedDate ? ` ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â· ${postedDate}` : ""}
             </p>
           </div>
         </div>
@@ -304,10 +369,19 @@ export default function IdeaDetails() {
               >
                 Show Interest
               </button>
-              <button onClick={handleCollaborate} className="app-button-secondary">
-                Request Collaboration
+              <button
+                onClick={handleCollaborate}
+                className="app-button-secondary"
+                disabled={isOwner}
+              >
+                {isOwner ? "You are the owner" : "Request Collaboration"}
               </button>
             </div>
+            {collabStatus.message ? (
+              <p className={`action-message ${collabStatus.type}`}>
+                {collabStatus.message}
+              </p>
+            ) : null}
             {bookmarkMessage ? (
               <p className="action-message">{bookmarkMessage}</p>
             ) : null}
@@ -386,7 +460,7 @@ export default function IdeaDetails() {
                       </div>
                     </div>
                   ) : null}
-                  {offer.status === "pending" ? (
+                  {offer.status === "pending" && isOwner ? (
                     <div className="offer-actions">
                       <button
                         className="app-button"
@@ -439,6 +513,62 @@ export default function IdeaDetails() {
                   ) : null}
                 </div>
               ))}
+            </div>
+          </section>
+        ) : null}
+
+        {isOwner ? (
+          <section className="pitch-section app-card">
+            <div className="pitch-header">
+              <div>
+                <h3>Pitch to Investors</h3>
+                <p>Update your pitch, budget, and equity before sending.</p>
+              </div>
+              {idea.isPitched ? <span className="app-pill">Pitched</span> : null}
+            </div>
+            <div className="pitch-field">
+              <label>Pitch message</label>
+              <textarea
+                name="pitchMessage"
+                value={pitchForm.pitchMessage}
+                onChange={handlePitchChange}
+                className="app-textarea"
+                placeholder="Explain why this idea deserves investment"
+              />
+            </div>
+            <div className="pitch-field-row">
+              <div className="pitch-field">
+                <label>Estimated budget (USD)</label>
+                <input
+                  type="number"
+                  name="estimatedBudget"
+                  value={pitchForm.estimatedBudget}
+                  onChange={handlePitchChange}
+                  className="app-input"
+                  placeholder="e.g. 50000"
+                />
+              </div>
+              <div className="pitch-field">
+                <label>Equity share (%)</label>
+                <input
+                  type="number"
+                  name="equityShare"
+                  value={pitchForm.equityShare}
+                  onChange={handlePitchChange}
+                  className="app-input"
+                  placeholder="e.g. 12"
+                />
+              </div>
+            </div>
+            {pitchStatus.message ? (
+              <p className={`pitch-status ${pitchStatus.type}`}>
+                {pitchStatus.message}
+              </p>
+            ) : null}
+            <div className="pitch-actions">
+              <button className="app-button" onClick={handlePitchSubmit} disabled={pitchLoading}>
+                {idea.isPitched ? "Update Pitch" : "Pitch to Investors"}
+              </button>
             </div>
           </section>
         ) : null}

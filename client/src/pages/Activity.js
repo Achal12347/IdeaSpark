@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { fetchUserActivity } from "../services/activityService";
+import {
+  fetchCollaborationRequests,
+  respondToCollaborationRequest,
+} from "../services/collaborationService";
 import { useAuth } from "../context/AuthContext";
 import "../styles/appPageTheme.css";
 import "../styles/Activity.css";
 
 export default function Activity() {
   const { currentUser, loading: authLoading } = useAuth();
-  const [activities, setActivities] = useState([]);
+  const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (authLoading || !currentUser) return;
@@ -15,16 +19,34 @@ export default function Activity() {
     const loadActivity = async () => {
       setLoading(true);
       try {
-        const data = await fetchUserActivity();
-        setActivities(data);
+        setError("");
+        const data = await fetchCollaborationRequests("incoming");
+        setRequests(data);
       } catch (error) {
         console.error("Error loading activity:", error);
+        setError("Unable to load collaboration requests.");
       } finally {
         setLoading(false);
       }
     };
     loadActivity();
   }, [authLoading, currentUser]);
+
+  const handleRespond = async (requestId, action) => {
+    try {
+      await respondToCollaborationRequest(requestId, action);
+      setRequests((prev) =>
+        prev.map((request) =>
+          request._id === requestId
+            ? { ...request, status: action === "accept" ? "accepted" : "rejected" }
+            : request
+        )
+      );
+    } catch (err) {
+      console.error("Unable to respond to request:", err);
+      setError("Unable to respond to request.");
+    }
+  };
 
   return (
     <div className="app-page activity-page">
@@ -38,16 +60,62 @@ export default function Activity() {
 
         {loading ? (
           <div className="activity-state">Loading activity...</div>
-        ) : activities.length === 0 ? (
-          <div className="activity-state">No recent activity.</div>
+        ) : error ? (
+          <div className="activity-state">{error}</div>
+        ) : requests.length === 0 ? (
+          <div className="activity-state">No collaboration requests yet.</div>
         ) : (
           <div className="app-list">
-            {activities.map((activity, index) => (
-              <div key={index} className="app-card activity-card">
-                <p className="activity-text">{activity.description}</p>
-                <span className="activity-time">
-                  {new Date(activity.timestamp).toLocaleString()}
-                </span>
+            {requests.map((request) => (
+              <div key={request._id} className="app-card activity-card">
+                <div className="activity-header">
+                  <div>
+                    <h3>{request.requester?.name || "User"}</h3>
+                    <p>{request.requester?.email}</p>
+                  </div>
+                  <span className={`activity-status ${request.status}`}>
+                    {request.status}
+                  </span>
+                </div>
+                <div className="activity-details">
+                  <p>
+                    <strong>Idea:</strong> {request.idea?.title || "General request"}
+                  </p>
+                  {request.requester?.roles?.length ? (
+                    <p>
+                      <strong>Roles:</strong> {request.requester.roles.join(", ")}
+                    </p>
+                  ) : null}
+                  {request.requester?.skills?.length ? (
+                    <p>
+                      <strong>Skills:</strong> {request.requester.skills.slice(0, 4).join(", ")}
+                    </p>
+                  ) : null}
+                </div>
+                {request.message ? (
+                  <p className="activity-message">{request.message}</p>
+                ) : null}
+                <div className="activity-footer">
+                  <span className="activity-time">
+                    {new Date(request.createdAt).toLocaleString()}
+                  </span>
+                  {request.status === "pending" ? (
+                    <div className="activity-actions">
+                      <button
+                        className="app-button"
+                        onClick={() => handleRespond(request._id, "accept")}
+                      >
+                        Accept
+                      </button>
+                      <button
+                        className="app-button-secondary"
+                        onClick={() => handleRespond(request._id, "reject")}
+                      >
+                        Reject
+                      </button>
+                    </div>
+                  ) : null}
+                </div>
               </div>
             ))}
           </div>

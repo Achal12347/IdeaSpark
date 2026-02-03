@@ -15,6 +15,7 @@ const hackathonRoutes = require("./routes/hackathonRoutes");
 const teamRoutes = require("./routes/teamRoutes");
 const messageRoutes = require("./routes/messageRoutes");
 const contactRoutes = require("./routes/contactRoutes");
+const collaborationRoutes = require("./routes/collaborationRoutes");
 
 // Create app FIRST
 const app = express();
@@ -27,6 +28,7 @@ const io = socketIo(server, {
     ],
   },
 });
+app.set("io", io);
 
 /* =========================
    Middleware
@@ -57,6 +59,7 @@ app.use("/api/hackathons", hackathonRoutes);
 app.use("/api/teams", teamRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/contact", contactRoutes);
+app.use("/api/collaboration", collaborationRoutes);
 
 // Health check (IMPORTANT for Render debugging)
 app.get("/", (req, res) => {
@@ -88,6 +91,12 @@ io.on('connection', (socket) => {
   socket.on('joinTeam', (teamId) => {
     socket.join(teamId);
     console.log(`User ${socket.id} joined team ${teamId}`);
+  });
+
+  socket.on('joinIdea', (ideaId) => {
+    if (!ideaId) return;
+    const room = `idea:${ideaId}`;
+    socket.join(room);
   });
 
   socket.on('sendMessage', async (data) => {

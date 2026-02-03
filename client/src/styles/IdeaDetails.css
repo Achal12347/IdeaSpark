@@ -81,6 +81,14 @@
   font-size: 13px;
 }
 
+.action-message.success {
+  color: #047857;
+}
+
+.action-message.error {
+  color: #b91c1c;
+}
+
 .comments-section {
   display: flex;
   flex-direction: column;
@@ -256,6 +264,67 @@
 .offer-error {
   color: #b91c1c;
   font-weight: 600;
+}
+
+.pitch-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pitch-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.pitch-header h3 {
+  margin: 0 0 6px;
+  font-size: 18px;
+}
+
+.pitch-header p {
+  margin: 0;
+  color: var(--app-muted);
+  font-size: 13px;
+}
+
+.pitch-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pitch-field label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--app-ink);
+}
+
+.pitch-field-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.pitch-actions {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.pitch-status {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.pitch-status.success {
+  color: #047857;
+}
+
+.pitch-status.error {
+  color: #b91c1c;
 }
 
 @media (max-width: 720px) {

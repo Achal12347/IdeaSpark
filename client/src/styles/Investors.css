@@ -1,0 +1,107 @@
+﻿.investors-page {
+  color: var(--app-ink);
+}
+
+.investors-loading {
+  text-align: center;
+  padding: 40px 20px;
+  font-weight: 600;
+  color: var(--app-muted);
+}
+
+.investors-empty {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.investors-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 20px;
+}
+
+.investors-ideas {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.is-selected {
+  border-color: var(--app-ink);
+  box-shadow: var(--app-shadow);
+}
+
+.investors-pitch {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.pitch-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.pitch-header h3 {
+  margin: 0 0 6px;
+  font-size: 18px;
+}
+
+.pitch-header p {
+  margin: 0;
+  color: var(--app-muted);
+  font-size: 13px;
+}
+
+.pitch-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pitch-field label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--app-ink);
+}
+
+.pitch-field-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.pitch-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pitch-status {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.pitch-status.success {
+  color: #047857;
+}
+
+.pitch-status.error {
+  color: #b91c1c;
+}
+
+.pitch-placeholder {
+  text-align: center;
+  color: var(--app-muted);
+}
+
+@media (max-width: 900px) {
+  .investors-grid {
+    grid-template-columns: 1fr;
+  }
+}

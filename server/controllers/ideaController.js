@@ -1,9 +1,16 @@
 const Idea = require('../models/Idea');
 const Comment = require('../models/Comment');
 const User = require('../models/User');
+const IdeaMessage = require('../models/IdeaMessage');
 
 const getUserByFirebaseUid = (uid) => User.findOne({ firebaseUID: uid });
 const isInvestor = (user) => Array.isArray(user?.roles) && user.roles.includes('Investor');
+const isOwnerOrCollaborator = (idea, userId) => {
+  if (!idea || !userId) return false;
+  if (idea.author?.toString() === userId.toString()) return true;
+  return Array.isArray(idea.collaborators)
+    && idea.collaborators.some((collabId) => collabId.toString() === userId.toString());
+};
 
 exports.createIdea = async (req, res) => {
   try {
@@ -80,6 +87,129 @@ exports.getMyIdeas = async (req, res) => {
     res.json(ideas);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching my ideas', error });
+  }
+};
+
+exports.getCollaboratorIdeas = async (req, res) => {
+  try {
+    const user = await User.findOne({ firebaseUID: req.user.uid });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const ideas = await Idea.find({
+      collaborators: user._id,
+      author: { $ne: user._id },
+    }).populate('author', 'name email');
+
+    res.json(ideas);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching collaborator ideas', error });
+  }
+};
+
+exports.getIdeaMessages = async (req, res) => {
+  try {
+    const user = await getUserByFirebaseUid(req.user.uid);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const idea = await Idea.findById(req.params.id);
+    if (!idea) {
+      return res.status(404).json({ message: 'Idea not found' });
+    }
+
+    if (!isOwnerOrCollaborator(idea, user._id)) {
+      return res.status(403).json({ message: 'Not authorized to view messages.' });
+    }
+
+    const messages = await IdeaMessage.find({ idea: idea._id })
+      .populate('sender', 'name email')
+      .sort({ createdAt: 1 });
+
+    res.json(messages);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching messages', error });
+  }
+};
+
+exports.postIdeaMessage = async (req, res) => {
+  try {
+    const { content } = req.body;
+    const user = await getUserByFirebaseUid(req.user.uid);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    if (!content || !content.trim()) {
+      return res.status(400).json({ message: 'Message content is required.' });
+    }
+
+    const idea = await Idea.findById(req.params.id);
+    if (!idea) {
+      return res.status(404).json({ message: 'Idea not found' });
+    }
+
+    if (!isOwnerOrCollaborator(idea, user._id)) {
+      return res.status(403).json({ message: 'Not authorized to send messages.' });
+    }
+
+    const message = await IdeaMessage.create({
+      content: content.trim(),
+      sender: user._id,
+      idea: idea._id,
+    });
+
+    await message.populate('sender', 'name email');
+    const io = req.app?.get('io');
+    if (io) {
+      io.to(`idea:${idea._id}`).emit('newIdeaMessage', message);
+    }
+    res.status(201).json(message);
+  } catch (error) {
+    res.status(500).json({ message: 'Error sending message', error });
+  }
+};
+exports.pitchIdea = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { pitchMessage, estimatedBudget, equityShare } = req.body;
+    const user = await User.findOne({ firebaseUID: req.user.uid });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const idea = await Idea.findById(id);
+    if (!idea) {
+      return res.status(404).json({ message: 'Idea not found' });
+    }
+
+    const isOwner = idea.author?.toString() === user._id.toString();
+    if (!isOwner) {
+      return res.status(403).json({ message: 'Only the idea owner can pitch this idea.' });
+    }
+
+    if (!pitchMessage || !pitchMessage.trim()) {
+      return res.status(400).json({ message: 'Pitch message is required.' });
+    }
+
+    if (estimatedBudget !== undefined && estimatedBudget !== '') {
+      idea.estimatedBudget = parseFloat(estimatedBudget);
+    }
+    if (equityShare !== undefined && equityShare !== '') {
+      idea.equityShare = parseFloat(equityShare);
+    }
+
+    idea.pitchMessage = pitchMessage.trim();
+    idea.isPitched = true;
+    idea.pitchedAt = new Date();
+
+    await idea.save();
+    res.json({ message: 'Idea pitched successfully', idea });
+  } catch (error) {
+    res.status(500).json({ message: 'Error pitching idea', error });
   }
 };
 
@@ -262,7 +392,7 @@ exports.respondToPitch = async (req, res) => {
     }
 
     const isOwner = user && idea.author?.toString() === user._id.toString();
-    if (!isOwner && user?.role !== 'admin') {
+    if (!isOwner) {
       return res.status(403).json({ message: 'Only the idea owner can respond to offers.' });
     }
 

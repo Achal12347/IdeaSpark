@@ -4,6 +4,10 @@ const {
   getIdea,
   getIdeas,
   getMyIdeas,
+  getCollaboratorIdeas,
+  getIdeaMessages,
+  postIdeaMessage,
+  pitchIdea,
   rateIdea,
   addComment,
   getComments,
@@ -30,6 +34,12 @@ router.get('/investor/offers', authenticateToken, getInvestorOffers);
 
 // GET /api/ideas/my - Get user's ideas
 router.get('/my', authenticateToken, getMyIdeas);
+
+// GET /api/ideas/collaborations - Ideas where user is a collaborator
+router.get('/collaborations', authenticateToken, getCollaboratorIdeas);
+
+// POST /api/ideas/:id/pitch - Pitch idea to investors
+router.post('/:id/pitch', authenticateToken, pitchIdea);
 
 // GET /api/ideas/:id - Get a single idea
 router.get('/:id', getIdea);
@@ -60,5 +70,9 @@ router.post('/:id/views', incrementViews);
 
 // POST /api/ideas/:id/interest - Record interest in an idea
 router.post('/:id/interest', authenticateToken, showInterest);
+
+// Idea collaboration messages
+router.get('/:id/messages', authenticateToken, getIdeaMessages);
+router.post('/:id/messages', authenticateToken, postIdeaMessage);
 
 module.exports = router;

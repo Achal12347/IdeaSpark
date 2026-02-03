@@ -18,6 +18,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AuthRoute from "./components/AuthRoute";
 import PublicRoute from "./components/PublicRoute";
 import Ideas from "./pages/Ideas";
+import Investors from "./pages/Investors";
 import PostIdea from "./pages/PostIdea";
 import IdeaDetails from "./pages/IdeaDetails";
 import Profile from "./pages/Profile";
@@ -98,6 +99,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Ideas />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/investors"
+          element={
+            <ProtectedRoute>
+              <Investors />
             </ProtectedRoute>
           }
         />

@@ -63,7 +63,7 @@ export default function InvestorDashboard() {
   });
 
   const ideas = ideasData.filter(
-    (idea) => (idea.fundingStatus || "seeking") !== "funded"
+    (idea) => (idea.fundingStatus || "seeking") !== "funded" && idea.isPitched
   );
   const loading = ideasLoading || profileLoading || (canInvest && offersLoading);
 
@@ -142,6 +142,8 @@ export default function InvestorDashboard() {
           </div>
           {loading ? (
             <p>Loading ideas...</p>
+          ) : ideas.length === 0 ? (
+            <p>No ideas have been pitched yet.</p>
           ) : (
             <div className="investor-grid">
               {ideas.map((idea) => (
@@ -166,6 +168,12 @@ export default function InvestorDashboard() {
               <p>{selectedIdea.title}</p>
             </div>
             <div className="offer-panel">
+              {selectedIdea.pitchMessage ? (
+                <div className="pitch-preview">
+                  <p className="pitch-label">Founder pitch</p>
+                  <p>{selectedIdea.pitchMessage}</p>
+                </div>
+              ) : null}
               <textarea
                 name="pitchContent"
                 placeholder="Tell the founder why you are interested"
@@ -226,20 +234,20 @@ export default function InvestorDashboard() {
                   <div className="offer-meta">
                     <span>{statusCopy(item.offer.status)}</span>
                     <span>
-                      Amount: {item.offer.amount ? `$${item.offer.amount}` : "â€”"}
+                      Amount: {item.offer.amount ? `$${item.offer.amount}` : "ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â"}
                     </span>
                     <span>
-                      Equity: {item.offer.equity ? `${item.offer.equity}%` : "â€”"}
+                      Equity: {item.offer.equity ? `${item.offer.equity}%` : "ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â"}
                     </span>
                   </div>
                   {item.offer.counterOffer ? (
                     <div className="counter-summary">
                       <p>Counter offer</p>
                       <span>
-                        Amount: {item.offer.counterOffer.amount ? `$${item.offer.counterOffer.amount}` : "â€”"}
+                        Amount: {item.offer.counterOffer.amount ? `$${item.offer.counterOffer.amount}` : "ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â"}
                       </span>
                       <span>
-                        Equity: {item.offer.counterOffer.equity ? `${item.offer.counterOffer.equity}%` : "â€”"}
+                        Equity: {item.offer.counterOffer.equity ? `${item.offer.counterOffer.equity}%` : "ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â"}
                       </span>
                       <span>{item.offer.counterOffer.message}</span>
                     </div>

@@ -120,6 +120,25 @@
   gap: 12px;
 }
 
+.pitch-preview {
+  background: #f9fafb;
+  border: 1px solid var(--dash-border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  font-size: 13px;
+  color: var(--dash-text);
+}
+
+.pitch-preview p {
+  margin: 0;
+}
+
+.pitch-label {
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: var(--dash-muted);
+}
+
 .offer-panel textarea,
 .offer-panel input {
   border: 1px solid var(--dash-border);

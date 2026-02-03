@@ -34,8 +34,12 @@ export default function IdeaCard({
   actionLabel,
   onAction,
 }) {
-  const summary =
+  const summaryBase =
     idea.description || idea.solutionDescription || idea.problemStatement || "";
+  const summary =
+    variant === "investor"
+      ? idea.pitchMessage || summaryBase
+      : summaryBase;
   const tags = Array.isArray(idea.tags) ? idea.tags : [];
   const authorName =
     idea.author?.name || idea.author?.email || idea.author?.username || "Unknown";

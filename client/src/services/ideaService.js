@@ -18,3 +18,14 @@ export const createIdea = async (ideaData) => {
 export const fetchMyIdeas = async () => {
   return await apiRequest('/api/ideas/my');
 };
+
+export const pitchIdea = async (ideaId, pitchData) => {
+  return await apiRequest(`/api/ideas/${ideaId}/pitch`, {
+    method: 'POST',
+    body: JSON.stringify(pitchData),
+  });
+};
+
+export const fetchCollaboratorIdeas = async () => {
+  return await apiRequest('/api/ideas/collaborations');
+};

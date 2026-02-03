@@ -39,6 +39,17 @@ const ideaSchema = new mongoose.Schema(
     equityShare: {
       type: Number,
     },
+    isPitched: {
+      type: Boolean,
+      default: false,
+    },
+    pitchMessage: {
+      type: String,
+      trim: true,
+    },
+    pitchedAt: {
+      type: Date,
+    },
     tags: [{
       type: String,
     }],
