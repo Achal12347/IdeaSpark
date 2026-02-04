@@ -1,15 +1,27 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useGetIdeasQuery } from "../store/apiSlice";
+import io from "socket.io-client";
 import IdeaCard from "../components/IdeaCard";
 import "../styles/appPageTheme.css";
 import "../styles/Ideas.css";
 
 export default function Ideas() {
   const navigate = useNavigate();
-  const { data: ideas = [], isLoading } = useGetIdeasQuery(undefined, {
+  const { data: ideas = [], isLoading, refetch } = useGetIdeasQuery(undefined, {
     refetchOnFocus: true,
     refetchOnReconnect: true,
   });
+  const socketUrl = (process.env.REACT_APP_API_URL || "http://localhost:5000").replace(
+    /\/api\/?$/,
+    ""
+  );
+
+  useEffect(() => {
+    const socket = io(socketUrl, { transports: ["websocket"] });
+    socket.on("ideasUpdated", () => refetch());
+    return () => socket.disconnect();
+  }, [refetch, socketUrl]);
 
   return (
     <div className="app-page ideas-page">

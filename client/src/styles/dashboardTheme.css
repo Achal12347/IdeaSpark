@@ -167,7 +167,7 @@
   padding: 8px 14px;
   border-radius: 999px;
   border: 1px solid var(--dash-border);
-  background: #ffffff;
+  background: var(--dash-surface);
   font-size: 14px;
   color: var(--dash-text);
 }
@@ -187,7 +187,7 @@
 .dashboard-shell button {
   font-family: var(--dash-font);
   border: 1px solid var(--dash-border);
-  background: #ffffff;
+  background: var(--dash-surface);
   color: var(--dash-text);
   border-radius: 999px;
   padding: 8px 14px;
@@ -277,7 +277,7 @@
   right: 0;
   top: calc(100% + 8px);
   min-width: 160px;
-  background: #ffffff;
+  background: var(--dash-surface);
   border: 1px solid var(--dash-border);
   border-radius: var(--dash-radius-sm);
   box-shadow: var(--dash-soft-shadow);
@@ -323,7 +323,7 @@
 
 .panel-card,
 .card {
-  background: #ffffff;
+  background: var(--dash-surface);
   border: 1px solid var(--dash-border);
   border-radius: var(--dash-radius-md);
   padding: 16px;

@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import apiRequest from "../services/api";
+import io from "socket.io-client";
 import {
   addBookmark,
   removeBookmark,
@@ -57,72 +58,88 @@ export default function IdeaDetails() {
   });
   const [pitchStatus, setPitchStatus] = useState({ type: "", message: "" });
   const [pitchLoading, setPitchLoading] = useState(false);
+  const socketUrl = (process.env.REACT_APP_API_URL || "http://localhost:5000").replace(
+    /\/api\/?$/,
+    ""
+  );
+
+  const incrementViews = useCallback(async () => {
+    try {
+      await apiRequest(`/api/ideas/${id}/views`, { method: "POST" });
+    } catch (error) {
+      console.error("Error incrementing views:", error);
+    }
+  }, [id]);
+
+  const loadIdea = useCallback(async () => {
+    try {
+      const ideaData = await apiRequest(`/api/ideas/${id}`);
+      setIdea(ideaData);
+      setRating(ideaData.averageRating || 0);
+      setInterestCount(ideaData.interestedUsers?.length || 0);
+    } catch (error) {
+      console.error("Error loading idea:", error);
+    }
+  }, [id]);
+
+  const loadComments = useCallback(async () => {
+    try {
+      const commentsData = await apiRequest(`/api/ideas/${id}/comments`);
+      setComments(commentsData);
+    } catch (error) {
+      console.error("Error loading comments:", error);
+    }
+  }, [id]);
+
+  const loadOffers = useCallback(async () => {
+    setOffersLoading(true);
+    setOffersError("");
+    try {
+      const offerData = await apiRequest(`/api/ideas/${id}/pitches`);
+      setOffers(offerData);
+      setOffersAllowed(true);
+    } catch (error) {
+      const errorMessage = error.message || "";
+      if (errorMessage.includes("403")) {
+        setOffersAllowed(false);
+      } else {
+        setOffersAllowed(true);
+        setOffersError("Unable to load funding offers.");
+      }
+    } finally {
+      setOffersLoading(false);
+    }
+  }, [id]);
+
+  const loadBookmarks = useCallback(async () => {
+    try {
+      const bookmarks = await fetchBookmarks();
+      const alreadySaved = bookmarks.some((bookmark) => bookmark._id === id);
+      setIsBookmarked(alreadySaved);
+    } catch (error) {
+      console.error("Error loading bookmarks:", error);
+    }
+  }, [id]);
 
   useEffect(() => {
-    const incrementViews = async () => {
-      try {
-        await apiRequest(`/api/ideas/${id}/views`, { method: "POST" });
-      } catch (error) {
-        console.error("Error incrementing views:", error);
-      }
-    };
-
-    const loadIdea = async () => {
-      try {
-        const ideaData = await apiRequest(`/api/ideas/${id}`);
-        setIdea(ideaData);
-        setRating(ideaData.averageRating || 0);
-        setInterestCount(ideaData.interestedUsers?.length || 0);
-      } catch (error) {
-        console.error("Error loading idea:", error);
-      }
-    };
-
-    const loadComments = async () => {
-      try {
-        const commentsData = await apiRequest(`/api/ideas/${id}/comments`);
-        setComments(commentsData);
-      } catch (error) {
-        console.error("Error loading comments:", error);
-      }
-    };
-
-    const loadOffers = async () => {
-      setOffersLoading(true);
-      setOffersError("");
-      try {
-        const offerData = await apiRequest(`/api/ideas/${id}/pitches`);
-        setOffers(offerData);
-        setOffersAllowed(true);
-      } catch (error) {
-        const errorMessage = error.message || "";
-        if (errorMessage.includes("403")) {
-          setOffersAllowed(false);
-        } else {
-          setOffersAllowed(true);
-          setOffersError("Unable to load funding offers.");
-        }
-      } finally {
-        setOffersLoading(false);
-      }
-    };
-
-    const loadBookmarks = async () => {
-      try {
-        const bookmarks = await fetchBookmarks();
-        const alreadySaved = bookmarks.some((bookmark) => bookmark._id === id);
-        setIsBookmarked(alreadySaved);
-      } catch (error) {
-        console.error("Error loading bookmarks:", error);
-      }
-    };
-
     incrementViews();
     loadIdea();
     loadComments();
     loadOffers();
     loadBookmarks();
-  }, [id]);
+  }, [incrementViews, loadIdea, loadComments, loadOffers, loadBookmarks]);
+
+  useEffect(() => {
+    const socket = io(socketUrl, { transports: ["websocket"] });
+    socket.on("ideaUpdated", (ideaId) => {
+      if (ideaId === id) {
+        loadIdea();
+        loadComments();
+        loadOffers();
+      }
+    });
+    return () => socket.disconnect();
+  }, [socketUrl, id, loadIdea, loadComments, loadOffers]);
 
   useEffect(() => {
     if (!idea) return;

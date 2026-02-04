@@ -43,6 +43,11 @@
   box-sizing: border-box;
 }
 
+[data-theme="dark"] .app-page,
+[data-theme="dark"] .app-page * {
+  color: var(--app-ink);
+}
+
 .app-container {
   max-width: 1100px;
   margin: 0 auto;
@@ -119,12 +124,12 @@
 
 .app-button {
   background: var(--app-accent);
-  color: #ffffff;
+  color: var(--app-surface);
   border-color: var(--app-accent);
 }
 
 .app-button-secondary {
-  background: #ffffff;
+  background: var(--app-surface);
   color: var(--app-ink);
 }
 
@@ -137,6 +142,8 @@
   border: 1px solid var(--app-border);
   font-size: 14px;
   font-family: "Manrope", "Segoe UI", sans-serif;
+  background: var(--app-surface);
+  color: var(--app-ink);
 }
 
 .app-textarea {

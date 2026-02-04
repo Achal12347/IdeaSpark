@@ -38,6 +38,7 @@ import Settings from "./pages/Settings";
 import Reports from "./pages/Reports";
 import MyIdeas from "./pages/MyIdeas";
 import Privacy from "./pages/Privacy";
+import Messages from "./pages/Messages";
 
 function ThemeSync() {
   const { currentUser, loading } = useAuth();
@@ -264,6 +265,14 @@ function App() {
             <AdminRoute>
               <Reports />
             </AdminRoute>
+          }
+        />
+        <Route
+          path="/messages"
+          element={
+            <ProtectedRoute>
+              <Messages />
+            </ProtectedRoute>
           }
         />
         <Route path="/privacy" element={<Privacy />} />

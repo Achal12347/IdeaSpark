@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { fetchUserProfile, updateUserProfile } from "../services/userService";
+import io from "socket.io-client";
 import "../styles/appPageTheme.css";
 import "../styles/ProfileSetup.css";
 
@@ -97,6 +98,38 @@ export default function Profile() {
       }
     };
     loadProfile();
+  }, []);
+
+  useEffect(() => {
+    const socketUrl = (process.env.REACT_APP_API_URL || "http://localhost:5000").replace(
+      /\/api\/?$/,
+      ""
+    );
+    const socket = io(socketUrl, { transports: ["websocket"] });
+    socket.on("userUpdated", async (payload) => {
+      if (!payload?.userId) return;
+      const profileData = await fetchUserProfile();
+      if (profileData?._id !== payload.userId) return;
+      setFormData({
+        fullName: profileData?.name || "",
+        username: profileData?.username || "",
+        bio: profileData?.bio || "",
+        roles: profileData?.roles || [],
+        skills: profileData?.skills || [],
+        interests: profileData?.interests || [],
+        experienceLevel: profileData?.experienceLevel || "",
+        lookingFor: profileData?.collaborationPreferences || [],
+        availability: profileData?.availability || "",
+        links: {
+          github: profileData?.links?.github || "",
+          portfolio: profileData?.links?.portfolio || "",
+          linkedin: profileData?.links?.linkedin || "",
+        },
+        profilePhoto: profileData?.profilePhoto || "",
+      });
+      setPhotoPreview(profileData?.profilePhoto || "");
+    });
+    return () => socket.disconnect();
   }, []);
 
   const toggleMulti = (field, value) => {

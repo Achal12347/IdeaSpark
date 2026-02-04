@@ -36,6 +36,10 @@ exports.createIdea = async (req, res) => {
     });
 
     await newIdea.save();
+    const io = req.app?.get('io');
+    if (io) {
+      io.emit('ideasUpdated');
+    }
     res.status(201).json(newIdea);
   } catch (error) {
     res.status(500).json({ message: 'Error creating idea', error });
@@ -219,6 +223,11 @@ exports.pitchIdea = async (req, res) => {
     idea.pitchedAt = new Date();
 
     await idea.save();
+    const io = req.app?.get('io');
+    if (io) {
+      io.emit('ideaUpdated', idea._id.toString());
+      io.emit('ideasUpdated');
+    }
     res.json({ message: 'Idea pitched successfully', idea });
   } catch (error) {
     res.status(500).json({ message: 'Error pitching idea', error });
@@ -260,6 +269,11 @@ exports.rateIdea = async (req, res) => {
         : 0;
 
     await idea.save();
+    const io = req.app?.get('io');
+    if (io) {
+      io.emit('ideaUpdated', idea._id.toString());
+      io.emit('ideasUpdated');
+    }
     res.json({
       message: 'Rating saved successfully',
       averageRating: idea.averageRating,
@@ -292,6 +306,10 @@ exports.addComment = async (req, res) => {
     });
 
     await newComment.save();
+    const io = req.app?.get('io');
+    if (io) {
+      io.emit('ideaUpdated', idea._id.toString());
+    }
     res.status(201).json(newComment);
   } catch (error) {
     res.status(500).json({ message: 'Error adding comment', error });
@@ -356,6 +374,11 @@ exports.submitPitch = async (req, res) => {
       });
     }
     await idea.save();
+    const io = req.app?.get('io');
+    if (io) {
+      io.emit('ideaUpdated', idea._id.toString());
+      io.emit('ideasUpdated');
+    }
     res.json({ message: 'Offer submitted successfully' });
   } catch (error) {
     res.status(500).json({ message: 'Error submitting pitch', error });
@@ -457,6 +480,11 @@ exports.respondToPitch = async (req, res) => {
     }
 
     await idea.save();
+    const io = req.app?.get('io');
+    if (io) {
+      io.emit('ideaUpdated', idea._id.toString());
+      io.emit('ideasUpdated');
+    }
     res.json({ message: 'Offer updated', offer: pitch });
   } catch (error) {
     res.status(500).json({ message: 'Error updating offer.' });
@@ -509,6 +537,11 @@ exports.confirmPitch = async (req, res) => {
     });
 
     await idea.save();
+    const io = req.app?.get('io');
+    if (io) {
+      io.emit('ideaUpdated', idea._id.toString());
+      io.emit('ideasUpdated');
+    }
     res.json({ message: 'Idea funded successfully.', offer: pitch });
   } catch (error) {
     res.status(500).json({ message: 'Error confirming offer.' });
@@ -538,6 +571,11 @@ exports.showInterest = async (req, res) => {
     if (!alreadyInterested) {
       idea.interestedUsers.push(user._id);
       await idea.save();
+    }
+    const io = req.app?.get('io');
+    if (io) {
+      io.emit('ideaUpdated', idea._id.toString());
+      io.emit('ideasUpdated');
     }
 
     res.json({

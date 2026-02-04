@@ -16,6 +16,8 @@ const teamRoutes = require("./routes/teamRoutes");
 const messageRoutes = require("./routes/messageRoutes");
 const contactRoutes = require("./routes/contactRoutes");
 const collaborationRoutes = require("./routes/collaborationRoutes");
+const adminMessageRoutes = require("./routes/adminMessageRoutes");
+const directMessageRoutes = require("./routes/directMessageRoutes");
 
 // Create app FIRST
 const app = express();
@@ -60,6 +62,8 @@ app.use("/api/teams", teamRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api/collaboration", collaborationRoutes);
+app.use("/api/admin-messages", adminMessageRoutes);
+app.use("/api/direct-messages", directMessageRoutes);
 
 // Health check (IMPORTANT for Render debugging)
 app.get("/", (req, res) => {

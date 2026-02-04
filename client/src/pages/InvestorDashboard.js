@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import apiRequest from "../services/api";
 import {
@@ -6,6 +6,7 @@ import {
   useGetInvestorOffersQuery,
   useGetUserProfileQuery,
 } from "../store/apiSlice";
+import io from "socket.io-client";
 import IdeaCard from "../components/IdeaCard";
 import "../styles/dashboardTheme.css";
 import "../styles/InvestorDashboard.css";
@@ -66,6 +67,21 @@ export default function InvestorDashboard() {
     (idea) => (idea.fundingStatus || "seeking") !== "funded" && idea.isPitched
   );
   const loading = ideasLoading || profileLoading || (canInvest && offersLoading);
+  const socketUrl = (process.env.REACT_APP_API_URL || "http://localhost:5000").replace(
+    /\/api\/?$/,
+    ""
+  );
+
+  useEffect(() => {
+    const socket = io(socketUrl, { transports: ["websocket"] });
+    socket.on("ideasUpdated", () => {
+      refetchIdeas();
+      if (canInvest) {
+        refetchOffers();
+      }
+    });
+    return () => socket.disconnect();
+  }, [refetchIdeas, refetchOffers, canInvest, socketUrl]);
 
   const handleOfferChange = (event) => {
     const { name, value } = event.target;

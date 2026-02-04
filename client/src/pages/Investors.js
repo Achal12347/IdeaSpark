@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import apiRequest from "../services/api";
 import { fetchMyIdeas } from "../services/ideaService";
+import io from "socket.io-client";
 import IdeaCard from "../components/IdeaCard";
 import "../styles/appPageTheme.css";
 import "../styles/Investors.css";
@@ -38,6 +39,10 @@ export default function Investors() {
   const [offersError, setOffersError] = useState("");
   const [counterDrafts, setCounterDrafts] = useState({});
   const [status, setStatus] = useState({ type: "", message: "" });
+  const socketUrl = (process.env.REACT_APP_API_URL || "http://localhost:5000").replace(
+    /\/api\/?$/,
+    ""
+  );
 
   useEffect(() => {
     const loadIdeas = async () => {
@@ -53,6 +58,19 @@ export default function Investors() {
     };
     loadIdeas();
   }, []);
+
+  useEffect(() => {
+    const socket = io(socketUrl, { transports: ["websocket"] });
+    socket.on("ideasUpdated", () => {
+      fetchMyIdeas()
+        .then((data) => setIdeas(Array.isArray(data) ? data : []))
+        .catch(() => null);
+      if (selectedIdea?._id) {
+        loadOffers(selectedIdea._id);
+      }
+    });
+    return () => socket.disconnect();
+  }, [socketUrl, selectedIdea?._id]);
 
   const handleSelectIdea = (idea) => {
     setSelectedIdea(idea);

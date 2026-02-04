@@ -3,6 +3,8 @@ import { auth } from "../firebase";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useGetIdeasQuery } from "../store/apiSlice";
+import { useEffect } from "react";
+import io from "socket.io-client";
 import IdeaCard from "../components/IdeaCard";
 import "../styles/dashboardTheme.css";
 import "../styles/Dashboard.css";
@@ -10,7 +12,7 @@ import "../styles/Dashboard.css";
 export default function Dashboard() {
   const navigate = useNavigate();
   const { currentUser, loading: authLoading } = useAuth();
-  const { data: ideas = [], isLoading: loadingIdeas } = useGetIdeasQuery(
+  const { data: ideas = [], isLoading: loadingIdeas, refetch } = useGetIdeasQuery(
     undefined,
     {
       skip: authLoading || !currentUser,
@@ -18,6 +20,19 @@ export default function Dashboard() {
       refetchOnReconnect: true,
     }
   );
+  const socketUrl = (process.env.REACT_APP_API_URL || "http://localhost:5000").replace(
+    /\/api\/?$/,
+    ""
+  );
+
+  useEffect(() => {
+    if (authLoading || !currentUser) return;
+    const socket = io(socketUrl, { transports: ["websocket"] });
+    socket.on("ideasUpdated", () => {
+      refetch();
+    });
+    return () => socket.disconnect();
+  }, [authLoading, currentUser, refetch, socketUrl]);
 
   const handleLogout = async () => {
     navigate("/");
@@ -46,9 +61,8 @@ export default function Dashboard() {
               <li onClick={() => navigate("/investor/dashboard")}>
                 Investor Dashboard
               </li>
-              <li onClick={() => alert("Hackathon will be announced shortly")}>
-                Hackathons
-              </li>
+              <li onClick={() => navigate("/hackathons")}>Hackathons</li>
+              <li onClick={() => navigate("/messages")}>Messages</li>
               <li onClick={() => navigate("/activity")}>Activity</li>
               <li onClick={() => navigate("/settings")}>Settings</li>
             </ul>

@@ -1,5 +1,6 @@
 const express = require("express");
 const User = require("../models/User");
+const Idea = require("../models/Idea");
 const verifyFirebaseToken = require("../middleware/authMiddleware");
 
 const router = express.Router();
@@ -19,6 +20,25 @@ router.get("/", verifyFirebaseToken, async (req, res) => {
     res.json(users);
   } catch (err) {
     console.error("Get users error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+/* ================================
+   Admin: list admin users
+   GET /api/users/admins
+================================ */
+router.get("/admins", verifyFirebaseToken, async (req, res) => {
+  try {
+    const requester = await User.findOne({ firebaseUID: req.user.uid });
+    if (!requester || requester.role !== "admin") {
+      return res.status(403).json({ error: "Unauthorized" });
+    }
+
+    const admins = await User.find({ role: "admin" }).select("name email roles");
+    res.json(admins);
+  } catch (err) {
+    console.error("Get admins error:", err);
     res.status(500).json({ error: "Server error" });
   }
 });
@@ -60,6 +80,10 @@ router.post("/bookmarks", verifyFirebaseToken, async (req, res) => {
       user.bookmarks.push(ideaId);
       await user.save();
     }
+    const io = req.app?.get("io");
+    if (io) {
+      io.emit("bookmarksUpdated", { userId: user._id.toString() });
+    }
 
     res.json({ success: true });
   } catch (err) {
@@ -80,10 +104,56 @@ router.delete("/bookmarks/:ideaId", verifyFirebaseToken, async (req, res) => {
       (bookmarkId) => bookmarkId.toString() !== ideaId
     );
     await user.save();
+    const io = req.app?.get("io");
+    if (io) {
+      io.emit("bookmarksUpdated", { userId: user._id.toString() });
+    }
 
     res.json({ success: true });
   } catch (err) {
     console.error("Remove bookmark error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+/* ================================
+   Member directory
+   GET /api/users/members
+================================ */
+router.get("/members", verifyFirebaseToken, async (req, res) => {
+  try {
+    const user = await User.findOne({ firebaseUID: req.user.uid });
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const ideas = await Idea.find({
+      $or: [{ author: user._id }, { collaborators: user._id }],
+    }).select("author collaborators");
+
+    const collaboratorIds = new Set();
+    ideas.forEach((idea) => {
+      if (idea.author) {
+        collaboratorIds.add(idea.author.toString());
+      }
+      (idea.collaborators || []).forEach((collabId) => {
+        collaboratorIds.add(collabId.toString());
+      });
+    });
+    collaboratorIds.delete(user._id.toString());
+
+    const members = await User.find({ _id: { $ne: user._id } }).select(
+      "-firebaseUID"
+    );
+
+    const result = members.map((member) => ({
+      ...member.toObject(),
+      isCollaborator: collaboratorIds.has(member._id.toString()),
+    }));
+
+    res.json(result);
+  } catch (err) {
+    console.error("Get members error:", err);
     res.status(500).json({ error: "Server error" });
   }
 });
@@ -200,6 +270,11 @@ router.post("/", verifyFirebaseToken, async (req, res) => {
       update,
       { new: true, upsert: true }
     );
+    const io = req.app?.get("io");
+    if (io) {
+      io.emit("userUpdated", { userId: user._id.toString() });
+      io.emit("membersUpdated");
+    }
 
     res.status(200).json({
       success: true,

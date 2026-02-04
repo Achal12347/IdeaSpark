@@ -3,8 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { auth } from "../firebase";
 import apiRequest from "../services/api";
 import { fetchIdeas } from "../services/ideaService";
-import { fetchAllUsers } from "../services/userService";
+import { fetchAllUsers, fetchAdmins } from "../services/userService";
+import io from "socket.io-client";
 import IdeaCard from "../components/IdeaCard";
+import UserCard from "../components/UserCard";
+import UserDetailsModal from "../components/UserDetailsModal";
 import "../styles/dashboardTheme.css";
 import "../styles/AdminDashboard.css";
 
@@ -53,24 +56,65 @@ export default function AdminDashboard() {
   const [contactMessages, setContactMessages] = useState([]);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [messagesError, setMessagesError] = useState("");
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [hackathons, setHackathons] = useState([]);
+  const [hackathonLoading, setHackathonLoading] = useState(false);
+  const [hackathonError, setHackathonError] = useState("");
+  const [hackathonForm, setHackathonForm] = useState({
+    title: "",
+    description: "",
+    theme: "",
+    banner: "",
+    registrationStart: "",
+    registrationEnd: "",
+    submissionDeadline: "",
+    resultAnnouncement: "",
+    teamLimit: 5,
+    rules: "",
+    allowedTechnologies: "",
+    submissionFormat: "",
+    judgingCriteria: "",
+    prizes: "",
+  });
+  const [selectedHackathon, setSelectedHackathon] = useState(null);
+  const [submissions, setSubmissions] = useState([]);
+  const [submissionsLoading, setSubmissionsLoading] = useState(false);
+  const [judgeDrafts, setJudgeDrafts] = useState({});
+  const [admins, setAdmins] = useState([]);
+  const [messageForm, setMessageForm] = useState({
+    recipientType: "public",
+    recipientId: "",
+    hackathonId: "",
+    content: "",
+  });
+  const [adminMessages, setAdminMessages] = useState([]);
+  const [hackathonAdminMessages, setHackathonAdminMessages] = useState([]);
+  const [hackathonAdminDraft, setHackathonAdminDraft] = useState("");
+  const [teams, setTeams] = useState([]);
+  const [councilSelection, setCouncilSelection] = useState([]);
+  const [hostSelection, setHostSelection] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
     const loadData = async () => {
       try {
         setMessagesError("");
-        const [ideasData, usersData] = await Promise.all([
+        const [ideasData, usersData, adminsData] = await Promise.all([
           fetchIdeas(),
           fetchAllUsers(),
+          fetchAdmins(),
         ]);
         const analyticsData = await apiRequest("/api/analytics").catch(() => null);
+        const hackathonData = await apiRequest("/api/hackathons").catch(() => []);
 
         const safeIdeas = Array.isArray(ideasData) ? ideasData : [];
         const safeUsers = Array.isArray(usersData) ? usersData : [];
 
         setIdeas(safeIdeas);
         setUsers(safeUsers);
+        setAdmins(Array.isArray(adminsData) ? adminsData : []);
         setAnalytics(analyticsData || null);
+        setHackathons(Array.isArray(hackathonData) ? hackathonData : []);
 
         const todayLabel = new Date().toDateString();
         const activeToday = safeUsers.filter((user) => {
@@ -116,6 +160,8 @@ export default function AdminDashboard() {
           }
           setContactMessages(data);
         }
+        const adminInbox = await apiRequest("/api/admin-messages/admin").catch(() => []);
+        setAdminMessages(Array.isArray(adminInbox) ? adminInbox : []);
       } catch (error) {
         console.error("Error loading admin data:", error);
         setMessagesError(error.message || "Unable to load contact messages.");
@@ -125,6 +171,43 @@ export default function AdminDashboard() {
     };
     loadData();
   }, []);
+
+  useEffect(() => {
+    const socketUrl = (process.env.REACT_APP_API_URL || "http://localhost:5000").replace(
+      /\/api\/?$/,
+      ""
+    );
+    const socket = io(socketUrl, { transports: ["websocket"] });
+    socket.on("adminMessage", (message) => {
+      if (message?.recipientType === "admin") {
+        setAdminMessages((prev) =>
+          prev.some((item) => item._id === message._id) ? prev : [message, ...prev]
+        );
+      }
+      const hackathonId =
+        typeof message?.hackathon === "string" ? message.hackathon : message?.hackathon?._id;
+      if (
+        message?.recipientType === "hackathon_admin" &&
+        selectedHackathon?._id &&
+        hackathonId === selectedHackathon._id
+      ) {
+        setHackathonAdminMessages((prev) =>
+          prev.some((item) => item._id === message._id) ? prev : [message, ...prev]
+        );
+      }
+    });
+    socket.on("hackathonUpdated", async (hackathonId) => {
+      const data = await apiRequest("/api/hackathons");
+      setHackathons(Array.isArray(data) ? data : []);
+      if (selectedHackathon?._id && hackathonId === selectedHackathon._id) {
+        const submissionsData = await apiRequest(
+          `/api/hackathons/${selectedHackathon._id}/submissions`
+        );
+        setSubmissions(Array.isArray(submissionsData) ? submissionsData : []);
+      }
+    });
+    return () => socket.disconnect();
+  }, [selectedHackathon?._id]);
 
   const handleLogout = async () => {
     navigate("/", { replace: true });
@@ -167,15 +250,11 @@ export default function AdminDashboard() {
                 <p>No users found yet.</p>
               ) : (
                 users.map((user) => (
-                  <div key={user._id} className="user-card card">
-                    <h4>{user.name || user.email || "User"}</h4>
-                    <p>Roles: {user.roles?.length ? user.roles.join(", ") : "N/A"}</p>
-                    <p>
-                      Skills:{" "}
-                      {user.skills?.length ? user.skills.slice(0, 3).join(", ") : "N/A"}
-                    </p>
-                    <p>Joined: {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "N/A"}</p>
-                  </div>
+                  <UserCard
+                    key={user._id}
+                    user={user}
+                    onClick={() => setSelectedUser(user)}
+                  />
                 ))
               )}
             </div>
@@ -185,12 +264,447 @@ export default function AdminDashboard() {
         return (
           <section className="admin-content">
             <h3>Hackathon Management</h3>
-            <p>Control hackathon modes, create events, manage submissions, and view rankings.</p>
-            <div className="admin-actions">
-              <button className="btn-primary">Create New Hackathon</button>
-              <button>Manage Active Hackathons</button>
-              <button>View Rankings</button>
+            <p>Control hackathon phases, submissions, and winner announcements.</p>
+
+            {hackathonError ? <p className="admin-error">{hackathonError}</p> : null}
+
+            <div className="admin-card stack">
+              <h4>Create hackathon</h4>
+              <div className="admin-grid">
+                {admins.map((admin) => (
+                  <label key={admin._id} className="admin-chip">
+                    <input
+                      type="checkbox"
+                      checked={councilSelection.includes(admin._id)}
+                      onChange={() =>
+                        setCouncilSelection((prev) =>
+                          prev.includes(admin._id)
+                            ? prev.filter((id) => id !== admin._id)
+                            : prev.length < 4
+                              ? [...prev, admin._id]
+                              : prev
+                        )
+                      }
+                    />
+                    {admin.name || admin.email}
+                  </label>
+                ))}
+              </div>
+              <select
+                className="admin-input"
+                value={hostSelection}
+                onChange={(e) => setHostSelection(e.target.value)}
+              >
+                <option value="">Select host admin</option>
+                {councilSelection.map((adminId) => {
+                  const admin = admins.find((item) => item._id === adminId);
+                  return (
+                    <option key={adminId} value={adminId}>
+                      {admin?.name || admin?.email || "Admin"}
+                    </option>
+                  );
+                })}
+              </select>
+              <div className="admin-grid">
+                <input
+                  className="admin-input"
+                  placeholder="Title"
+                  value={hackathonForm.title}
+                  onChange={(e) =>
+                    setHackathonForm((prev) => ({ ...prev, title: e.target.value }))
+                  }
+                />
+                <input
+                  className="admin-input"
+                  placeholder="Theme"
+                  value={hackathonForm.theme}
+                  onChange={(e) =>
+                    setHackathonForm((prev) => ({ ...prev, theme: e.target.value }))
+                  }
+                />
+                <input
+                  className="admin-input"
+                  placeholder="Banner image URL"
+                  value={hackathonForm.banner}
+                  onChange={(e) =>
+                    setHackathonForm((prev) => ({ ...prev, banner: e.target.value }))
+                  }
+                />
+                <input
+                  className="admin-input"
+                  type="date"
+                  value={hackathonForm.registrationStart}
+                  onChange={(e) =>
+                    setHackathonForm((prev) => ({ ...prev, registrationStart: e.target.value }))
+                  }
+                />
+                <input
+                  className="admin-input"
+                  type="date"
+                  value={hackathonForm.registrationEnd}
+                  onChange={(e) =>
+                    setHackathonForm((prev) => ({ ...prev, registrationEnd: e.target.value }))
+                  }
+                />
+                <input
+                  className="admin-input"
+                  type="date"
+                  value={hackathonForm.submissionDeadline}
+                  onChange={(e) =>
+                    setHackathonForm((prev) => ({ ...prev, submissionDeadline: e.target.value }))
+                  }
+                />
+                <input
+                  className="admin-input"
+                  type="date"
+                  value={hackathonForm.resultAnnouncement}
+                  onChange={(e) =>
+                    setHackathonForm((prev) => ({ ...prev, resultAnnouncement: e.target.value }))
+                  }
+                />
+                <input
+                  className="admin-input"
+                  type="number"
+                  placeholder="Team limit"
+                  value={hackathonForm.teamLimit}
+                  onChange={(e) =>
+                    setHackathonForm((prev) => ({ ...prev, teamLimit: e.target.value }))
+                  }
+                />
+              </div>
+              <textarea
+                className="admin-textarea"
+                placeholder="Description"
+                value={hackathonForm.description}
+                onChange={(e) =>
+                  setHackathonForm((prev) => ({ ...prev, description: e.target.value }))
+                }
+              />
+              <input
+                className="admin-input"
+                placeholder="Rules (comma separated)"
+                value={hackathonForm.rules}
+                onChange={(e) =>
+                  setHackathonForm((prev) => ({ ...prev, rules: e.target.value }))
+                }
+              />
+              <input
+                className="admin-input"
+                placeholder="Allowed technologies (comma separated)"
+                value={hackathonForm.allowedTechnologies}
+                onChange={(e) =>
+                  setHackathonForm((prev) => ({ ...prev, allowedTechnologies: e.target.value }))
+                }
+              />
+              <input
+                className="admin-input"
+                placeholder="Submission format (comma separated)"
+                value={hackathonForm.submissionFormat}
+                onChange={(e) =>
+                  setHackathonForm((prev) => ({ ...prev, submissionFormat: e.target.value }))
+                }
+              />
+              <input
+                className="admin-input"
+                placeholder="Judging criteria (comma separated)"
+                value={hackathonForm.judgingCriteria}
+                onChange={(e) =>
+                  setHackathonForm((prev) => ({ ...prev, judgingCriteria: e.target.value }))
+                }
+              />
+              <input
+                className="admin-input"
+                placeholder="Prizes (comma separated)"
+                value={hackathonForm.prizes}
+                onChange={(e) =>
+                  setHackathonForm((prev) => ({ ...prev, prizes: e.target.value }))
+                }
+              />
+              <button
+                className="btn-primary"
+                onClick={async () => {
+                  setHackathonLoading(true);
+                  setHackathonError("");
+                  try {
+                    const payload = {
+                      ...hackathonForm,
+                      teamLimit: Number(hackathonForm.teamLimit) || 5,
+                      rules: hackathonForm.rules
+                        ? hackathonForm.rules.split(",").map((r) => r.trim()).filter(Boolean)
+                        : [],
+                      allowedTechnologies: hackathonForm.allowedTechnologies
+                        ? hackathonForm.allowedTechnologies.split(",").map((r) => r.trim()).filter(Boolean)
+                        : [],
+                      submissionFormat: hackathonForm.submissionFormat
+                        ? hackathonForm.submissionFormat.split(",").map((r) => r.trim()).filter(Boolean)
+                        : [],
+                      judgingCriteria: hackathonForm.judgingCriteria
+                        ? hackathonForm.judgingCriteria.split(",").map((r) => r.trim()).filter(Boolean)
+                        : [],
+                      prizes: hackathonForm.prizes
+                        ? hackathonForm.prizes.split(",").map((r) => r.trim()).filter(Boolean)
+                        : [],
+                    };
+                    const created = await apiRequest("/api/hackathons", {
+                      method: "POST",
+                      body: JSON.stringify(payload),
+                    });
+                    if (councilSelection.length === 4 && hostSelection && created?._id) {
+                      await apiRequest(`/api/hackathons/${created._id}/council`, {
+                        method: "POST",
+                        body: JSON.stringify({
+                          adminIds: councilSelection,
+                          hostId: hostSelection,
+                        }),
+                      });
+                    }
+                    const data = await apiRequest("/api/hackathons");
+                    setHackathons(Array.isArray(data) ? data : []);
+                    setHackathonForm({
+                      title: "",
+                      description: "",
+                      theme: "",
+                      banner: "",
+                      registrationStart: "",
+                      registrationEnd: "",
+                      submissionDeadline: "",
+                      resultAnnouncement: "",
+                      teamLimit: 5,
+                      rules: "",
+                      allowedTechnologies: "",
+                      submissionFormat: "",
+                      judgingCriteria: "",
+                      prizes: "",
+                    });
+                    setCouncilSelection([]);
+                    setHostSelection("");
+                  } catch (error) {
+                    setHackathonError("Unable to create hackathon.");
+                  } finally {
+                    setHackathonLoading(false);
+                  }
+                }}
+                disabled={hackathonLoading}
+              >
+                {hackathonLoading ? "Creating..." : "Create Hackathon"}
+              </button>
             </div>
+
+            <div className="admin-card stack">
+              <h4>Existing hackathons</h4>
+              {hackathons.length === 0 ? (
+                <p>No hackathons yet.</p>
+              ) : (
+                <div className="admin-grid">
+                  {hackathons.map((hackathon) => (
+                    <div key={hackathon._id} className="card">
+                      <h4>{hackathon.title}</h4>
+                      <p>{hackathon.description}</p>
+                      <p>Status: {hackathon.status}</p>
+                      <p>
+                        Launch confirmations: {hackathon.launchConfirmations?.length || 0}/4
+                      </p>
+                      <p>
+                        Winner confirmations: {hackathon.winnerConfirmations?.length || 0}/4
+                      </p>
+                      <div className="admin-actions">
+                        <button
+                          onClick={async () => {
+                            if (councilSelection.length !== 4 || !hostSelection) {
+                              setHackathonError("Select 4 admins and a host first.");
+                              return;
+                            }
+                            await apiRequest(`/api/hackathons/${hackathon._id}/council`, {
+                              method: "POST",
+                              body: JSON.stringify({
+                                adminIds: councilSelection,
+                                hostId: hostSelection,
+                              }),
+                            });
+                            const data = await apiRequest("/api/hackathons");
+                            setHackathons(Array.isArray(data) ? data : []);
+                          }}
+                        >
+                          Assign council
+                        </button>
+                        <button
+                          onClick={async () => {
+                            await apiRequest(
+                              `/api/hackathons/${hackathon._id}/confirm-launch`,
+                              { method: "POST" }
+                            );
+                            const data = await apiRequest("/api/hackathons");
+                            setHackathons(Array.isArray(data) ? data : []);
+                          }}
+                        >
+                          Confirm launch
+                        </button>
+                        <button
+                          className="btn-primary"
+                          onClick={async () => {
+                            setSelectedHackathon(hackathon);
+                            setSubmissionsLoading(true);
+                            const data = await apiRequest(
+                              `/api/hackathons/${hackathon._id}/submissions`
+                            );
+                            setSubmissions(Array.isArray(data) ? data : []);
+                            setSubmissionsLoading(false);
+                            const adminChat = await apiRequest(
+                              `/api/admin-messages/hackathon/${hackathon._id}/admin-chat`
+                            );
+                            setHackathonAdminMessages(Array.isArray(adminChat) ? adminChat : []);
+                          }}
+                        >
+                          View submissions
+                        </button>
+                        <button
+                          onClick={async () => {
+                            await apiRequest(`/api/hackathons/${hackathon._id}/announce`, {
+                              method: "POST",
+                            });
+                          }}
+                        >
+                          Compute winners
+                        </button>
+                        <button
+                          onClick={async () => {
+                            await apiRequest(
+                              `/api/hackathons/${hackathon._id}/confirm-winners`,
+                              { method: "POST" }
+                            );
+                            const data = await apiRequest("/api/hackathons");
+                            setHackathons(Array.isArray(data) ? data : []);
+                          }}
+                        >
+                          Confirm winners
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {selectedHackathon ? (
+              <div className="admin-card stack">
+                <h4>Submissions: {selectedHackathon.title}</h4>
+                {submissionsLoading ? (
+                  <p>Loading submissions...</p>
+                ) : submissions.length === 0 ? (
+                  <p>No submissions yet.</p>
+                ) : (
+                  submissions.map((submission) => (
+                    <div key={submission._id} className="card">
+                      <h5>{submission.title}</h5>
+                      <p>{submission.description}</p>
+                      <p>Team: {submission.team?.name || "Unknown"}</p>
+                      <div className="admin-grid">
+                        {["innovation", "feasibility", "design", "technical", "impact"].map(
+                          (field) => (
+                            <input
+                              key={field}
+                              className="admin-input"
+                              type="number"
+                              placeholder={field}
+                              value={judgeDrafts[submission._id]?.[field] || ""}
+                              onChange={(e) =>
+                                setJudgeDrafts((prev) => ({
+                                  ...prev,
+                                  [submission._id]: {
+                                    ...prev[submission._id],
+                                    [field]: Number(e.target.value),
+                                  },
+                                }))
+                              }
+                            />
+                          )
+                        )}
+                      </div>
+                      <textarea
+                        className="admin-textarea"
+                        placeholder="Feedback"
+                        value={judgeDrafts[submission._id]?.feedback || ""}
+                        onChange={(e) =>
+                          setJudgeDrafts((prev) => ({
+                            ...prev,
+                            [submission._id]: {
+                              ...prev[submission._id],
+                              feedback: e.target.value,
+                            },
+                          }))
+                        }
+                      />
+                      <button
+                        className="btn-primary"
+                        onClick={async () => {
+                          await apiRequest(
+                            `/api/hackathons/${selectedHackathon._id}/submissions/${submission._id}/judge`,
+                            {
+                              method: "POST",
+                              body: JSON.stringify({
+                                scores: judgeDrafts[submission._id] || {},
+                                feedback: judgeDrafts[submission._id]?.feedback || "",
+                              }),
+                            }
+                          );
+                        }}
+                      >
+                        Submit score
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            ) : null}
+
+            {selectedHackathon ? (
+              <div className="admin-card stack">
+                <h4>Admin-only hackathon chat</h4>
+                <div className="admin-chat-list">
+                  {hackathonAdminMessages.length === 0 ? (
+                    <p>No admin messages yet.</p>
+                  ) : (
+                    hackathonAdminMessages.map((message) => (
+                      <div key={message._id} className="card">
+                        <p>{message.content}</p>
+                        <small>
+                          {message.sender?.name || "Admin"} •{" "}
+                          {new Date(message.createdAt).toLocaleString()}
+                        </small>
+                      </div>
+                    ))
+                  )}
+                </div>
+                <textarea
+                  className="admin-textarea"
+                  placeholder="Write a private admin message..."
+                  value={hackathonAdminDraft}
+                  onChange={(e) => setHackathonAdminDraft(e.target.value)}
+                />
+                <button
+                  className="btn-primary"
+                  onClick={async () => {
+                    if (!hackathonAdminDraft.trim()) return;
+                    await apiRequest("/api/admin-messages", {
+                      method: "POST",
+                      body: JSON.stringify({
+                        recipientType: "hackathon_admin",
+                        content: hackathonAdminDraft,
+                        hackathonId: selectedHackathon._id,
+                        visibility: "private",
+                      }),
+                    });
+                    const data = await apiRequest(
+                      `/api/admin-messages/hackathon/${selectedHackathon._id}/admin-chat`
+                    );
+                    setHackathonAdminMessages(Array.isArray(data) ? data : []);
+                    setHackathonAdminDraft("");
+                  }}
+                >
+                  Send to admins
+                </button>
+              </div>
+            ) : null}
           </section>
         );
       case "Investors":
@@ -234,6 +748,120 @@ export default function AdminDashboard() {
                 )}
               </div>
             )}
+          </section>
+        );
+      case "Admin Messages":
+        return (
+          <section className="admin-content">
+            <h3>Admin Message Center</h3>
+            <p>Send announcements or private messages to admins, users, or teams.</p>
+            <div className="admin-card stack">
+              <div className="admin-grid">
+                <select
+                  className="admin-input"
+                  value={messageForm.recipientType}
+                  onChange={(e) =>
+                    setMessageForm((prev) => ({ ...prev, recipientType: e.target.value }))
+                  }
+                >
+                  <option value="public">Public (all users)</option>
+                  <option value="admin">Admin (private)</option>
+                  <option value="user">User (private)</option>
+                  <option value="hackathon_team">Hackathon team</option>
+                </select>
+                <select
+                  className="admin-input"
+                  value={messageForm.recipientId}
+                  onChange={(e) =>
+                    setMessageForm((prev) => ({ ...prev, recipientId: e.target.value }))
+                  }
+                >
+                  <option value="">Select recipient</option>
+                  {messageForm.recipientType === "admin" &&
+                    admins.map((admin) => (
+                      <option key={admin._id} value={admin._id}>
+                        {admin.name || admin.email}
+                      </option>
+                    ))}
+                  {messageForm.recipientType === "user" &&
+                    users.map((user) => (
+                      <option key={user._id} value={user._id}>
+                        {user.name || user.email}
+                      </option>
+                    ))}
+                  {messageForm.recipientType === "hackathon_team" &&
+                    teams.map((team) => (
+                      <option key={team._id} value={team._id}>
+                        {team.name}
+                      </option>
+                    ))}
+                </select>
+                <select
+                  className="admin-input"
+                  value={messageForm.hackathonId}
+                  onChange={async (e) => {
+                    const hackathonId = e.target.value;
+                    setMessageForm((prev) => ({ ...prev, hackathonId }));
+                    if (hackathonId) {
+                      const data = await apiRequest(`/api/hackathons/${hackathonId}/teams`);
+                      setTeams(Array.isArray(data) ? data : []);
+                    }
+                  }}
+                >
+                  <option value="">Hackathon (optional)</option>
+                  {hackathons.map((hackathon) => (
+                    <option key={hackathon._id} value={hackathon._id}>
+                      {hackathon.title}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <textarea
+                className="admin-textarea"
+                placeholder="Write a message..."
+                value={messageForm.content}
+                onChange={(e) =>
+                  setMessageForm((prev) => ({ ...prev, content: e.target.value }))
+                }
+              />
+              <button
+                className="btn-primary"
+                onClick={async () => {
+                  await apiRequest("/api/admin-messages", {
+                    method: "POST",
+                    body: JSON.stringify({
+                      recipientType: messageForm.recipientType,
+                      recipientId: messageForm.recipientId || undefined,
+                      content: messageForm.content,
+                      hackathonId: messageForm.hackathonId || undefined,
+                      visibility: messageForm.recipientType === "public" ? "public" : "private",
+                    }),
+                  });
+                  const inbox = await apiRequest("/api/admin-messages/admin");
+                  setAdminMessages(Array.isArray(inbox) ? inbox : []);
+                  setMessageForm((prev) => ({ ...prev, content: "" }));
+                }}
+              >
+                Publish message
+              </button>
+            </div>
+
+            <div className="admin-card stack">
+              <h4>Recent messages</h4>
+              {adminMessages.length === 0 ? (
+                <p>No admin messages yet.</p>
+              ) : (
+                adminMessages.map((message) => (
+                  <div key={message._id} className="card">
+                    <p>{message.content}</p>
+                    <small>
+                      {message.sender?.name || "Admin"} •{" "}
+                      {new Date(message.createdAt).toLocaleString()}
+                    </small>
+                  </div>
+                ))
+              )}
+            </div>
           </section>
         );
       default:
@@ -371,6 +999,12 @@ export default function AdminDashboard() {
             >
               Messages
             </button>
+            <button
+              onClick={() => setPageTitle("Admin Messages")}
+              className={pageTitle === "Admin Messages" ? "active" : ""}
+            >
+              Admin Messages
+            </button>
             <button onClick={() => navigate("/analytics")}>Analytics</button>
             <button onClick={() => navigate("/reports")}>Reports</button>
           </nav>
@@ -415,6 +1049,7 @@ export default function AdminDashboard() {
           {renderContent()}
         </div>
       </div>
+      <UserDetailsModal user={selectedUser} onClose={() => setSelectedUser(null)} />
     </div>
   );
 }

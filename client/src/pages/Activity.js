@@ -4,6 +4,8 @@ import {
   respondToCollaborationRequest,
 } from "../services/collaborationService";
 import { useAuth } from "../context/AuthContext";
+import apiRequest from "../services/api";
+import io from "socket.io-client";
 import "../styles/appPageTheme.css";
 import "../styles/Activity.css";
 
@@ -12,6 +14,8 @@ export default function Activity() {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [adminMessages, setAdminMessages] = useState([]);
+  const [directConversations, setDirectConversations] = useState([]);
 
   useEffect(() => {
     if (authLoading || !currentUser) return;
@@ -22,6 +26,10 @@ export default function Activity() {
         setError("");
         const data = await fetchCollaborationRequests("incoming");
         setRequests(data);
+        const inbox = await apiRequest("/api/admin-messages/inbox");
+        setAdminMessages(Array.isArray(inbox) ? inbox : []);
+        const dm = await apiRequest("/api/direct-messages/conversations");
+        setDirectConversations(Array.isArray(dm) ? dm : []);
       } catch (error) {
         console.error("Error loading activity:", error);
         setError("Unable to load collaboration requests.");
@@ -30,6 +38,40 @@ export default function Activity() {
       }
     };
     loadActivity();
+  }, [authLoading, currentUser]);
+
+  useEffect(() => {
+    if (authLoading || !currentUser) return;
+    const socketUrl = (process.env.REACT_APP_API_URL || "http://localhost:5000").replace(
+      /\/api\/?$/,
+      ""
+    );
+    const socket = io(socketUrl, { transports: ["websocket"] });
+    socket.on("adminMessage", (message) => {
+      const recipientType = message?.recipientType;
+      const recipientId = message?.recipientId;
+      const matches =
+        recipientType === "public" ||
+        (recipientType === "user" && recipientId === currentUser?._id);
+      if (matches) {
+        setAdminMessages((prev) =>
+          prev.some((item) => item._id === message._id) ? prev : [message, ...prev]
+        );
+      }
+    });
+    socket.on("directMessage", async (message) => {
+      const senderId = message?.sender?._id || message?.sender;
+      const recipientId = message?.recipient?._id || message?.recipient;
+      if (![senderId, recipientId].includes(currentUser?._id)) return;
+      const dm = await apiRequest("/api/direct-messages/conversations");
+      setDirectConversations(Array.isArray(dm) ? dm : []);
+    });
+    socket.on("collaborationRequest", async (payload) => {
+      if (payload?.recipient !== currentUser?._id) return;
+      const data = await fetchCollaborationRequests("incoming");
+      setRequests(data);
+    });
+    return () => socket.disconnect();
   }, [authLoading, currentUser]);
 
   const handleRespond = async (requestId, action) => {
@@ -115,6 +157,61 @@ export default function Activity() {
                       </button>
                     </div>
                   ) : null}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className="app-header">
+          <div>
+            <h2 className="app-title">Admin Messages</h2>
+            <p className="app-subtitle">Announcements and private messages.</p>
+          </div>
+        </div>
+        {adminMessages.length === 0 ? (
+          <div className="activity-state">No admin messages yet.</div>
+        ) : (
+          <div className="app-list">
+            {adminMessages.map((message) => (
+              <div key={message._id} className="app-card activity-card">
+                <div className="activity-header">
+                  <div>
+                    <h3>{message.sender?.name || "Admin"}</h3>
+                    <p>{message.sender?.email}</p>
+                  </div>
+                  <span className="activity-time">
+                    {new Date(message.createdAt).toLocaleString()}
+                  </span>
+                </div>
+                <p className="activity-message">{message.content}</p>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <div className="app-header">
+          <div>
+            <h2 className="app-title">Direct Messages</h2>
+            <p className="app-subtitle">Recent private conversations.</p>
+          </div>
+        </div>
+        {directConversations.length === 0 ? (
+          <div className="activity-state">No direct messages yet.</div>
+        ) : (
+          <div className="app-list">
+            {directConversations.slice(0, 5).map((item) => (
+              <div key={item.user._id} className="app-card activity-card">
+                <div className="activity-header">
+                  <div>
+                    <h3>{item.user.name || item.user.email}</h3>
+                    <p>{item.lastMessage?.content}</p>
+                  </div>
+                  <span className="activity-time">
+                    {item.lastMessage?.createdAt
+                      ? new Date(item.lastMessage.createdAt).toLocaleString()
+                      : ""}
+                  </span>
                 </div>
               </div>
             ))}

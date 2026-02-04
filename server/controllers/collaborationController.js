@@ -67,6 +67,12 @@ exports.createRequest = async (req, res) => {
       idea: idea ? idea._id : undefined,
       message: message ? message.trim() : "",
     });
+    const io = req.app?.get("io");
+    if (io) {
+      io.emit("collaborationRequest", {
+        recipient: recipient._id.toString(),
+      });
+    }
 
     res.status(201).json({ message: "Request sent.", request: newRequest });
   } catch (error) {

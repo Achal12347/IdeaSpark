@@ -1,83 +1,62 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const hackathonSchema = new mongoose.Schema(
   {
-    name: {
-      type: String,
-      required: true,
-    },
-    description: {
-      type: String,
-      required: true,
-    },
-    startDate: {
-      type: Date,
-      required: true,
-    },
-    endDate: {
-      type: Date,
-      required: true,
-    },
-    registrationDeadline: {
-      type: Date,
-      required: true,
-    },
-    maxParticipants: {
-      type: Number,
-      default: 100,
-    },
-    participants: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-    }],
-    submissions: [{
-      team: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Team',
-      },
-      idea: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Idea',
-      },
-      submittedAt: {
-        type: Date,
-        default: Date.now,
-      },
-    }],
-    judges: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
-    }],
-    prizes: [{
-      title: {
-        type: String,
-        required: true,
-      },
-      description: {
-        type: String,
-      },
-      value: {
-        type: Number,
-      },
-    }],
+    title: { type: String, required: true, trim: true },
+    description: { type: String, required: true, trim: true },
+    theme: { type: String, trim: true },
+    banner: { type: String, trim: true },
+    registrationStart: { type: Date, required: true },
+    registrationEnd: { type: Date, required: true },
+    submissionDeadline: { type: Date, required: true },
+    resultAnnouncement: { type: Date, required: true },
+    teamLimit: { type: Number, default: 5 },
+    rules: [{ type: String, trim: true }],
+    allowedTechnologies: [{ type: String, trim: true }],
+    submissionFormat: [{ type: String, trim: true }],
+    judgingCriteria: [{ type: String, trim: true }],
+    prizes: [{ type: String, trim: true }],
+    certificates: { type: String, trim: true },
     status: {
       type: String,
-      enum: ['upcoming', 'ongoing', 'completed'],
-      default: 'upcoming',
+      enum: ["upcoming", "active", "completed"],
+      default: "upcoming",
     },
     organizer: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
       required: true,
     },
-    rules: {
-      type: String,
+    winners: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "HackathonSubmission",
+      },
+    ],
+    councilAdmins: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    hostAdmin: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
     },
-    themes: [{
-      type: String,
-    }],
+    launchConfirmations: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    winnerConfirmations: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model('Hackathon', hackathonSchema);
+module.exports = mongoose.model("Hackathon", hackathonSchema);

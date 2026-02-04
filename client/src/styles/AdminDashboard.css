@@ -49,6 +49,59 @@
   gap: 12px;
 }
 
+.admin-card {
+  background: var(--dash-surface);
+  border: 1px solid var(--dash-border);
+  border-radius: var(--dash-radius-md);
+  padding: 16px;
+  box-shadow: var(--dash-soft-shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.admin-card.stack {
+  gap: 16px;
+}
+
+.admin-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--dash-border);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 12px;
+  background: var(--dash-surface);
+  color: var(--dash-text);
+}
+
+.admin-chip input {
+  margin: 0;
+}
+
+.admin-input,
+.admin-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--dash-border);
+  font-size: 14px;
+  background: var(--dash-surface);
+  color: var(--dash-text);
+}
+
+.admin-textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+.admin-chat-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
 .admin-content p {
   color: var(--dash-muted);
   margin: 0;

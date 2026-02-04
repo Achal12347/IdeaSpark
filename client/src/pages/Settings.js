@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { fetchUserProfile, updateUserProfile } from "../services/userService";
 import { auth } from "../firebase";
+import io from "socket.io-client";
 import "../styles/appPageTheme.css";
 import "../styles/Settings.css";
 
@@ -87,6 +88,41 @@ export default function Settings() {
       }
     };
     loadProfile();
+  }, []);
+
+  useEffect(() => {
+    const socketUrl = (process.env.REACT_APP_API_URL || "http://localhost:5000").replace(
+      /\/api\/?$/,
+      ""
+    );
+    const socket = io(socketUrl, { transports: ["websocket"] });
+    socket.on("userUpdated", async (payload) => {
+      if (!payload?.userId) return;
+      if (!auth.currentUser) return;
+      const data = await fetchUserProfile();
+      if (data?._id !== payload.userId) return;
+      setProfile({
+        name: data?.name || "",
+        bio: data?.bio || "",
+        links: {
+          github: data?.links?.github || "",
+          portfolio: data?.links?.portfolio || "",
+          linkedin: data?.links?.linkedin || "",
+        },
+        collaborationPreferences: data?.collaborationPreferences || [],
+        availability: data?.availability || "",
+        notificationSettings: {
+          ...notificationDefaults,
+          ...(data?.notificationSettings || {}),
+        },
+        appearanceSettings: {
+          ...appearanceDefaults,
+          ...(data?.appearanceSettings || {}),
+        },
+        createdAt: data?.createdAt || "",
+      });
+    });
+    return () => socket.disconnect();
   }, []);
 
   const lastLoginTime = useMemo(() => {

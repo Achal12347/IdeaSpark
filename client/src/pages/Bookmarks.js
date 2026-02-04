@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { fetchBookmarks } from "../services/bookmarkService";
 import { useAuth } from "../context/AuthContext";
 import IdeaCard from "../components/IdeaCard";
+import apiRequest from "../services/api";
+import io from "socket.io-client";
 import "../styles/appPageTheme.css";
 import "../styles/Bookmarks.css";
 
@@ -11,6 +13,7 @@ export default function Bookmarks() {
   const navigate = useNavigate();
   const [bookmarks, setBookmarks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [userId, setUserId] = useState("");
 
   useEffect(() => {
     if (authLoading || !currentUser) return;
@@ -20,6 +23,8 @@ export default function Bookmarks() {
       try {
         const data = await fetchBookmarks();
         setBookmarks(data);
+        const profile = await apiRequest("/api/users/me");
+        setUserId(profile?._id || "");
       } catch (error) {
         console.error("Error loading bookmarks:", error);
       } finally {
@@ -28,6 +33,21 @@ export default function Bookmarks() {
     };
     loadBookmarks();
   }, [authLoading, currentUser]);
+
+  useEffect(() => {
+    if (authLoading || !currentUser) return;
+    const socketUrl = (process.env.REACT_APP_API_URL || "http://localhost:5000").replace(
+      /\/api\/?$/,
+      ""
+    );
+    const socket = io(socketUrl, { transports: ["websocket"] });
+    socket.on("bookmarksUpdated", async (payload) => {
+      if (payload?.userId !== userId) return;
+      const data = await fetchBookmarks();
+      setBookmarks(data);
+    });
+    return () => socket.disconnect();
+  }, [authLoading, currentUser, userId]);
 
   return (
     <div className="app-page bookmarks-page">

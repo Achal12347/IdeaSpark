@@ -3,7 +3,9 @@
 }
 
 .hackathons-list {
-  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .hackathon-card {
@@ -37,6 +39,115 @@
   color: var(--app-muted);
   font-size: 13px;
   flex-wrap: wrap;
+}
+
+.hackathons-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 20px;
+  margin-top: 8px;
+}
+
+.hackathon-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.hackathon-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: sticky;
+  top: 24px;
+  height: fit-content;
+}
+
+.detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.detail-header h3 {
+  margin: 0 0 6px;
+}
+
+.detail-header p {
+  margin: 0;
+  color: var(--app-muted);
+  font-size: 13px;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+.detail-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--app-muted);
+  font-weight: 600;
+}
+
+.detail-block {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.admin-confirmations {
+  border-top: 1px solid var(--app-border);
+  padding-top: 12px;
+}
+
+.admin-chat {
+  border-top: 1px solid var(--app-border);
+  padding-top: 12px;
+}
+
+.hackathon-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.message-card {
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-md);
+  padding: 12px;
+  background: var(--app-surface);
+}
+
+.message-content {
+  margin: 0;
+  color: var(--app-ink);
+}
+
+.message-meta {
+  display: block;
+  margin-top: 6px;
+  color: var(--app-muted);
+  font-size: 12px;
+}
+
+.detail-block h4 {
+  margin: 0;
+}
+
+.detail-placeholder {
+  text-align: center;
+  color: var(--app-muted);
+}
+
+.status-note {
+  margin: 0;
+  font-size: 13px;
+  color: var(--app-muted);
 }
 
 .hackathons-empty {
@@ -75,7 +186,7 @@
   padding: 12px 14px;
   border: 1px solid var(--app-border);
   border-radius: var(--app-radius-md);
-  background: #fff;
+  background: var(--app-surface);
 }
 
 .rankings-rank {
@@ -96,6 +207,14 @@
   .hackathon-card-header {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .hackathons-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hackathon-detail {
+    position: static;
   }
 
   .rankings-list li {

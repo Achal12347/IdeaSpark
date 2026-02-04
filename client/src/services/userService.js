@@ -19,6 +19,14 @@ export const fetchUserStats = async () => {
   return await apiRequest('/api/users/stats');
 };
 
+export const fetchMembers = async () => {
+  return await apiRequest('/api/users/members');
+};
+
+export const fetchAdmins = async () => {
+  return await apiRequest('/api/users/admins');
+};
+
 export const fetchSuggestedCollaborators = async () => {
   return await apiRequest('/api/users/suggested-collaborators');
 };

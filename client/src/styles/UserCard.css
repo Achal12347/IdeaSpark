@@ -1,0 +1,138 @@
+@import "./appPageTheme.css";
+
+.user-card {
+  width: 100%;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-md);
+  background: var(--app-surface);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: var(--app-shadow);
+  cursor: pointer;
+  text-align: left;
+}
+
+.user-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--app-accent);
+  color: var(--app-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+.user-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.user-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.user-title h4 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.user-subtitle {
+  margin: 0;
+  color: var(--app-muted);
+  font-size: 13px;
+}
+
+.user-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--app-accent-soft);
+  color: var(--app-ink);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.user-action {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--app-muted);
+}
+
+.user-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 60;
+}
+
+.user-modal {
+  width: min(720px, 100%);
+  background: var(--app-surface);
+  border-radius: var(--app-radius-lg);
+  border: 1px solid var(--app-border);
+  padding: 20px;
+  box-shadow: var(--app-shadow);
+}
+
+.user-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.user-modal-header h3 {
+  margin: 0 0 6px;
+  font-size: 20px;
+}
+
+.user-modal-header p {
+  margin: 0;
+  color: var(--app-muted);
+  font-size: 13px;
+}
+
+.user-close {
+  border: 1px solid var(--app-border);
+  background: transparent;
+  color: var(--app-ink);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.user-modal-body {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.user-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--app-muted);
+  font-weight: 600;
+}
+
+.user-modal-body p {
+  margin: 6px 0 0;
+  color: var(--app-ink);
+  font-size: 14px;
+}

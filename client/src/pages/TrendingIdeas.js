@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchTrendingIdeas } from "../services/ideaService";
 import { useAuth } from "../context/AuthContext";
+import io from "socket.io-client";
 import IdeaCard from "../components/IdeaCard";
 import "../styles/appPageTheme.css";
 import "../styles/TrendingIdeas.css";
@@ -11,23 +12,34 @@ export default function TrendingIdeas() {
   const navigate = useNavigate();
   const [trendingIdeas, setTrendingIdeas] = useState([]);
   const [loading, setLoading] = useState(true);
+  const socketUrl = (process.env.REACT_APP_API_URL || "http://localhost:5000").replace(
+    /\/api\/?$/,
+    ""
+  );
+
+  const loadTrendingIdeas = async () => {
+    setLoading(true);
+    try {
+      const data = await fetchTrendingIdeas();
+      setTrendingIdeas(data);
+    } catch (error) {
+      console.error("Error loading trending ideas:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (authLoading || !currentUser) return;
-
-    const loadTrendingIdeas = async () => {
-      setLoading(true);
-      try {
-        const data = await fetchTrendingIdeas();
-        setTrendingIdeas(data);
-      } catch (error) {
-        console.error("Error loading trending ideas:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
     loadTrendingIdeas();
   }, [authLoading, currentUser]);
+
+  useEffect(() => {
+    if (authLoading || !currentUser) return;
+    const socket = io(socketUrl, { transports: ["websocket"] });
+    socket.on("ideasUpdated", loadTrendingIdeas);
+    return () => socket.disconnect();
+  }, [authLoading, currentUser, socketUrl]);
 
   return (
     <div className="app-page trending-page">

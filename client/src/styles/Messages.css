@@ -1,0 +1,244 @@
+@import "./appPageTheme.css";
+
+.messages-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  gap: 16px;
+}
+
+.messages-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.messages-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.messages-section h4 {
+  margin: 0 0 8px;
+  font-size: 14px;
+}
+
+.admin-message-card {
+  border: 1px solid var(--app-border);
+  background: var(--app-surface);
+  border-radius: var(--app-radius-md);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.admin-message-card p {
+  margin: 0;
+  font-size: 13px;
+}
+
+.admin-message-card span {
+  font-size: 11px;
+  color: var(--app-muted);
+}
+
+.messages-note {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--app-muted);
+}
+
+.messages-link {
+  margin-top: 10px;
+  display: inline-flex;
+  font-size: 13px;
+  color: var(--app-ink);
+  text-decoration: underline;
+}
+.messages-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.messages-filters {
+  display: flex;
+  gap: 8px;
+}
+
+.filter-btn {
+  border: 1px solid var(--app-border);
+  background: var(--app-surface);
+  color: var(--app-ink);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.filter-btn.active {
+  background: var(--app-ink);
+  color: var(--app-surface);
+}
+
+.messages-item {
+  border: 1px solid var(--app-border);
+  background: var(--app-surface);
+  border-radius: var(--app-radius-md);
+  padding: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  text-align: left;
+  cursor: pointer;
+}
+
+.messages-item.active {
+  border-color: var(--app-ink);
+}
+
+.messages-item h4 {
+  margin: 0 0 6px;
+  font-size: 14px;
+}
+
+.messages-item p {
+  margin: 0;
+  color: var(--app-muted);
+  font-size: 12px;
+}
+
+.messages-time {
+  font-size: 11px;
+  color: var(--app-muted);
+  white-space: nowrap;
+}
+
+.messages-thread {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.thread-header h3 {
+  margin: 0 0 4px;
+}
+
+.thread-header p {
+  margin: 0;
+  color: var(--app-muted);
+  font-size: 12px;
+}
+
+.thread-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 360px;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.thread-message {
+  align-self: flex-start;
+  border: 1px solid var(--app-border);
+  background: var(--app-surface);
+  border-radius: var(--app-radius-md);
+  padding: 10px 12px;
+  max-width: 80%;
+}
+
+.thread-message.own {
+  align-self: flex-end;
+  background: var(--app-ink);
+  color: var(--app-surface);
+  border-color: transparent;
+}
+
+.thread-message p {
+  margin: 0 0 6px;
+  font-size: 13px;
+}
+
+.thread-message span {
+  font-size: 10px;
+  color: var(--app-muted);
+}
+
+.thread-message.own span {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.thread-input {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.messages-loading,
+.messages-empty {
+  color: var(--app-muted);
+  margin: 0;
+}
+
+.thread-placeholder {
+  text-align: center;
+  color: var(--app-muted);
+}
+
+.user-picker-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 60;
+}
+
+.user-picker {
+  background: var(--app-surface);
+  border-radius: var(--app-radius-lg);
+  border: 1px solid var(--app-border);
+  padding: 20px;
+  width: min(520px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.user-picker-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.user-picker-item {
+  border: 1px solid var(--app-border);
+  background: var(--app-surface);
+  border-radius: var(--app-radius-md);
+  padding: 12px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.user-picker-item h4 {
+  margin: 0 0 6px;
+  font-size: 14px;
+}
+
+.user-picker-item p {
+  margin: 0;
+  color: var(--app-muted);
+  font-size: 12px;
+}
+
+@media (max-width: 900px) {
+  .messages-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -25,7 +25,7 @@
 }
 
 .idea-card {
-  background: #ffffff;
+  background: var(--dash-surface);
   border: 1px solid var(--dash-border);
   border-radius: var(--dash-radius-md);
   padding: 16px;
