@@ -168,8 +168,8 @@
   font-size: 11px;
   font-weight: 600;
   text-transform: capitalize;
-  background: #f3f4f6;
-  color: #111827;
+  background: var(--app-accent-soft);
+  color: var(--app-ink);
 }
 
 .status-owner_accepted {
@@ -221,7 +221,7 @@
 .counter-block {
   padding: 10px;
   border-radius: var(--app-radius-md);
-  background: #f9fafb;
+  background: var(--app-surface);
   border: 1px solid var(--app-border);
   display: flex;
   flex-direction: column;

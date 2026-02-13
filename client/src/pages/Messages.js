@@ -18,6 +18,7 @@ export default function Messages() {
   const [members, setMembers] = useState([]);
   const [showPicker, setShowPicker] = useState(false);
   const [adminMessages, setAdminMessages] = useState([]);
+  const [currentUserId, setCurrentUserId] = useState("");
 
   const socketUrl = useMemo(
     () =>
@@ -50,6 +51,8 @@ export default function Messages() {
       try {
         await loadConversations();
         await loadAdminMessages();
+        const profile = await apiRequest("/api/users/me");
+        setCurrentUserId(profile?._id || "");
         const data = await fetchMembers();
         setMembers(Array.isArray(data) ? data : []);
       } finally {
@@ -70,7 +73,6 @@ export default function Messages() {
     socket.on("directMessage", async (message) => {
       const senderId = message?.sender?._id || message?.sender;
       const recipientId = message?.recipient?._id || message?.recipient;
-      const currentUserId = currentUser?._id;
 
       if (![senderId, recipientId].includes(currentUserId)) return;
 
@@ -83,7 +85,7 @@ export default function Messages() {
       }
     });
     return () => socket.disconnect();
-  }, [authLoading, currentUser, selectedUser?._id, socketUrl]);
+  }, [authLoading, currentUser, selectedUser?._id, socketUrl, currentUserId]);
 
   const handleSend = async () => {
     if (!selectedUser?._id || !messageText.trim()) return;
@@ -214,7 +216,7 @@ export default function Messages() {
                       <p className="messages-empty">No messages yet.</p>
                     ) : (
                       thread.map((message) => {
-                        const isOwn = message.sender?._id === currentUser?._id;
+                        const isOwn = message.sender?._id === currentUserId;
                         return (
                           <div
                             key={message._id}

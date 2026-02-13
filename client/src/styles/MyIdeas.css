@@ -94,13 +94,13 @@
   border-radius: 999px;
   font-size: 11px;
   font-weight: 600;
-  background: #f3f4f6;
-  color: #111827;
+  background: var(--app-accent-soft);
+  color: var(--app-ink);
 }
 
 .chat-badge.owner {
-  background: #111827;
-  color: #ffffff;
+  background: var(--app-ink);
+  color: var(--app-surface);
 }
 
 .chat-badge.collaborator {
@@ -131,7 +131,7 @@
   padding: 10px 12px;
   border-radius: var(--app-radius-md);
   border: 1px solid var(--app-border);
-  background: #fff;
+  background: var(--app-surface);
   font-size: 13px;
   max-width: 90%;
 }
@@ -149,9 +149,9 @@
 
 .message-item.own {
   align-self: flex-end;
-  background: #111827;
+  background: var(--app-ink);
   border-color: transparent;
-  color: #ffffff;
+  color: var(--app-surface);
 }
 
 .message-item.own p,

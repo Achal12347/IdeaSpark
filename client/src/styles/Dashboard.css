@@ -58,11 +58,12 @@
 }
 
 .idea-card-tag {
-  background: #f6f4f1;
+  background: var(--dash-panel);
   border: 1px solid var(--dash-border);
   padding: 4px 10px;
   border-radius: 999px;
   font-size: 12px;
+  color: var(--dash-text);
 }
 
 .idea-card-stats {
@@ -93,7 +94,8 @@
   padding: 10px 12px;
   border-radius: 12px;
   border: 1px solid var(--dash-border);
-  background: #ffffff;
+  background: var(--dash-surface);
+  color: var(--dash-text);
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -105,4 +107,16 @@
 
 .right-panel .panel-card button {
   width: 100%;
+}
+
+.mobile-panels {
+  display: none;
+  flex-direction: column;
+  gap: 16px;
+}
+
+@media (max-width: 1100px) {
+  .mobile-panels {
+    display: flex;
+  }
 }

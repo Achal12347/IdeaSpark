@@ -45,7 +45,7 @@
   padding: 10px 12px;
   border-radius: var(--app-radius-md);
   border: 1px solid var(--app-border);
-  background: #fff;
+  background: var(--app-surface);
 }
 
 .meta-label {
@@ -169,7 +169,7 @@
   padding: 12px 14px;
   border-radius: var(--app-radius-md);
   border: 1px solid var(--app-border);
-  background: #fff;
+  background: var(--app-surface);
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -205,7 +205,7 @@
   border: 1px solid var(--app-border);
   border-radius: var(--app-radius-md);
   padding: 16px;
-  background: #fff;
+  background: var(--app-surface);
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -293,7 +293,7 @@
 .counter-block {
   padding: 10px 12px;
   border-radius: var(--app-radius-md);
-  background: #f9fafb;
+  background: var(--app-accent-soft);
   border: 1px solid var(--app-border);
   display: flex;
   flex-direction: column;

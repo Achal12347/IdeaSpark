@@ -30,8 +30,8 @@
 .investor-badge {
   padding: 6px 12px;
   border-radius: 999px;
-  background: #111827;
-  color: #fff;
+  background: var(--dash-accent);
+  color: var(--dash-surface);
   font-size: 12px;
   font-weight: 600;
 }
@@ -55,7 +55,7 @@
 }
 
 .investor-section {
-  background: #fff;
+  background: var(--dash-surface);
   border: 1px solid var(--dash-border);
   border-radius: 18px;
   padding: 18px 20px;
@@ -104,8 +104,8 @@
   padding: 8px 14px;
   border-radius: 999px;
   border: 1px solid var(--dash-border);
-  background: #111827;
-  color: #fff;
+  background: var(--dash-accent);
+  color: var(--dash-surface);
   cursor: pointer;
 }
 
@@ -121,7 +121,7 @@
 }
 
 .pitch-preview {
-  background: #f9fafb;
+  background: var(--dash-panel);
   border: 1px solid var(--dash-border);
   border-radius: 12px;
   padding: 10px 12px;
@@ -145,6 +145,8 @@
   border-radius: 12px;
   padding: 12px;
   font-size: 14px;
+  background: var(--dash-surface);
+  color: var(--dash-text);
 }
 
 .offer-fields {
@@ -163,14 +165,14 @@
   padding: 10px 16px;
   border-radius: 999px;
   border: 1px solid var(--dash-border);
-  background: #111827;
-  color: #fff;
+  background: var(--dash-accent);
+  color: var(--dash-surface);
   cursor: pointer;
 }
 
 .offer-actions button.ghost {
-  background: #fff;
-  color: #111827;
+  background: var(--dash-surface);
+  color: var(--dash-text);
 }
 
 .offers-list {
@@ -207,7 +209,7 @@
 }
 
 .counter-summary {
-  background: #f9fafb;
+  background: var(--dash-panel);
   border-radius: 12px;
   padding: 10px 12px;
   display: grid;

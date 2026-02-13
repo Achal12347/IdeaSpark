@@ -208,7 +208,7 @@
 
 .btn-primary {
   background: var(--dash-accent);
-  color: #ffffff;
+  color: var(--dash-surface);
   border-color: var(--dash-accent);
 }
 
@@ -259,7 +259,7 @@
   height: 32px;
   border-radius: 50%;
   background: var(--dash-accent);
-  color: #ffffff;
+  color: var(--dash-surface);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -330,6 +330,27 @@
   box-shadow: var(--dash-soft-shadow);
 }
 
+.mobile-nav {
+  display: none;
+  gap: 8px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding: 8px;
+  border-radius: var(--dash-radius-md);
+  border: 1px solid var(--dash-border);
+  background: var(--dash-panel);
+}
+
+.mobile-nav button {
+  white-space: nowrap;
+}
+
+.mobile-nav button.active {
+  background: var(--dash-accent);
+  color: var(--dash-surface);
+  border-color: var(--dash-accent);
+}
+
 @media (max-width: 1100px) {
   .dashboard-frame {
     grid-template-columns: var(--dash-side-width) minmax(0, 1fr);
@@ -366,5 +387,9 @@
 
   .search-field input {
     width: 100%;
+  }
+
+  .mobile-nav {
+    display: flex;
   }
 }

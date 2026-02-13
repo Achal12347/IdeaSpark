@@ -60,13 +60,20 @@ exports.getIdea = async (req, res) => {
 
 exports.incrementViews = async (req, res) => {
   try {
-    const idea = await Idea.findById(req.params.id);
+    const idea = await Idea.findByIdAndUpdate(
+      req.params.id,
+      { $inc: { views: 1 }, $set: { updatedAt: new Date() } },
+      { new: true }
+    );
     if (!idea) {
       return res.status(404).json({ message: 'Idea not found' });
     }
-    idea.views += 1;
-    await idea.save();
-    res.json({ message: 'Views incremented' });
+    const io = req.app?.get('io');
+    if (io) {
+      io.emit('ideaUpdated', idea._id.toString());
+      io.emit('ideasUpdated');
+    }
+    res.json({ message: 'Views incremented', views: idea.views });
   } catch (error) {
     res.status(500).json({ message: 'Error incrementing views', error });
   }
@@ -74,7 +81,9 @@ exports.incrementViews = async (req, res) => {
 
 exports.getIdeas = async (req, res) => {
   try {
-    const ideas = await Idea.find().populate('author', 'name email');
+    const ideas = await Idea.find()
+      .populate('author', 'name email')
+      .sort({ createdAt: -1 });
     res.json(ideas);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching ideas', error });

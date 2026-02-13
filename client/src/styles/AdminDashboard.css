@@ -38,9 +38,9 @@
 }
 
 .stat-card.highlight {
-  background: #1a1a1a;
-  color: #ffffff;
-  border-color: #1a1a1a;
+  background: var(--dash-accent);
+  color: var(--dash-surface);
+  border-color: var(--dash-accent);
 }
 
 .admin-actions {
@@ -148,7 +148,7 @@
 }
 
 .message-body {
-  color: #1f2937;
+  color: var(--dash-text);
   font-size: 14px;
   line-height: 1.6;
 }
@@ -202,7 +202,7 @@
 }
 
 .legend-dot.users {
-  background: #111827;
+  background: var(--dash-accent);
 }
 
 .legend-dot.ideas {
@@ -237,7 +237,7 @@
 }
 
 .chart-bar.users {
-  background: #111827;
+  background: var(--dash-accent);
 }
 
 .chart-bar.ideas {
@@ -278,7 +278,7 @@
   margin-top: 16px;
   padding: 12px;
   border-radius: 12px;
-  background: #f9fafb;
+  background: var(--dash-panel);
   border: 1px solid var(--dash-border);
   display: flex;
   flex-direction: column;

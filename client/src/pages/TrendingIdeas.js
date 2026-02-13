@@ -36,7 +36,7 @@ export default function TrendingIdeas() {
 
   useEffect(() => {
     if (authLoading || !currentUser) return;
-    const socket = io(socketUrl, { transports: ["websocket"] });
+    const socket = io(socketUrl, { transports: ["websocket", "polling"] });
     socket.on("ideasUpdated", loadTrendingIdeas);
     return () => socket.disconnect();
   }, [authLoading, currentUser, socketUrl]);

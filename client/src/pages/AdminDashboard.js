@@ -1046,6 +1046,53 @@ export default function AdminDashboard() {
             </div>
           </header>
 
+          <nav className="mobile-nav admin-mobile-nav">
+            <button
+              onClick={() => setPageTitle("Dashboard")}
+              className={pageTitle === "Dashboard" ? "active" : ""}
+            >
+              Dashboard
+            </button>
+            <button
+              onClick={() => setPageTitle("Users")}
+              className={pageTitle === "Users" ? "active" : ""}
+            >
+              Users
+            </button>
+            <button
+              onClick={() => setPageTitle("Ideas")}
+              className={pageTitle === "Ideas" ? "active" : ""}
+            >
+              Ideas
+            </button>
+            <button
+              onClick={() => setPageTitle("Investors")}
+              className={pageTitle === "Investors" ? "active" : ""}
+            >
+              Investors
+            </button>
+            <button
+              onClick={() => setPageTitle("Hackathons")}
+              className={pageTitle === "Hackathons" ? "active" : ""}
+            >
+              Hackathons
+            </button>
+            <button
+              onClick={() => setPageTitle("Messages")}
+              className={pageTitle === "Messages" ? "active" : ""}
+            >
+              Messages
+            </button>
+            <button
+              onClick={() => setPageTitle("Admin Messages")}
+              className={pageTitle === "Admin Messages" ? "active" : ""}
+            >
+              Admin Messages
+            </button>
+            <button onClick={() => navigate("/analytics")}>Analytics</button>
+            <button onClick={() => navigate("/reports")}>Reports</button>
+          </nav>
+
           {renderContent()}
         </div>
       </div>

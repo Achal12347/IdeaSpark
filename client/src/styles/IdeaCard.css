@@ -57,8 +57,8 @@
   font-size: 11px;
   font-weight: 600;
   text-transform: capitalize;
-  background: #f3f4f6;
-  color: #111827;
+  background: var(--app-accent-soft, #f3f4f6);
+  color: var(--app-ink, var(--dash-text, #111827));
 }
 
 .idea-card-badge.status-funded {
@@ -87,7 +87,7 @@
 .idea-card-action {
   border: 1px solid var(--app-border, var(--dash-border, #e5e7eb));
   background: var(--app-ink, var(--dash-accent, #111827));
-  color: #ffffff;
+  color: var(--app-surface, var(--dash-surface, #ffffff));
   border-radius: 999px;
   padding: 6px 12px;
   font-size: 12px;

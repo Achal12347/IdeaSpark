@@ -18,6 +18,8 @@ export default function Dashboard() {
       skip: authLoading || !currentUser,
       refetchOnFocus: true,
       refetchOnReconnect: true,
+      refetchOnMountOrArgChange: true,
+      pollingInterval: 15000,
     }
   );
   const socketUrl = (process.env.REACT_APP_API_URL || "http://localhost:5000").replace(
@@ -27,7 +29,7 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (authLoading || !currentUser) return;
-    const socket = io(socketUrl, { transports: ["websocket"] });
+    const socket = io(socketUrl, { transports: ["websocket", "polling"] });
     socket.on("ideasUpdated", () => {
       refetch();
     });
@@ -107,6 +109,23 @@ export default function Dashboard() {
             </div>
           </header>
 
+          <nav className="mobile-nav">
+            <button className="active" onClick={() => navigate("/dashboard")}>
+              Feed
+            </button>
+            <button onClick={() => navigate("/my-ideas")}>My Ideas</button>
+            <button onClick={() => navigate("/bookmarks")}>Bookmarks</button>
+            <button onClick={() => navigate("/members")}>Members</button>
+            <button onClick={() => navigate("/investors")}>Investors</button>
+            <button onClick={() => navigate("/investor/dashboard")}>
+              Investor Dashboard
+            </button>
+            <button onClick={() => navigate("/hackathons")}>Hackathons</button>
+            <button onClick={() => navigate("/messages")}>Messages</button>
+            <button onClick={() => navigate("/activity")}>Activity</button>
+            <button onClick={() => navigate("/settings")}>Settings</button>
+          </nav>
+
           {/* Feed */}
           <section className="feed">
             <div className="section-title">
@@ -126,6 +145,29 @@ export default function Dashboard() {
                 />
               ))
             )}
+            <div className="mobile-panels">
+              <div className="panel-card">
+                <h4>Insights</h4>
+                <ul className="insights-list">
+                  <li onClick={() => navigate("/trending-ideas")}>Trending Ideas</li>
+                  <li onClick={() => navigate("/investor-views")}>
+                    Investors viewed your profile
+                  </li>
+                  <li onClick={() => navigate("/weekly-stats")}>Weekly Stats</li>
+                  <li onClick={() => navigate("/suggested-collaborators")}>
+                    Suggested Collaborators
+                  </li>
+                </ul>
+              </div>
+
+              <div className="panel-card">
+                <h4>Quick Actions</h4>
+                <button className="btn-primary" onClick={() => navigate("/add-idea")}>
+                  Create Post
+                </button>
+                <button onClick={() => navigate("/activity")}>View Activity</button>
+              </div>
+            </div>
           </section>
         </main>
 

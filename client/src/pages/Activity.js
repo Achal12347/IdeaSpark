@@ -16,6 +16,7 @@ export default function Activity() {
   const [error, setError] = useState("");
   const [adminMessages, setAdminMessages] = useState([]);
   const [directConversations, setDirectConversations] = useState([]);
+  const [currentUserId, setCurrentUserId] = useState("");
 
   useEffect(() => {
     if (authLoading || !currentUser) return;
@@ -30,6 +31,8 @@ export default function Activity() {
         setAdminMessages(Array.isArray(inbox) ? inbox : []);
         const dm = await apiRequest("/api/direct-messages/conversations");
         setDirectConversations(Array.isArray(dm) ? dm : []);
+        const profile = await apiRequest("/api/users/me");
+        setCurrentUserId(profile?._id || "");
       } catch (error) {
         console.error("Error loading activity:", error);
         setError("Unable to load collaboration requests.");
@@ -52,7 +55,7 @@ export default function Activity() {
       const recipientId = message?.recipientId;
       const matches =
         recipientType === "public" ||
-        (recipientType === "user" && recipientId === currentUser?._id);
+        (recipientType === "user" && recipientId === currentUserId);
       if (matches) {
         setAdminMessages((prev) =>
           prev.some((item) => item._id === message._id) ? prev : [message, ...prev]
@@ -62,17 +65,17 @@ export default function Activity() {
     socket.on("directMessage", async (message) => {
       const senderId = message?.sender?._id || message?.sender;
       const recipientId = message?.recipient?._id || message?.recipient;
-      if (![senderId, recipientId].includes(currentUser?._id)) return;
+      if (![senderId, recipientId].includes(currentUserId)) return;
       const dm = await apiRequest("/api/direct-messages/conversations");
       setDirectConversations(Array.isArray(dm) ? dm : []);
     });
     socket.on("collaborationRequest", async (payload) => {
-      if (payload?.recipient !== currentUser?._id) return;
+      if (payload?.recipient !== currentUserId) return;
       const data = await fetchCollaborationRequests("incoming");
       setRequests(data);
     });
     return () => socket.disconnect();
-  }, [authLoading, currentUser]);
+  }, [authLoading, currentUser, currentUserId]);
 
   const handleRespond = async (requestId, action) => {
     try {

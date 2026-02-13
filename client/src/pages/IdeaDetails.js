@@ -65,7 +65,10 @@ export default function IdeaDetails() {
 
   const incrementViews = useCallback(async () => {
     try {
-      await apiRequest(`/api/ideas/${id}/views`, { method: "POST" });
+      const response = await apiRequest(`/api/ideas/${id}/views`, { method: "POST" });
+      if (response?.views !== undefined) {
+        setIdea((prev) => (prev ? { ...prev, views: response.views } : prev));
+      }
     } catch (error) {
       console.error("Error incrementing views:", error);
     }
@@ -122,15 +125,18 @@ export default function IdeaDetails() {
   }, [id]);
 
   useEffect(() => {
-    incrementViews();
-    loadIdea();
-    loadComments();
-    loadOffers();
-    loadBookmarks();
+    const loadInitial = async () => {
+      await incrementViews();
+      await loadIdea();
+      loadComments();
+      loadOffers();
+      loadBookmarks();
+    };
+    loadInitial();
   }, [incrementViews, loadIdea, loadComments, loadOffers, loadBookmarks]);
 
   useEffect(() => {
-    const socket = io(socketUrl, { transports: ["websocket"] });
+    const socket = io(socketUrl, { transports: ["websocket", "polling"] });
     socket.on("ideaUpdated", (ideaId) => {
       if (ideaId === id) {
         loadIdea();

@@ -11,6 +11,8 @@ export default function Ideas() {
   const { data: ideas = [], isLoading, refetch } = useGetIdeasQuery(undefined, {
     refetchOnFocus: true,
     refetchOnReconnect: true,
+    refetchOnMountOrArgChange: true,
+    pollingInterval: 15000,
   });
   const socketUrl = (process.env.REACT_APP_API_URL || "http://localhost:5000").replace(
     /\/api\/?$/,
@@ -18,7 +20,7 @@ export default function Ideas() {
   );
 
   useEffect(() => {
-    const socket = io(socketUrl, { transports: ["websocket"] });
+    const socket = io(socketUrl, { transports: ["websocket", "polling"] });
     socket.on("ideasUpdated", () => refetch());
     return () => socket.disconnect();
   }, [refetch, socketUrl]);
