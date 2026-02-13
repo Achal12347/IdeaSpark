@@ -138,7 +138,7 @@
   border: 1px solid var(--app-border);
   border-radius: var(--app-radius-md);
   padding: 12px;
-  background: #fff;
+  background: var(--app-surface);
   display: flex;
   flex-direction: column;
   gap: 10px;

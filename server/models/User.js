@@ -91,6 +91,21 @@ const userSchema = new mongoose.Schema(
       enum: ["user", "admin"],
       default: "user", // 👈 IMPORTANT
     },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
+    deletionReason: {
+      type: String,
+      trim: true,
+    },
+    deletedAt: {
+      type: Date,
+    },
+    deletedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
   },
   { timestamps: true }
 );

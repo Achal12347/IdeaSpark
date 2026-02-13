@@ -19,6 +19,7 @@ const {
   confirmPitch,
   incrementViews,
   showInterest,
+  deleteIdea,
 } = require('../controllers/ideaController');
 const authenticateToken = require('../middleware/authMiddleware');
 
@@ -47,6 +48,9 @@ router.post('/:id/pitch', authenticateToken, pitchIdea);
 
 // GET /api/ideas/:id - Get a single idea
 router.get('/:id', getIdea);
+
+// DELETE /api/ideas/:id - Admin delete idea
+router.delete('/:id', authenticateToken, deleteIdea);
 
 // POST /api/ideas/:id/rate - Rate an idea
 router.post('/:id/rate', authenticateToken, rateIdea);

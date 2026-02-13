@@ -26,6 +26,10 @@ export default function PublicRoute({ children }) {
         }
 
         const data = await res.json();
+        if (data.deleted) {
+          setRedirectTo("/account-deleted");
+          return;
+        }
         if (data.role === "admin") {
           setRedirectTo("/admin/dashboard");
         } else if (data.exists) {

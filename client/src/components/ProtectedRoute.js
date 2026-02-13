@@ -9,6 +9,7 @@ export default function ProtectedRoute({ children }) {
     const cached = localStorage.getItem("ideaspark_hasProfile");
     return cached === "true";
   });
+  const [accountDeleted, setAccountDeleted] = useState(false);
 
   useEffect(() => {
     if (authLoading || !currentUser) {
@@ -28,6 +29,13 @@ export default function ProtectedRoute({ children }) {
 
         const data = await res.json();
         const exists = Boolean(data.exists);
+        const deleted = Boolean(data.deleted);
+        setAccountDeleted(deleted);
+        if (deleted) {
+          localStorage.setItem("ideaspark_account_deleted", "true");
+        } else {
+          localStorage.removeItem("ideaspark_account_deleted");
+        }
         setHasProfile(exists);
         localStorage.setItem("ideaspark_hasProfile", exists ? "true" : "false");
       } catch (err) {
@@ -48,6 +56,8 @@ export default function ProtectedRoute({ children }) {
   if (authLoading || checking) return <p>Loading...</p>;
 
   if (!currentUser) return <Navigate to="/" replace />;
+
+  if (accountDeleted) return <Navigate to="/account-deleted" replace />;
 
   if (!hasProfile) return <Navigate to="/profile-setup" replace />;
 

@@ -39,6 +39,7 @@ import Reports from "./pages/Reports";
 import MyIdeas from "./pages/MyIdeas";
 import Privacy from "./pages/Privacy";
 import Messages from "./pages/Messages";
+import AccountDeleted from "./pages/AccountDeleted";
 
 function ThemeSync() {
   const { currentUser, loading } = useAuth();
@@ -275,6 +276,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="/account-deleted" element={<AccountDeleted />} />
         <Route path="/privacy" element={<Privacy />} />
       </Routes>
     </AuthProvider>

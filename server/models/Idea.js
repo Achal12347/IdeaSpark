@@ -128,6 +128,21 @@ const ideaSchema = new mongoose.Schema(
       ref: 'User',
       required: true,
     },
+    isDeleted: {
+      type: Boolean,
+      default: false,
+    },
+    deletionReason: {
+      type: String,
+      trim: true,
+    },
+    deletedAt: {
+      type: Date,
+    },
+    deletedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
   },
   { timestamps: true }
 );

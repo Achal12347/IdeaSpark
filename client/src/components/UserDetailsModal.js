@@ -1,7 +1,17 @@
+import { useEffect, useState } from "react";
 import "../styles/UserCard.css";
 
-export default function UserDetailsModal({ user, onClose }) {
+export default function UserDetailsModal({ user, onClose, onDelete, deleteLoading }) {
+  const [reason, setReason] = useState("");
+
+  useEffect(() => {
+    setReason("");
+  }, [user?._id]);
+
   if (!user) return null;
+
+  const linkValues = [user.links?.github, user.links?.portfolio, user.links?.linkedin].filter(Boolean);
+  const linksText = linkValues.length ? linkValues.join(" - ") : "Not specified";
 
   return (
     <div className="user-modal-overlay" onClick={onClose}>
@@ -42,18 +52,27 @@ export default function UserDetailsModal({ user, onClose }) {
           </div>
           <div>
             <span className="user-label">Links</span>
-            <p>
-              {user.links?.github || user.links?.portfolio || user.links?.linkedin
-                ? [
-                    user.links?.github,
-                    user.links?.portfolio,
-                    user.links?.linkedin,
-                  ]
-                    .filter(Boolean)
-                    .join(" • ")
-                : "Not specified"}
-            </p>
+            <p>{linksText}</p>
           </div>
+          {onDelete ? (
+            <div className="user-delete-block">
+              <span className="user-label">Delete user</span>
+              <textarea
+                className="user-delete-input"
+                placeholder="Reason for deletion"
+                value={reason}
+                onChange={(event) => setReason(event.target.value)}
+              />
+              <button
+                type="button"
+                className="user-delete-btn"
+                onClick={() => onDelete(user._id, reason)}
+                disabled={!reason.trim() || deleteLoading}
+              >
+                {deleteLoading ? "Deleting..." : "Delete user"}
+              </button>
+            </div>
+          ) : null}
         </div>
       </div>
     </div>

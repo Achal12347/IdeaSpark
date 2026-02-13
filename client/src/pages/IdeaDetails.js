@@ -58,6 +58,11 @@ export default function IdeaDetails() {
   });
   const [pitchStatus, setPitchStatus] = useState({ type: "", message: "" });
   const [pitchLoading, setPitchLoading] = useState(false);
+  const [deletedInfo, setDeletedInfo] = useState(null);
+  const [recoveryRequest, setRecoveryRequest] = useState(null);
+  const [recoveryReason, setRecoveryReason] = useState("");
+  const [recoverySubmitting, setRecoverySubmitting] = useState(false);
+  const apiBaseUrl = process.env.REACT_APP_API_URL || "";
   const socketUrl = (process.env.REACT_APP_API_URL || "http://localhost:5000").replace(
     /\/api\/?$/,
     ""
@@ -76,12 +81,52 @@ export default function IdeaDetails() {
 
   const loadIdea = useCallback(async () => {
     try {
-      const ideaData = await apiRequest(`/api/ideas/${id}`);
+      if (!currentUser) return false;
+      const token = currentUser ? await currentUser.getIdToken() : null;
+      const response = await fetch(`${apiBaseUrl}/api/ideas/${id}`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token ? `Bearer ${token}` : "",
+        },
+      });
+
+      if (response.status === 410) {
+        const data = await response.json();
+        setDeletedInfo({
+          reason: data?.deletionReason || "",
+          deletedAt: data?.deletedAt || "",
+        });
+        setRecoveryRequest(null);
+        setIdea(null);
+        return false;
+      }
+
+      if (!response.ok) {
+        throw new Error(`API request failed: ${response.status}`);
+      }
+
+      const ideaData = await response.json();
+      setDeletedInfo(null);
       setIdea(ideaData);
       setRating(ideaData.averageRating || 0);
       setInterestCount(ideaData.interestedUsers?.length || 0);
+      return true;
     } catch (error) {
       console.error("Error loading idea:", error);
+      return false;
+    }
+  }, [apiBaseUrl, id, currentUser]);
+
+  const loadRecoveryRequest = useCallback(async () => {
+    try {
+      const data = await apiRequest(`/api/recovery-requests/me?type=idea&ideaId=${id}`);
+      if (Array.isArray(data) && data.length > 0) {
+        setRecoveryRequest(data[0]);
+      } else {
+        setRecoveryRequest(null);
+      }
+    } catch (error) {
+      setRecoveryRequest(null);
     }
   }, [id]);
 
@@ -127,7 +172,8 @@ export default function IdeaDetails() {
   useEffect(() => {
     const loadInitial = async () => {
       await incrementViews();
-      await loadIdea();
+      const active = await loadIdea();
+      if (!active) return;
       loadComments();
       loadOffers();
       loadBookmarks();
@@ -136,12 +182,20 @@ export default function IdeaDetails() {
   }, [incrementViews, loadIdea, loadComments, loadOffers, loadBookmarks]);
 
   useEffect(() => {
+    if (!deletedInfo) return;
+    if (!currentUser) return;
+    loadRecoveryRequest();
+  }, [deletedInfo, currentUser, loadRecoveryRequest]);
+
+  useEffect(() => {
     const socket = io(socketUrl, { transports: ["websocket", "polling"] });
     socket.on("ideaUpdated", (ideaId) => {
       if (ideaId === id) {
-        loadIdea();
-        loadComments();
-        loadOffers();
+        loadIdea().then((active) => {
+          if (!active) return;
+          loadComments();
+          loadOffers();
+        });
       }
     });
     return () => socket.disconnect();
@@ -282,6 +336,27 @@ export default function IdeaDetails() {
     setPitchForm((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleRecoveryRequest = async () => {
+    if (!recoveryReason.trim()) return;
+    setRecoverySubmitting(true);
+    try {
+      const response = await apiRequest("/api/recovery-requests", {
+        method: "POST",
+        body: JSON.stringify({
+          type: "idea",
+          ideaId: id,
+          reason: recoveryReason.trim(),
+        }),
+      });
+      setRecoveryRequest(response?.request || null);
+      setRecoveryReason("");
+    } catch (error) {
+      // no-op
+    } finally {
+      setRecoverySubmitting(false);
+    }
+  };
+
   const handlePitchSubmit = async () => {
     if (!pitchForm.pitchMessage.trim()) {
       setPitchStatus({ type: "error", message: "Pitch message is required." });
@@ -309,6 +384,62 @@ export default function IdeaDetails() {
       setPitchLoading(false);
     }
   };
+
+  if (deletedInfo) {
+    return (
+      <div className="app-page idea-details-page">
+        <div className="app-container">
+          <div className="app-card idea-deleted-card">
+            <h2>Idea removed</h2>
+            <p className="idea-deleted-note">
+              This idea has been removed by an administrator.
+            </p>
+            {deletedInfo.reason ? (
+              <div className="idea-deleted-reason">
+                <span>Reason</span>
+                <p>{deletedInfo.reason}</p>
+              </div>
+            ) : null}
+            {deletedInfo.deletedAt ? (
+              <p className="idea-deleted-meta">
+                Removed on {new Date(deletedInfo.deletedAt).toLocaleString()}
+              </p>
+            ) : null}
+            <div className="idea-recovery">
+              <h3>Request recovery</h3>
+              {recoveryRequest ? (
+                <div className="idea-recovery-status">
+                  <span>Status</span>
+                  <p>{recoveryRequest.status}</p>
+                  {recoveryRequest.adminNote ? (
+                    <p className="idea-recovery-note">
+                      Admin note: {recoveryRequest.adminNote}
+                    </p>
+                  ) : null}
+                </div>
+              ) : (
+                <>
+                  <textarea
+                    className="app-textarea"
+                    placeholder="Explain why this idea should be restored"
+                    value={recoveryReason}
+                    onChange={(e) => setRecoveryReason(e.target.value)}
+                  />
+                  <button
+                    className="app-button"
+                    onClick={handleRecoveryRequest}
+                    disabled={!recoveryReason.trim() || recoverySubmitting}
+                  >
+                    {recoverySubmitting ? "Submitting..." : "Submit recovery request"}
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!idea) {
     return (

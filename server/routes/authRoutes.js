@@ -32,6 +32,8 @@ router.get("/me", verifyFirebaseToken, async (req, res) => {
     res.json({
       exists: true,
       role: user.role || "user",
+      deleted: Boolean(user.isDeleted),
+      deletionReason: user.deletionReason || "",
     });
   } catch (err) {
     console.error("auth/me error:", err);

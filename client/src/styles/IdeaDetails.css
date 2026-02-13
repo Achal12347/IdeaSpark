@@ -371,6 +371,73 @@
   color: #b91c1c;
 }
 
+.idea-deleted-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.idea-deleted-note {
+  margin: 0;
+  color: var(--app-muted);
+}
+
+.idea-deleted-reason {
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-md);
+  padding: 12px 14px;
+  background: var(--app-accent-soft);
+}
+
+.idea-deleted-reason span {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--app-muted);
+  font-weight: 600;
+}
+
+.idea-deleted-reason p {
+  margin: 6px 0 0;
+}
+
+.idea-deleted-meta {
+  margin: 0;
+  font-size: 13px;
+  color: var(--app-muted);
+}
+
+.idea-recovery {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.idea-recovery h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.idea-recovery-status {
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-md);
+  padding: 12px 14px;
+  background: var(--app-accent-soft);
+}
+
+.idea-recovery-status span {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--app-muted);
+  font-weight: 600;
+}
+
+.idea-recovery-note {
+  margin: 6px 0 0;
+  color: var(--app-muted);
+}
+
 @media (max-width: 720px) {
   .offer-header {
     flex-direction: column;

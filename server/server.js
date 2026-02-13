@@ -18,6 +18,7 @@ const contactRoutes = require("./routes/contactRoutes");
 const collaborationRoutes = require("./routes/collaborationRoutes");
 const adminMessageRoutes = require("./routes/adminMessageRoutes");
 const directMessageRoutes = require("./routes/directMessageRoutes");
+const recoveryRequestRoutes = require("./routes/recoveryRequestRoutes");
 
 // Create app FIRST
 const app = express();
@@ -64,6 +65,7 @@ app.use("/api/contact", contactRoutes);
 app.use("/api/collaboration", collaborationRoutes);
 app.use("/api/admin-messages", adminMessageRoutes);
 app.use("/api/direct-messages", directMessageRoutes);
+app.use("/api/recovery-requests", recoveryRequestRoutes);
 
 // Health check (IMPORTANT for Render debugging)
 app.get("/", (req, res) => {

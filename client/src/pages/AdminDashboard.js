@@ -87,13 +87,74 @@ export default function AdminDashboard() {
     hackathonId: "",
     content: "",
   });
+  const [deleteLoading, setDeleteLoading] = useState(false);
   const [adminMessages, setAdminMessages] = useState([]);
   const [hackathonAdminMessages, setHackathonAdminMessages] = useState([]);
   const [hackathonAdminDraft, setHackathonAdminDraft] = useState("");
   const [teams, setTeams] = useState([]);
   const [councilSelection, setCouncilSelection] = useState([]);
   const [hostSelection, setHostSelection] = useState("");
+  const [recoveryRequests, setRecoveryRequests] = useState([]);
   const navigate = useNavigate();
+
+  const handleDeleteUser = async (userId, reason) => {
+    if (!userId) return;
+    setDeleteLoading(true);
+    try {
+      await apiRequest(`/api/users/${userId}`, {
+        method: "DELETE",
+        body: JSON.stringify({ reason }),
+      });
+      setUsers((prev) => prev.filter((user) => user._id !== userId));
+      setStats((prev) => ({
+        ...prev,
+        totalUsers: Math.max(0, prev.totalUsers - 1),
+      }));
+      setSelectedUser(null);
+    } catch (error) {
+      console.error("Error deleting user:", error);
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  const handleDeleteIdea = async (ideaId) => {
+    if (!ideaId) return;
+    const reason = window.prompt("Reason for deleting this idea?");
+    if (!reason || !reason.trim()) return;
+    try {
+      await apiRequest(`/api/ideas/${ideaId}`, {
+        method: "DELETE",
+        body: JSON.stringify({ reason: reason.trim() }),
+      });
+      setIdeas((prev) => prev.filter((idea) => idea._id !== ideaId));
+      setStats((prev) => ({
+        ...prev,
+        totalIdeas: Math.max(0, prev.totalIdeas - 1),
+        pendingReviews: Math.max(0, prev.pendingReviews - 1),
+      }));
+    } catch (error) {
+      console.error("Error deleting idea:", error);
+    }
+  };
+
+  const handleRecoveryDecision = async (requestId, action) => {
+    try {
+      await apiRequest(`/api/recovery-requests/${requestId}/decide`, {
+        method: "POST",
+        body: JSON.stringify({ action }),
+      });
+      const updated = await apiRequest("/api/recovery-requests");
+      setRecoveryRequests(Array.isArray(updated) ? updated : []);
+      if (action === "approve") {
+        const [ideasData, usersData] = await Promise.all([fetchIdeas(), fetchAllUsers()]);
+        setIdeas(Array.isArray(ideasData) ? ideasData : []);
+        setUsers(Array.isArray(usersData) ? usersData : []);
+      }
+    } catch (error) {
+      console.error("Error updating recovery request:", error);
+    }
+  };
 
   useEffect(() => {
     const loadData = async () => {
@@ -106,6 +167,7 @@ export default function AdminDashboard() {
         ]);
         const analyticsData = await apiRequest("/api/analytics").catch(() => null);
         const hackathonData = await apiRequest("/api/hackathons").catch(() => []);
+        const recoveryData = await apiRequest("/api/recovery-requests").catch(() => []);
 
         const safeIdeas = Array.isArray(ideasData) ? ideasData : [];
         const safeUsers = Array.isArray(usersData) ? usersData : [];
@@ -115,6 +177,7 @@ export default function AdminDashboard() {
         setAdmins(Array.isArray(adminsData) ? adminsData : []);
         setAnalytics(analyticsData || null);
         setHackathons(Array.isArray(hackathonData) ? hackathonData : []);
+        setRecoveryRequests(Array.isArray(recoveryData) ? recoveryData : []);
 
         const todayLabel = new Date().toDateString();
         const activeToday = safeUsers.filter((user) => {
@@ -206,6 +269,10 @@ export default function AdminDashboard() {
         setSubmissions(Array.isArray(submissionsData) ? submissionsData : []);
       }
     });
+    socket.on("recoveryRequestUpdated", async () => {
+      const data = await apiRequest("/api/recovery-requests");
+      setRecoveryRequests(Array.isArray(data) ? data : []);
+    });
     return () => socket.disconnect();
   }, [selectedHackathon?._id]);
 
@@ -235,6 +302,8 @@ export default function AdminDashboard() {
                     variant="admin"
                     className="card"
                     onClick={() => navigate(`/idea/${idea._id}`)}
+                    actionLabel="Delete"
+                    onAction={() => handleDeleteIdea(idea._id)}
                   />
                 ))
               )}
@@ -750,6 +819,59 @@ export default function AdminDashboard() {
             )}
           </section>
         );
+      case "Recovery Requests":
+        return (
+          <section className="admin-content">
+            <h3>Recovery Requests</h3>
+            <p>Approve or reject account and idea recovery requests.</p>
+            <div className="admin-card stack">
+              {recoveryRequests.length === 0 ? (
+                <p>No recovery requests yet.</p>
+              ) : (
+                recoveryRequests.map((request) => (
+                  <div key={request._id} className="card recovery-card">
+                    <div className="recovery-header">
+                      <div>
+                        <h4>
+                          {request.type === "account" ? "Account recovery" : "Idea recovery"}
+                        </h4>
+                        <p>
+                          {request.requester?.name || request.requester?.email || "User"}
+                          {request.idea?.title ? ` · ${request.idea.title}` : ""}
+                        </p>
+                      </div>
+                      <span className={`recovery-status status-${request.status}`}>
+                        {request.status}
+                      </span>
+                    </div>
+                    <p className="recovery-reason">{request.reason}</p>
+                    <p className="recovery-meta">
+                      Requested on {new Date(request.createdAt).toLocaleString()}
+                    </p>
+                    {request.status === "pending" ? (
+                      <div className="recovery-actions">
+                        <button
+                          className="btn-primary"
+                          onClick={() => handleRecoveryDecision(request._id, "approve")}
+                        >
+                          Approve
+                        </button>
+                        <button onClick={() => handleRecoveryDecision(request._id, "reject")}>
+                          Reject
+                        </button>
+                      </div>
+                    ) : request.adminNote ? (
+                      <p className="recovery-admin-note">
+                        Admin note: {request.adminNote}
+                      </p>
+                    ) : null}
+                  </div>
+                ))
+              )}
+            </div>
+          </section>
+        );
+
       case "Admin Messages":
         return (
           <section className="admin-content">
@@ -1005,6 +1127,12 @@ export default function AdminDashboard() {
             >
               Admin Messages
             </button>
+            <button
+              onClick={() => setPageTitle("Recovery Requests")}
+              className={pageTitle === "Recovery Requests" ? "active" : ""}
+            >
+              Recovery Requests
+            </button>
             <button onClick={() => navigate("/analytics")}>Analytics</button>
             <button onClick={() => navigate("/reports")}>Reports</button>
           </nav>
@@ -1089,6 +1217,12 @@ export default function AdminDashboard() {
             >
               Admin Messages
             </button>
+            <button
+              onClick={() => setPageTitle("Recovery Requests")}
+              className={pageTitle === "Recovery Requests" ? "active" : ""}
+            >
+              Recovery Requests
+            </button>
             <button onClick={() => navigate("/analytics")}>Analytics</button>
             <button onClick={() => navigate("/reports")}>Reports</button>
           </nav>
@@ -1096,7 +1230,12 @@ export default function AdminDashboard() {
           {renderContent()}
         </div>
       </div>
-      <UserDetailsModal user={selectedUser} onClose={() => setSelectedUser(null)} />
+      <UserDetailsModal
+        user={selectedUser}
+        onClose={() => setSelectedUser(null)}
+        onDelete={handleDeleteUser}
+        deleteLoading={deleteLoading}
+      />
     </div>
   );
 }

@@ -136,3 +136,42 @@
   color: var(--app-ink);
   font-size: 14px;
 }
+
+.user-delete-block {
+  grid-column: 1 / -1;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-md);
+  padding: 12px 14px;
+  background: var(--app-accent-soft);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.user-delete-input {
+  width: 100%;
+  min-height: 90px;
+  padding: 10px 12px;
+  border-radius: var(--app-radius-md);
+  border: 1px solid var(--app-border);
+  background: var(--app-surface);
+  color: var(--app-ink);
+  font-family: "Manrope", "Segoe UI", sans-serif;
+  font-size: 13px;
+}
+
+.user-delete-btn {
+  align-self: flex-start;
+  border: 1px solid #fca5a5;
+  background: #fee2e2;
+  color: #991b1b;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.user-delete-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

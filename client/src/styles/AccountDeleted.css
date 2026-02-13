@@ -1,0 +1,96 @@
+.account-deleted-page {
+  display: flex;
+  align-items: center;
+}
+
+.account-deleted-card {
+  max-width: 640px;
+  margin: 0 auto;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.account-deleted-card h1 {
+  margin: 0;
+  font-size: 28px;
+}
+
+.account-deleted-note {
+  margin: 0;
+  color: var(--app-muted);
+}
+
+.account-deleted-reason {
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-md);
+  padding: 12px 14px;
+  background: var(--app-accent-soft);
+}
+
+.account-deleted-reason span {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--app-muted);
+  font-weight: 600;
+}
+
+.account-deleted-reason p {
+  margin: 6px 0 0;
+}
+
+.account-deleted-meta {
+  margin: 0;
+  font-size: 13px;
+  color: var(--app-muted);
+}
+
+.account-deleted-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.account-deleted-recovery {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.account-deleted-recovery h3 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.account-deleted-input {
+  width: 100%;
+  min-height: 110px;
+  padding: 12px 14px;
+  border-radius: var(--app-radius-md);
+  border: 1px solid var(--app-border);
+  background: var(--app-surface);
+  color: var(--app-ink);
+  font-family: "Manrope", "Segoe UI", sans-serif;
+}
+
+.account-deleted-status {
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-radius-md);
+  padding: 12px 14px;
+  background: var(--app-accent-soft);
+}
+
+.account-deleted-status span {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--app-muted);
+  font-weight: 600;
+}
+
+.account-deleted-admin-note {
+  margin: 6px 0 0;
+  color: var(--app-muted);
+}

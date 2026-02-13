@@ -11,6 +11,21 @@ const isOwnerOrCollaborator = (idea, userId) => {
   return Array.isArray(idea.collaborators)
     && idea.collaborators.some((collabId) => collabId.toString() === userId.toString());
 };
+const ensureIdeaActive = (idea, res) => {
+  if (!idea) {
+    res.status(404).json({ message: 'Idea not found' });
+    return false;
+  }
+  if (idea.isDeleted) {
+    res.status(410).json({
+      message: 'Idea has been removed',
+      deletionReason: idea.deletionReason || '',
+      deletedAt: idea.deletedAt,
+    });
+    return false;
+  }
+  return true;
+};
 
 exports.createIdea = async (req, res) => {
   try {
@@ -49,8 +64,8 @@ exports.createIdea = async (req, res) => {
 exports.getIdea = async (req, res) => {
   try {
     const idea = await Idea.findById(req.params.id).populate('author', 'name email');
-    if (!idea) {
-      return res.status(404).json({ message: 'Idea not found' });
+    if (!ensureIdeaActive(idea, res)) {
+      return;
     }
     res.json(idea);
   } catch (error) {
@@ -60,14 +75,15 @@ exports.getIdea = async (req, res) => {
 
 exports.incrementViews = async (req, res) => {
   try {
+    const existing = await Idea.findById(req.params.id);
+    if (!ensureIdeaActive(existing, res)) {
+      return;
+    }
     const idea = await Idea.findByIdAndUpdate(
       req.params.id,
       { $inc: { views: 1 }, $set: { updatedAt: new Date() } },
       { new: true }
     );
-    if (!idea) {
-      return res.status(404).json({ message: 'Idea not found' });
-    }
     const io = req.app?.get('io');
     if (io) {
       io.emit('ideaUpdated', idea._id.toString());
@@ -81,7 +97,7 @@ exports.incrementViews = async (req, res) => {
 
 exports.getIdeas = async (req, res) => {
   try {
-    const ideas = await Idea.find()
+    const ideas = await Idea.find({ isDeleted: { $ne: true } })
       .populate('author', 'name email')
       .sort({ createdAt: -1 });
     res.json(ideas);
@@ -92,7 +108,7 @@ exports.getIdeas = async (req, res) => {
 
 exports.getTrendingIdeas = async (req, res) => {
   try {
-    const ideas = await Idea.find()
+    const ideas = await Idea.find({ isDeleted: { $ne: true } })
       .populate('author', 'name email')
       .sort({ averageRating: -1, totalRatings: -1, views: -1, updatedAt: -1 })
       .limit(20);
@@ -108,7 +124,7 @@ exports.getMyIdeas = async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
-    const ideas = await Idea.find({ author: user._id });
+    const ideas = await Idea.find({ author: user._id, isDeleted: { $ne: true } });
     res.json(ideas);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching my ideas', error });
@@ -125,6 +141,7 @@ exports.getCollaboratorIdeas = async (req, res) => {
     const ideas = await Idea.find({
       collaborators: user._id,
       author: { $ne: user._id },
+      isDeleted: { $ne: true },
     }).populate('author', 'name email');
 
     res.json(ideas);
@@ -141,8 +158,8 @@ exports.getIdeaMessages = async (req, res) => {
     }
 
     const idea = await Idea.findById(req.params.id);
-    if (!idea) {
-      return res.status(404).json({ message: 'Idea not found' });
+    if (!ensureIdeaActive(idea, res)) {
+      return;
     }
 
     if (!isOwnerOrCollaborator(idea, user._id)) {
@@ -172,8 +189,8 @@ exports.postIdeaMessage = async (req, res) => {
     }
 
     const idea = await Idea.findById(req.params.id);
-    if (!idea) {
-      return res.status(404).json({ message: 'Idea not found' });
+    if (!ensureIdeaActive(idea, res)) {
+      return;
     }
 
     if (!isOwnerOrCollaborator(idea, user._id)) {
@@ -207,8 +224,8 @@ exports.pitchIdea = async (req, res) => {
     }
 
     const idea = await Idea.findById(id);
-    if (!idea) {
-      return res.status(404).json({ message: 'Idea not found' });
+    if (!ensureIdeaActive(idea, res)) {
+      return;
     }
 
     const isOwner = idea.author?.toString() === user._id.toString();
@@ -259,8 +276,8 @@ exports.rateIdea = async (req, res) => {
     }
 
     const idea = await Idea.findById(id);
-    if (!idea) {
-      return res.status(404).json({ message: 'Idea not found' });
+    if (!ensureIdeaActive(idea, res)) {
+      return;
     }
 
     const existingRating = idea.ratings.find(
@@ -304,8 +321,8 @@ exports.addComment = async (req, res) => {
     }
 
     const idea = await Idea.findById(id);
-    if (!idea) {
-      return res.status(404).json({ message: 'Idea not found' });
+    if (!ensureIdeaActive(idea, res)) {
+      return;
     }
 
     const newComment = new Comment({
@@ -328,6 +345,10 @@ exports.addComment = async (req, res) => {
 exports.getComments = async (req, res) => {
   try {
     const { id } = req.params;
+    const idea = await Idea.findById(id);
+    if (!ensureIdeaActive(idea, res)) {
+      return;
+    }
     const comments = await Comment.find({ idea: id }).populate('author', 'name email').sort({ createdAt: -1 });
     res.json(comments);
   } catch (error) {
@@ -350,8 +371,8 @@ exports.submitPitch = async (req, res) => {
     }
 
     const idea = await Idea.findById(id);
-    if (!idea) {
-      return res.status(404).json({ message: 'Idea not found' });
+    if (!ensureIdeaActive(idea, res)) {
+      return;
     }
 
     if (idea.fundingStatus === 'funded') {
@@ -399,8 +420,8 @@ exports.getPitches = async (req, res) => {
     const { id } = req.params;
     const user = await getUserByFirebaseUid(req.user.uid);
     const idea = await Idea.findById(id).populate('pitches.investor', 'name email username');
-    if (!idea) {
-      return res.status(404).json({ message: 'Idea not found' });
+    if (!ensureIdeaActive(idea, res)) {
+      return;
     }
 
     const isOwner = user && idea.author?.toString() === user._id.toString();
@@ -421,7 +442,10 @@ exports.getInvestorOffers = async (req, res) => {
       return res.status(403).json({ message: 'Investor role required.' });
     }
 
-    const ideas = await Idea.find({ 'pitches.investor': investorUser._id }).select('title pitches fundingStatus');
+    const ideas = await Idea.find({
+      'pitches.investor': investorUser._id,
+      isDeleted: { $ne: true },
+    }).select('title pitches fundingStatus');
 
     const offers = ideas.flatMap((idea) =>
       idea.pitches
@@ -447,8 +471,8 @@ exports.respondToPitch = async (req, res) => {
     const user = await getUserByFirebaseUid(req.user.uid);
 
     const idea = await Idea.findById(id);
-    if (!idea) {
-      return res.status(404).json({ message: 'Idea not found' });
+    if (!ensureIdeaActive(idea, res)) {
+      return;
     }
 
     const isOwner = user && idea.author?.toString() === user._id.toString();
@@ -510,8 +534,8 @@ exports.confirmPitch = async (req, res) => {
     }
 
     const idea = await Idea.findById(id);
-    if (!idea) {
-      return res.status(404).json({ message: 'Idea not found' });
+    if (!ensureIdeaActive(idea, res)) {
+      return;
     }
 
     const pitch = idea.pitches.id(pitchId);
@@ -565,8 +589,8 @@ exports.showInterest = async (req, res) => {
     }
 
     const idea = await Idea.findById(req.params.id);
-    if (!idea) {
-      return res.status(404).json({ message: 'Idea not found' });
+    if (!ensureIdeaActive(idea, res)) {
+      return;
     }
 
     if (!idea.interestedUsers) {
@@ -593,5 +617,44 @@ exports.showInterest = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ message: 'Error recording interest.' });
+  }
+};
+
+exports.deleteIdea = async (req, res) => {
+  try {
+    const requester = await User.findOne({ firebaseUID: req.user.uid });
+    if (!requester || requester.role !== 'admin') {
+      return res.status(403).json({ message: 'Unauthorized' });
+    }
+
+    const { reason } = req.body || {};
+    if (!reason || !reason.trim()) {
+      return res.status(400).json({ message: 'Deletion reason is required.' });
+    }
+
+    const idea = await Idea.findByIdAndUpdate(
+      req.params.id,
+      {
+        isDeleted: true,
+        deletionReason: reason.trim(),
+        deletedAt: new Date(),
+        deletedBy: requester._id,
+      },
+      { new: true }
+    );
+
+    if (!idea) {
+      return res.status(404).json({ message: 'Idea not found' });
+    }
+
+    const io = req.app?.get('io');
+    if (io) {
+      io.emit('ideaUpdated', idea._id.toString());
+      io.emit('ideasUpdated');
+    }
+
+    res.json({ message: 'Idea deleted', ideaId: idea._id.toString() });
+  } catch (error) {
+    res.status(500).json({ message: 'Error deleting idea', error });
   }
 };

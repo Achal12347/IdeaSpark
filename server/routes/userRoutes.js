@@ -16,7 +16,7 @@ router.get("/", verifyFirebaseToken, async (req, res) => {
       return res.status(403).json({ error: "Unauthorized" });
     }
 
-    const users = await User.find().select("-firebaseUID");
+    const users = await User.find({ isDeleted: { $ne: true } }).select("-firebaseUID");
     res.json(users);
   } catch (err) {
     console.error("Get users error:", err);
@@ -35,10 +35,61 @@ router.get("/admins", verifyFirebaseToken, async (req, res) => {
       return res.status(403).json({ error: "Unauthorized" });
     }
 
-    const admins = await User.find({ role: "admin" }).select("name email roles");
+    const admins = await User.find({ role: "admin", isDeleted: { $ne: true } }).select(
+      "name email roles"
+    );
     res.json(admins);
   } catch (err) {
     console.error("Get admins error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+/* ================================
+   Admin: delete user (soft delete)
+   DELETE /api/users/:id
+================================ */
+router.delete("/:id", verifyFirebaseToken, async (req, res) => {
+  try {
+    const requester = await User.findOne({ firebaseUID: req.user.uid });
+    if (!requester || requester.role !== "admin") {
+      return res.status(403).json({ error: "Unauthorized" });
+    }
+
+    const { id } = req.params;
+    const { reason } = req.body || {};
+    if (!reason || !reason.trim()) {
+      return res.status(400).json({ error: "Deletion reason is required." });
+    }
+
+    if (requester._id.toString() === id) {
+      return res.status(400).json({ error: "You cannot delete your own account." });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      id,
+      {
+        isDeleted: true,
+        deletionReason: reason.trim(),
+        deletedAt: new Date(),
+        deletedBy: requester._id,
+      },
+      { new: true }
+    );
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    const io = req.app?.get("io");
+    if (io) {
+      io.emit("userUpdated", { userId: user._id.toString() });
+      io.emit("membersUpdated");
+    }
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error("Delete user error:", err);
     res.status(500).json({ error: "Server error" });
   }
 });
@@ -142,9 +193,10 @@ router.get("/members", verifyFirebaseToken, async (req, res) => {
     });
     collaboratorIds.delete(user._id.toString());
 
-    const members = await User.find({ _id: { $ne: user._id } }).select(
-      "-firebaseUID"
-    );
+    const members = await User.find({
+      _id: { $ne: user._id },
+      isDeleted: { $ne: true },
+    }).select("-firebaseUID");
 
     const result = members.map((member) => ({
       ...member.toObject(),
@@ -170,7 +222,11 @@ router.get("/:uid/exists", verifyFirebaseToken, async (req, res) => {
     }
 
     const user = await User.findOne({ firebaseUID: req.user.uid });
-    res.json({ exists: !!user });
+    res.json({
+      exists: !!user,
+      deleted: Boolean(user?.isDeleted),
+      deletionReason: user?.deletionReason || "",
+    });
   } catch (err) {
     console.error("Profile exists error:", err);
     res.status(500).json({ error: "Server error" });
