@@ -64,6 +64,18 @@ export default function Analytics() {
             <p>{analytics.totalComments}</p>
           </div>
           <div className="metric-card app-card">
+            <h3>New Users (7d)</h3>
+            <p>{analytics.newUsersWeek || 0}</p>
+          </div>
+          <div className="metric-card app-card">
+            <h3>New Ideas (7d)</h3>
+            <p>{analytics.newIdeasWeek || 0}</p>
+          </div>
+          <div className="metric-card app-card">
+            <h3>Active Investors (7d)</h3>
+            <p>{analytics.activeInvestors || 0}</p>
+          </div>
+          <div className="metric-card app-card">
             <h3>Average Rating</h3>
             <p>{analytics.averageRating?.toFixed(1) || 'N/A'}</p>
           </div>

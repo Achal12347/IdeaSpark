@@ -87,6 +87,11 @@ const ideaSchema = new mongoose.Schema(
       equity: {
         type: Number,
       },
+      pipelineStatus: {
+        type: String,
+        enum: ['interested', 'meeting', 'negotiation', 'funded'],
+        default: 'interested',
+      },
       status: {
         type: String,
         enum: ['pending', 'owner_accepted', 'countered', 'rejected', 'funded'],

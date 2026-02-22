@@ -17,6 +17,7 @@ const {
   getInvestorOffers,
   respondToPitch,
   confirmPitch,
+  updatePitchPipeline,
   incrementViews,
   showInterest,
   deleteIdea,
@@ -72,6 +73,9 @@ router.post('/:id/pitches/:pitchId/respond', authenticateToken, respondToPitch);
 
 // POST /api/ideas/:id/pitches/:pitchId/confirm - Investor confirms
 router.post('/:id/pitches/:pitchId/confirm', authenticateToken, confirmPitch);
+
+// POST /api/ideas/:id/pitches/:pitchId/pipeline - Update pipeline status
+router.post('/:id/pitches/:pitchId/pipeline', authenticateToken, updatePitchPipeline);
 
 // POST /api/ideas/:id/views - Increment views for an idea
 router.post('/:id/views', incrementViews);

@@ -2,6 +2,7 @@ const express = require("express");
 const User = require("../models/User");
 const Idea = require("../models/Idea");
 const verifyFirebaseToken = require("../middleware/authMiddleware");
+const logActivity = require("../utils/logActivity");
 
 const router = express.Router();
 
@@ -331,6 +332,17 @@ router.post("/", verifyFirebaseToken, async (req, res) => {
       io.emit("userUpdated", { userId: user._id.toString() });
       io.emit("membersUpdated");
     }
+    await logActivity({
+      userId: user._id,
+      type: existingUser ? "profile_updated" : "profile_created",
+      title: existingUser ? "Profile updated" : "Profile setup complete",
+      message: existingUser
+        ? "Your profile information was updated."
+        : "Your profile is now live and ready.",
+      link: "/profile",
+      metadata: { userId: user._id, isNew: !existingUser },
+      io,
+    });
 
     res.status(200).json({
       success: true,

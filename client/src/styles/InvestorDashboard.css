@@ -208,6 +208,28 @@
   color: var(--dash-muted);
 }
 
+.offer-pipeline {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.offer-pipeline label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--dash-muted);
+  font-weight: 600;
+}
+
+.offer-pipeline select {
+  border: 1px solid var(--dash-border);
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: var(--dash-surface);
+  color: var(--dash-text);
+}
+
 .counter-summary {
   background: var(--dash-panel);
   border-radius: 12px;

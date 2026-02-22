@@ -28,6 +28,21 @@ const statusCopy = (status) => {
   }
 };
 
+const pipelineCopy = (status) => {
+  switch (status) {
+    case "interested":
+      return "Interested";
+    case "meeting":
+      return "Meeting";
+    case "negotiation":
+      return "Negotiation";
+    case "funded":
+      return "Funded";
+    default:
+      return "Interested";
+  }
+};
+
 export default function InvestorDashboard() {
   const navigate = useNavigate();
   const [selectedIdea, setSelectedIdea] = useState(null);
@@ -128,6 +143,22 @@ export default function InvestorDashboard() {
       refetchOffers();
     } catch (error) {
       setStatus({ type: "error", message: error.message || "Unable to confirm offer." });
+    }
+  };
+
+  const handlePipelineUpdate = async (offerItem, pipelineStatus) => {
+    try {
+      await apiRequest(
+        `/api/ideas/${offerItem.ideaId}/pitches/${offerItem.offer._id}/pipeline`,
+        {
+          method: "POST",
+          body: JSON.stringify({ pipelineStatus }),
+        }
+      );
+      refetchOffers();
+      refetchIdeas();
+    } catch (error) {
+      setStatus({ type: "error", message: error.message || "Unable to update pipeline." });
     }
   };
 
@@ -249,21 +280,38 @@ export default function InvestorDashboard() {
                   </div>
                   <div className="offer-meta">
                     <span>{statusCopy(item.offer.status)}</span>
+                    <span>Pipeline: {pipelineCopy(item.offer.pipelineStatus)}</span>
                     <span>
-                      Amount: {item.offer.amount ? `$${item.offer.amount}` : "ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â"}
+                      Amount: {item.offer.amount ? `$${item.offer.amount}` : "N/A"}
                     </span>
                     <span>
-                      Equity: {item.offer.equity ? `${item.offer.equity}%` : "ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â"}
+                      Equity: {item.offer.equity ? `${item.offer.equity}%` : "N/A"}
                     </span>
                   </div>
+                  {canInvest ? (
+                    <div className="offer-pipeline">
+                      <label>Pipeline stage</label>
+                      <select
+                        value={item.offer.pipelineStatus || "interested"}
+                        onChange={(event) =>
+                          handlePipelineUpdate(item, event.target.value)
+                        }
+                      >
+                        <option value="interested">Interested</option>
+                        <option value="meeting">Meeting</option>
+                        <option value="negotiation">Negotiation</option>
+                        <option value="funded">Funded</option>
+                      </select>
+                    </div>
+                  ) : null}
                   {item.offer.counterOffer ? (
                     <div className="counter-summary">
                       <p>Counter offer</p>
                       <span>
-                        Amount: {item.offer.counterOffer.amount ? `$${item.offer.counterOffer.amount}` : "ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â"}
+                        Amount: {item.offer.counterOffer.amount ? `$${item.offer.counterOffer.amount}` : "N/A"}
                       </span>
                       <span>
-                        Equity: {item.offer.counterOffer.equity ? `${item.offer.counterOffer.equity}%` : "ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â"}
+                        Equity: {item.offer.counterOffer.equity ? `${item.offer.counterOffer.equity}%` : "N/A"}
                       </span>
                       <span>{item.offer.counterOffer.message}</span>
                     </div>
@@ -282,3 +330,4 @@ export default function InvestorDashboard() {
     </div>
   );
 }
+

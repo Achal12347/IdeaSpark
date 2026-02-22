@@ -9,7 +9,6 @@ export default function Unauthorized() {
   const [ideas, setIdeas] = useState([]);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [promptIdea, setPromptIdea] = useState(null);
 
   useEffect(() => {
     const loadPublic = async () => {
@@ -39,7 +38,7 @@ export default function Unauthorized() {
   }, []);
 
   const handleIdeaClick = (idea) => {
-    setPromptIdea(idea);
+    navigate(`/idea/${idea._id}/preview`);
   };
 
   return (
@@ -101,21 +100,6 @@ export default function Unauthorized() {
         )}
       </div>
 
-      {promptIdea ? (
-        <div className="unauthorized-overlay" onClick={() => setPromptIdea(null)}>
-          <div className="unauthorized-modal" onClick={(e) => e.stopPropagation()}>
-            <h3>Sign in to view details</h3>
-            <p>
-              Create an account to view full idea details, connect with founders,
-              and start collaborating.
-            </p>
-            <div className="unauthorized-actions">
-              <button className="app-button" onClick={() => navigate("/signup")}>Sign up</button>
-              <button className="app-button-secondary" onClick={() => navigate("/login")}>Log in</button>
-            </div>
-          </div>
-        </div>
-      ) : null}
     </div>
   );
 }

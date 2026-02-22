@@ -1117,6 +1117,18 @@ export default function AdminDashboard() {
                 <p>{stats.avgIdeasPerUser}</p>
               </div>
               <div className="stat-card card">
+                <h4>New Users (7d)</h4>
+                <p>{analytics?.newUsersWeek || 0}</p>
+              </div>
+              <div className="stat-card card">
+                <h4>New Ideas (7d)</h4>
+                <p>{analytics?.newIdeasWeek || 0}</p>
+              </div>
+              <div className="stat-card card">
+                <h4>Active Investors (7d)</h4>
+                <p>{analytics?.activeInvestors || 0}</p>
+              </div>
+              <div className="stat-card card">
                 <h4>Active Today</h4>
                 <p>{stats.activeToday}</p>
               </div>

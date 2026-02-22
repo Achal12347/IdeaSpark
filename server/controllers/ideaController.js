@@ -2,6 +2,7 @@ const Idea = require('../models/Idea');
 const Comment = require('../models/Comment');
 const User = require('../models/User');
 const IdeaMessage = require('../models/IdeaMessage');
+const logActivity = require('../utils/logActivity');
 
 const getUserByFirebaseUid = (uid) => User.findOne({ firebaseUID: uid });
 const isInvestor = (user) => Array.isArray(user?.roles) && user.roles.includes('Investor');
@@ -51,7 +52,22 @@ exports.createIdea = async (req, res) => {
     });
 
     await newIdea.save();
+    const ideaCount = await Idea.countDocuments({ author: user._id, isDeleted: { $ne: true } });
+    const isFirstIdea = ideaCount === 1;
     const io = req.app?.get('io');
+    const fundingNote =
+      newIdea.estimatedBudget || newIdea.equityShare ? " and seeking funding" : "";
+    await logActivity({
+      userId: user._id,
+      type: 'idea_created',
+      title: isFirstIdea ? 'Posted your first idea' : 'Posted a new idea',
+      message: newIdea.title
+        ? `"${newIdea.title}" is now live${fundingNote}.`
+        : `Your idea is now live${fundingNote}.`,
+      link: '/my-ideas',
+      metadata: { ideaId: newIdea._id, firstIdea: isFirstIdea },
+      io,
+    });
     if (io) {
       io.emit('ideasUpdated');
     }
@@ -250,6 +266,15 @@ exports.pitchIdea = async (req, res) => {
 
     await idea.save();
     const io = req.app?.get('io');
+    await logActivity({
+      userId: user._id,
+      type: 'idea_pitched',
+      title: 'Idea pitched to investors',
+      message: idea.title ? `You pitched "${idea.title}" to investors.` : 'You pitched your idea.',
+      link: '/investors',
+      metadata: { ideaId: idea._id },
+      io,
+    });
     if (io) {
       io.emit('ideaUpdated', idea._id.toString());
       io.emit('ideasUpdated');
@@ -296,6 +321,19 @@ exports.rateIdea = async (req, res) => {
 
     await idea.save();
     const io = req.app?.get('io');
+    if (idea.author) {
+      await logActivity({
+        userId: idea.author,
+        type: 'investor_offer_received',
+        title: 'New investor offer',
+        message: idea.title
+          ? `A new offer was submitted for "${idea.title}".`
+          : 'A new investor offer was submitted.',
+        link: `/idea/${idea._id}`,
+        metadata: { ideaId: idea._id },
+        io,
+      });
+    }
     if (io) {
       io.emit('ideaUpdated', idea._id.toString());
       io.emit('ideasUpdated');
@@ -399,12 +437,55 @@ exports.submitPitch = async (req, res) => {
         pitchContent: pitchContent.trim(),
         amount: normalizedAmount,
         equity: normalizedEquity,
+        pipelineStatus: 'interested',
         status: 'pending',
         createdAt: new Date(),
       });
     }
     await idea.save();
     const io = req.app?.get('io');
+    await logActivity({
+      userId: pitch.investor,
+      type: 'offer_response',
+      title:
+        action === 'accept'
+          ? 'Offer accepted by idea owner'
+          : action === 'reject'
+            ? 'Offer rejected by idea owner'
+            : 'Counter offer received',
+      message: idea.title
+        ? `Update on your offer for "${idea.title}".`
+        : 'Your offer has an update.',
+      link: `/idea/${idea._id}`,
+      metadata: { ideaId: idea._id, pitchId: pitch._id, action },
+      io,
+    });
+    if (['accept', 'counter'].includes(action)) {
+      const pipelineStatus = pitch.pipelineStatus || 'interested';
+      const statusLabel = pipelineStatus.replace(/_/g, ' ');
+      await logActivity({
+        userId: idea.author,
+        type: 'pipeline_updated',
+        title: 'Investment pipeline updated',
+        message: idea.title
+          ? `"${idea.title}" moved to ${statusLabel}.`
+          : `Pipeline moved to ${statusLabel}.`,
+        link: `/idea/${idea._id}`,
+        metadata: { ideaId: idea._id, pitchId: pitch._id, pipelineStatus },
+        io,
+      });
+      await logActivity({
+        userId: pitch.investor,
+        type: 'pipeline_updated',
+        title: 'Investment pipeline updated',
+        message: idea.title
+          ? `"${idea.title}" moved to ${statusLabel}.`
+          : `Pipeline moved to ${statusLabel}.`,
+        link: `/idea/${idea._id}`,
+        metadata: { ideaId: idea._id, pitchId: pitch._id, pipelineStatus },
+        io,
+      });
+    }
     if (io) {
       io.emit('ideaUpdated', idea._id.toString());
       io.emit('ideasUpdated');
@@ -488,6 +569,7 @@ exports.respondToPitch = async (req, res) => {
     if (action === 'accept') {
       pitch.status = 'owner_accepted';
       pitch.updatedAt = new Date();
+      pitch.pipelineStatus = 'meeting';
     } else if (action === 'reject') {
       pitch.status = 'rejected';
       pitch.updatedAt = new Date();
@@ -508,12 +590,57 @@ exports.respondToPitch = async (req, res) => {
         createdAt: new Date(),
       };
       pitch.updatedAt = new Date();
+      pitch.pipelineStatus = 'negotiation';
     } else {
       return res.status(400).json({ message: 'Invalid action.' });
     }
 
     await idea.save();
     const io = req.app?.get('io');
+    await logActivity({
+      userId: idea.author,
+      type: 'idea_funded',
+      title: 'Idea funded',
+      message: idea.title
+        ? `"${idea.title}" has been funded.`
+        : 'Your idea has been funded.',
+      link: `/idea/${idea._id}`,
+      metadata: { ideaId: idea._id, pitchId: pitch._id },
+      io,
+    });
+    await logActivity({
+      userId: investorUser._id,
+      type: 'investment_confirmed',
+      title: 'Investment confirmed',
+      message: idea.title
+        ? `You are now collaborating on "${idea.title}".`
+        : 'Your investment was confirmed.',
+      link: `/idea/${idea._id}`,
+      metadata: { ideaId: idea._id, pitchId: pitch._id },
+      io,
+    });
+    await logActivity({
+      userId: idea.author,
+      type: 'pipeline_updated',
+      title: 'Investment pipeline updated',
+      message: idea.title
+        ? `"${idea.title}" moved to funded.`
+        : 'Pipeline moved to funded.',
+      link: `/idea/${idea._id}`,
+      metadata: { ideaId: idea._id, pitchId: pitch._id, pipelineStatus: 'funded' },
+      io,
+    });
+    await logActivity({
+      userId: investorUser._id,
+      type: 'pipeline_updated',
+      title: 'Investment pipeline updated',
+      message: idea.title
+        ? `"${idea.title}" moved to funded.`
+        : 'Pipeline moved to funded.',
+      link: `/idea/${idea._id}`,
+      metadata: { ideaId: idea._id, pitchId: pitch._id, pipelineStatus: 'funded' },
+      io,
+    });
     if (io) {
       io.emit('ideaUpdated', idea._id.toString());
       io.emit('ideasUpdated');
@@ -553,6 +680,7 @@ exports.confirmPitch = async (req, res) => {
 
     pitch.status = 'funded';
     pitch.updatedAt = new Date();
+    pitch.pipelineStatus = 'funded';
     idea.fundingStatus = 'funded';
 
     if (!idea.collaborators) {
@@ -578,6 +706,85 @@ exports.confirmPitch = async (req, res) => {
     res.json({ message: 'Idea funded successfully.', offer: pitch });
   } catch (error) {
     res.status(500).json({ message: 'Error confirming offer.' });
+  }
+};
+
+exports.updatePitchPipeline = async (req, res) => {
+  try {
+    const { id, pitchId } = req.params;
+    const { pipelineStatus } = req.body;
+    const user = await getUserByFirebaseUid(req.user.uid);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const idea = await Idea.findById(id);
+    if (!ensureIdeaActive(idea, res)) {
+      return;
+    }
+
+    const pitch = idea.pitches.id(pitchId);
+    if (!pitch) {
+      return res.status(404).json({ message: 'Offer not found' });
+    }
+
+    const isOwner = idea.author?.toString() === user._id.toString();
+    const isPitchInvestor = pitch.investor?.toString() === user._id.toString();
+    if (!isOwner && !isPitchInvestor) {
+      return res.status(403).json({ message: 'Not authorized to update pipeline.' });
+    }
+
+    const allowed = ['interested', 'meeting', 'negotiation', 'funded'];
+    if (!allowed.includes(pipelineStatus)) {
+      return res.status(400).json({ message: 'Invalid pipeline status.' });
+    }
+
+    if (pipelineStatus === 'funded' && pitch.status !== 'funded') {
+      return res.status(400).json({ message: 'Pipeline can be funded only after confirmation.' });
+    }
+
+    pitch.pipelineStatus = pipelineStatus;
+    pitch.updatedAt = new Date();
+    await idea.save();
+
+    const statusLabel = pipelineStatus.replace(/_/g, ' ');
+    const io = req.app?.get('io');
+    if (idea.author) {
+      await logActivity({
+        userId: idea.author,
+        type: 'pipeline_updated',
+        title: 'Investment pipeline updated',
+        message: idea.title
+          ? `"${idea.title}" moved to ${statusLabel}.`
+          : `Pipeline moved to ${statusLabel}.`,
+        link: `/idea/${idea._id}`,
+        metadata: { ideaId: idea._id, pitchId: pitch._id, pipelineStatus },
+        io,
+      });
+    }
+    if (pitch.investor) {
+      await logActivity({
+        userId: pitch.investor,
+        type: 'pipeline_updated',
+        title: 'Investment pipeline updated',
+        message: idea.title
+          ? `"${idea.title}" moved to ${statusLabel}.`
+          : `Pipeline moved to ${statusLabel}.`,
+        link: `/idea/${idea._id}`,
+        metadata: { ideaId: idea._id, pitchId: pitch._id, pipelineStatus },
+        io,
+      });
+    }
+
+    if (io) {
+      io.emit('ideaUpdated', idea._id.toString());
+      io.emit('ideasUpdated');
+    }
+
+    res.json({ message: 'Pipeline updated', offer: pitch });
+  } catch (error) {
+    res.status(500).json({ message: 'Error updating pipeline.' });
   }
 };
 

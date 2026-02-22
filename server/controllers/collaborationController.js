@@ -1,6 +1,7 @@
 const CollaborationRequest = require("../models/CollaborationRequest");
 const Idea = require("../models/Idea");
 const User = require("../models/User");
+const logActivity = require("../utils/logActivity");
 
 const getUserByFirebaseUid = (uid) => User.findOne({ firebaseUID: uid });
 
@@ -68,6 +69,28 @@ exports.createRequest = async (req, res) => {
       message: message ? message.trim() : "",
     });
     const io = req.app?.get("io");
+    await logActivity({
+      userId: requester._id,
+      type: "collaboration_request_sent",
+      title: "Collaboration request sent",
+      message: idea?.title
+        ? `You requested to collaborate on "${idea.title}".`
+        : `You sent a collaboration request to ${recipient.name || recipient.email}.`,
+      link: "/activity",
+      metadata: { requestId: newRequest._id, ideaId: idea?._id },
+      io,
+    });
+    await logActivity({
+      userId: recipient._id,
+      type: "collaboration_request_received",
+      title: "New collaboration request",
+      message: idea?.title
+        ? `${requester.name || requester.email} wants to collaborate on "${idea.title}".`
+        : `${requester.name || requester.email} sent you a collaboration request.`,
+      link: "/activity",
+      metadata: { requestId: newRequest._id, ideaId: idea?._id },
+      io,
+    });
     if (io) {
       io.emit("collaborationRequest", {
         recipient: recipient._id.toString(),
@@ -136,6 +159,31 @@ exports.respondToRequest = async (req, res) => {
     request.status = action === "accept" ? "accepted" : "rejected";
     request.respondedAt = new Date();
     await request.save();
+    const ideaDoc = request.idea ? await Idea.findById(request.idea).select("title") : null;
+    const ideaTitle = ideaDoc?.title;
+    const io = req.app?.get("io");
+    await logActivity({
+      userId: request.requester,
+      type: action === "accept" ? "collaboration_accepted" : "collaboration_rejected",
+      title: action === "accept" ? "Collaboration accepted" : "Collaboration rejected",
+      message: ideaTitle
+        ? `Your collaboration request for "${ideaTitle}" was ${action}ed.`
+        : `Your collaboration request was ${action}ed.`,
+      link: "/activity",
+      metadata: { requestId: request._id, action },
+      io,
+    });
+    await logActivity({
+      userId: request.recipient,
+      type: action === "accept" ? "collaboration_confirmed" : "collaboration_rejected",
+      title: action === "accept" ? "You accepted a collaboration" : "You rejected a collaboration",
+      message: ideaTitle
+        ? `You ${action}ed a collaboration for "${ideaTitle}".`
+        : `You ${action}ed a collaboration request.`,
+      link: "/activity",
+      metadata: { requestId: request._id, action },
+      io,
+    });
 
     if (action === "accept" && request.idea) {
       const idea = await Idea.findById(request.idea);
@@ -149,6 +197,17 @@ exports.respondToRequest = async (req, res) => {
         if (!idea.collaborators.find((id) => id.toString() === collaboratorId.toString())) {
           idea.collaborators.push(collaboratorId);
           await idea.save();
+          await logActivity({
+            userId: collaboratorId,
+            type: "collaboration_added",
+            title: "Added as collaborator",
+            message: idea.title
+              ? `You are now a collaborator on "${idea.title}".`
+              : "You were added as a collaborator.",
+            link: `/idea/${idea._id}`,
+            metadata: { ideaId: idea._id },
+            io,
+          });
         }
       }
     }

@@ -1,5 +1,6 @@
 const DirectMessage = require("../models/DirectMessage");
 const User = require("../models/User");
+const logActivity = require("../utils/logActivity");
 
 const getUserByFirebaseUid = (uid) => User.findOne({ firebaseUID: uid });
 
@@ -92,6 +93,17 @@ exports.sendMessage = async (req, res) => {
     await message.populate("sender", "name email");
     await message.populate("recipient", "name email");
     const io = req.app?.get("io");
+    await logActivity({
+      userId: recipient._id,
+      type: "direct_message_received",
+      title: "New private message",
+      message: user.name
+        ? `Message from ${user.name}.`
+        : `Message from ${user.email || "a user"}.`,
+      link: "/messages",
+      metadata: { senderId: user._id, messageId: message._id },
+      io,
+    });
     if (io) {
       io.emit("directMessage", message);
     }

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import apiRequest from "../services/api";
@@ -26,6 +26,21 @@ const statusLabel = (status) => {
       return "Rejected";
     default:
       return "Unknown";
+  }
+};
+
+const pipelineLabel = (status) => {
+  switch (status) {
+    case "interested":
+      return "Interested";
+    case "meeting":
+      return "Meeting";
+    case "negotiation":
+      return "Negotiation";
+    case "funded":
+      return "Funded";
+    default:
+      return "Interested";
   }
 };
 
@@ -67,6 +82,23 @@ export default function IdeaDetails() {
     /\/api\/?$/,
     ""
   );
+  const ratingBreakdown = useMemo(() => {
+    if (!idea?.ratings) {
+      return [0, 0, 0, 0, 0];
+    }
+    const buckets = [0, 0, 0, 0, 0];
+    idea.ratings.forEach((entry) => {
+      const value = Math.round(Number(entry.rating || 0));
+      if (value >= 1 && value <= 5) {
+        buckets[value - 1] += 1;
+      }
+    });
+    return buckets;
+  }, [idea?.ratings]);
+  const totalRatings = idea?.totalRatings || ratingBreakdown.reduce((sum, count) => sum + count, 0);
+  const effectiveRating = userRating || rating;
+  const ratingTone =
+    effectiveRating > 3 ? "is-high" : effectiveRating > 0 && effectiveRating < 3 ? "is-low" : "";
 
   const incrementViews = useCallback(async () => {
     try {
@@ -265,6 +297,19 @@ export default function IdeaDetails() {
       setIdea(ideaData);
     } catch (error) {
       console.error("Error updating offer:", error);
+    }
+  };
+
+  const handlePipelineUpdate = async (offerId, pipelineStatus) => {
+    try {
+      await apiRequest(`/api/ideas/${id}/pitches/${offerId}/pipeline`, {
+        method: "POST",
+        body: JSON.stringify({ pipelineStatus }),
+      });
+      const offerData = await apiRequest(`/api/ideas/${id}/pitches`);
+      setOffers(offerData);
+    } catch (error) {
+      console.error("Error updating pipeline:", error);
     }
   };
 
@@ -549,7 +594,8 @@ export default function IdeaDetails() {
             <h3>
               Rating: {rating.toFixed(1)} ({idea.totalRatings || 0} ratings)
             </h3>
-            <div className="star-rating">
+            <p className="rating-helper">Tap a star to rate this idea.</p>
+            <div className={`star-rating ${ratingTone}`.trim()}>
               {[1, 2, 3, 4, 5].map((star) => (
                 <span
                   key={star}
@@ -559,6 +605,21 @@ export default function IdeaDetails() {
                   *
                 </span>
               ))}
+            </div>
+            <div className="rating-breakdown">
+              {[5, 4, 3, 2, 1].map((score) => {
+                const count = ratingBreakdown[score - 1] || 0;
+                const percent = totalRatings ? Math.round((count / totalRatings) * 100) : 0;
+                return (
+                  <div key={score} className="rating-row">
+                    <span>{score}★</span>
+                    <div className="rating-bar">
+                      <span style={{ width: `${percent}%` }} />
+                    </div>
+                    <span>{count}</span>
+                  </div>
+                );
+              })}
             </div>
           </section>
 
@@ -661,6 +722,7 @@ export default function IdeaDetails() {
                   <div className="offer-meta">
                     <span>Amount: {offer.amount ? `$${offer.amount}` : "N/A"}</span>
                     <span>Equity: {offer.equity ? `${offer.equity}%` : "N/A"}</span>
+                    <span>Pipeline: {pipelineLabel(offer.pipelineStatus)}</span>
                   </div>
                   {offer.counterOffer ? (
                     <div className="counter-block">
@@ -725,6 +787,23 @@ export default function IdeaDetails() {
                           Send counter
                         </button>
                       </div>
+                    </div>
+                  ) : null}
+                  {isOwner ? (
+                    <div className="offer-actions pipeline-actions">
+                      <label className="pipeline-label">Pipeline stage</label>
+                      <select
+                        className="app-input"
+                        value={offer.pipelineStatus || "interested"}
+                        onChange={(event) =>
+                          handlePipelineUpdate(offer._id, event.target.value)
+                        }
+                      >
+                        <option value="interested">Interested</option>
+                        <option value="meeting">Meeting</option>
+                        <option value="negotiation">Negotiation</option>
+                        <option value="funded">Funded</option>
+                      </select>
                     </div>
                   ) : null}
                 </div>

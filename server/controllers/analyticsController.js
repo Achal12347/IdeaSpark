@@ -72,6 +72,25 @@ exports.getAnalytics = async (req, res) => {
     // Total connections (accepted collaborations)
     const totalConnections = await CollaborationRequest.countDocuments({ status: 'accepted' });
 
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+
+    const newUsersWeek = await User.countDocuments({
+      isDeleted: { $ne: true },
+      createdAt: { $gte: weekAgo },
+    });
+
+    const newIdeasWeek = await Idea.countDocuments({
+      isDeleted: { $ne: true },
+      createdAt: { $gte: weekAgo },
+    });
+
+    const activeInvestors = await User.countDocuments({
+      roles: { $in: ['Investor'] },
+      isDeleted: { $ne: true },
+      updatedAt: { $gte: weekAgo },
+    });
+
     res.json({
       totalIdeas,
       totalUsers,
@@ -85,6 +104,9 @@ exports.getAnalytics = async (req, res) => {
       totalInvestors,
       totalInvestment,
       totalConnections,
+      newUsersWeek,
+      newIdeasWeek,
+      activeInvestors,
     });
   } catch (error) {
     res.status(500).json({ message: 'Error fetching analytics', error });

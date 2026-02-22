@@ -3,9 +3,10 @@ import { auth } from "../firebase";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useGetIdeasQuery } from "../store/apiSlice";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import io from "socket.io-client";
 import IdeaCard from "../components/IdeaCard";
+import apiRequest from "../services/api";
 import "../styles/dashboardTheme.css";
 import "../styles/Dashboard.css";
 
@@ -13,6 +14,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { currentUser, loading: authLoading } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
+  const [messageNotifications, setMessageNotifications] = useState([]);
   const { data: ideas = [], isLoading: loadingIdeas, refetch } = useGetIdeasQuery(
     undefined,
     {
@@ -28,14 +30,36 @@ export default function Dashboard() {
     ""
   );
 
+  const loadMessageNotifications = useCallback(async () => {
+    if (authLoading || !currentUser) return;
+    try {
+      const data = await apiRequest(
+        "/api/activity?type=direct_message_received&undismissed=true&limit=10"
+      );
+      setMessageNotifications(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Unable to load notifications:", error);
+    }
+  }, [authLoading, currentUser]);
+
   useEffect(() => {
     if (authLoading || !currentUser) return;
     const socket = io(socketUrl, { transports: ["websocket", "polling"] });
     socket.on("ideasUpdated", () => {
       refetch();
     });
+    socket.on("directMessage", () => {
+      loadMessageNotifications();
+    });
+    socket.on("activityUpdated", () => {
+      loadMessageNotifications();
+    });
     return () => socket.disconnect();
-  }, [authLoading, currentUser, refetch, socketUrl]);
+  }, [authLoading, currentUser, refetch, socketUrl, loadMessageNotifications]);
+
+  useEffect(() => {
+    loadMessageNotifications();
+  }, [loadMessageNotifications]);
 
   const handleLogout = async () => {
     navigate("/");
@@ -152,6 +176,37 @@ export default function Dashboard() {
 
           {/* Feed */}
           <section className="feed">
+            {messageNotifications.length > 0 ? (
+              <div className="dashboard-notification">
+                <div>
+                  <h4>
+                    {messageNotifications.length === 1
+                      ? "You have a new private message"
+                      : `You have ${messageNotifications.length} new private messages`}
+                  </h4>
+                  <p>Please check the Messages page to respond.</p>
+                </div>
+                <div className="dashboard-notification-actions">
+                  <button
+                    className="btn-primary"
+                    onClick={() => navigate("/messages")}
+                  >
+                    Open Messages
+                  </button>
+                  <button
+                    onClick={async () => {
+                      await apiRequest("/api/activity/dismiss", {
+                        method: "POST",
+                        body: JSON.stringify({ type: "direct_message_received" }),
+                      });
+                      setMessageNotifications([]);
+                    }}
+                  >
+                    Dismiss
+                  </button>
+                </div>
+              </div>
+            ) : null}
             <div className="section-title">
               <h3>Idea Feed</h3>
               <span className="section-subtitle">Latest ideas from the community</span>
