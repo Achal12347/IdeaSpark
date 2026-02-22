@@ -1,0 +1,101 @@
+.unauthorized-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+  gap: 20px;
+}
+
+.unauthorized-ideas h3 {
+  margin: 0 0 12px;
+}
+
+.unauthorized-users {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.unauthorized-note {
+  margin: 0;
+  color: var(--app-muted);
+  font-size: 13px;
+}
+
+.unauthorized-user-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.unauthorized-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--app-radius-md);
+  border: 1px solid var(--app-border);
+  background: var(--app-surface);
+}
+
+.unauthorized-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--app-accent);
+  color: var(--app-surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+.unauthorized-user-name {
+  margin: 0 0 4px;
+  font-weight: 600;
+}
+
+.unauthorized-user-role {
+  margin: 0;
+  color: var(--app-muted);
+  font-size: 12px;
+}
+
+.unauthorized-loading {
+  padding: 30px;
+  text-align: center;
+  color: var(--app-muted);
+}
+
+.unauthorized-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 70;
+}
+
+.unauthorized-modal {
+  background: var(--app-surface);
+  border-radius: var(--app-radius-lg);
+  border: 1px solid var(--app-border);
+  padding: 20px;
+  max-width: 420px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.unauthorized-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 900px) {
+  .unauthorized-grid {
+    grid-template-columns: 1fr;
+  }
+}

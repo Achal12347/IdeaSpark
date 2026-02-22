@@ -123,6 +123,11 @@ const LandingPage = () => {
             <p>Private spaces for mentors, investors, and founding teams.</p>
           </div>
         </div>
+        <div className="section-actions">
+          <Link to="/explore" className="ghost-btn">
+            View live ideas
+          </Link>
+        </div>
       </section>
 
       <section className="section split">

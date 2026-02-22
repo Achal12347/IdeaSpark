@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useGetIdeasQuery } from "../store/apiSlice";
 import io from "socket.io-client";
@@ -25,6 +25,14 @@ export default function Ideas() {
     return () => socket.disconnect();
   }, [refetch, socketUrl]);
 
+  const sortedIdeas = useMemo(() => {
+    return [...ideas].sort((a, b) => {
+      const aTime = a?.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const bTime = b?.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return bTime - aTime;
+    });
+  }, [ideas]);
+
   return (
     <div className="app-page ideas-page">
       <div className="app-container">
@@ -50,7 +58,7 @@ export default function Ideas() {
           </div>
         ) : (
           <div className="ideas-grid app-grid">
-            {ideas.map((idea) => (
+            {sortedIdeas.map((idea) => (
               <IdeaCard
                 key={idea._id}
                 idea={idea}

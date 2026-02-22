@@ -3,7 +3,7 @@ import { auth } from "../firebase";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useGetIdeasQuery } from "../store/apiSlice";
-import { useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
 import io from "socket.io-client";
 import IdeaCard from "../components/IdeaCard";
 import "../styles/dashboardTheme.css";
@@ -12,6 +12,7 @@ import "../styles/Dashboard.css";
 export default function Dashboard() {
   const navigate = useNavigate();
   const { currentUser, loading: authLoading } = useAuth();
+  const [searchTerm, setSearchTerm] = useState("");
   const { data: ideas = [], isLoading: loadingIdeas, refetch } = useGetIdeasQuery(
     undefined,
     {
@@ -40,6 +41,24 @@ export default function Dashboard() {
     navigate("/");
     await signOut(auth);
   };
+
+  const normalizedSearch = searchTerm.trim().toLowerCase();
+  const sortedIdeas = useMemo(() => {
+    return [...ideas].sort((a, b) => {
+      const aTime = a?.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const bTime = b?.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return bTime - aTime;
+    });
+  }, [ideas]);
+  const filteredIdeas = useMemo(() => {
+    if (!normalizedSearch) return sortedIdeas;
+    return sortedIdeas.filter((idea) => {
+      const tags = Array.isArray(idea.tags) ? idea.tags.join(" ") : "";
+      const author = idea.author?.name || idea.author?.email || "";
+      const haystack = `${idea.title || ""} ${idea.problemStatement || ""} ${idea.solutionDescription || ""} ${tags} ${author}`.toLowerCase();
+      return haystack.includes(normalizedSearch);
+    });
+  }, [normalizedSearch, sortedIdeas]);
 
   const profileName =
     currentUser?.displayName || currentUser?.email || "Profile";
@@ -78,7 +97,12 @@ export default function Dashboard() {
             <div className="topbar-left">
               <h2 className="topbar-title">Dashboard</h2>
               <div className="search-field">
-                <input type="text" placeholder="Search ideas, users..." />
+                <input
+                  type="text"
+                  placeholder="Search ideas, users..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
               </div>
             </div>
             <div className="top-actions">
@@ -136,7 +160,7 @@ export default function Dashboard() {
             {loadingIdeas ? (
               <p>Loading ideas...</p>
             ) : (
-              ideas.map((idea) => (
+              filteredIdeas.map((idea) => (
                 <IdeaCard
                   key={idea._id}
                   idea={idea}

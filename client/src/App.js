@@ -40,6 +40,8 @@ import MyIdeas from "./pages/MyIdeas";
 import Privacy from "./pages/Privacy";
 import Messages from "./pages/Messages";
 import AccountDeleted from "./pages/AccountDeleted";
+import Analytics from "./pages/Analytics";
+import Unauthorized from "./pages/Unauthorized";
 
 function ThemeSync() {
   const { currentUser, loading } = useAuth();
@@ -266,6 +268,22 @@ function App() {
             <AdminRoute>
               <Reports />
             </AdminRoute>
+          }
+        />
+        <Route
+          path="/analytics"
+          element={
+            <AdminRoute>
+              <Analytics />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/explore"
+          element={
+            <PublicRoute>
+              <Unauthorized />
+            </PublicRoute>
           }
         />
         <Route

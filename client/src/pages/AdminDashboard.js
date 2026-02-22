@@ -41,6 +41,7 @@ const buildMonthlySeries = (items, dateKey, monthsCount = 6) => {
 
 export default function AdminDashboard() {
   const [pageTitle, setPageTitle] = useState("Dashboard");
+  const [searchTerm, setSearchTerm] = useState("");
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalIdeas: 0,
@@ -154,6 +155,87 @@ export default function AdminDashboard() {
     } catch (error) {
       console.error("Error updating recovery request:", error);
     }
+  };
+
+  const handleGeneratePdf = () => {
+    const totalInvestors = analytics?.totalInvestors || 0;
+    const totalInvestment = analytics?.totalInvestment || 0;
+    const totalConnections = analytics?.totalConnections || 0;
+    const topUsers = analytics?.topUsers || [];
+    const topIdeas = analytics?.topIdeas || [];
+    const now = new Date().toLocaleString();
+
+    const maxValue = Math.max(stats.totalUsers || 0, stats.totalIdeas || 0, 1);
+    const usersWidth = Math.round(((stats.totalUsers || 0) / maxValue) * 100);
+    const ideasWidth = Math.round(((stats.totalIdeas || 0) / maxValue) * 100);
+
+    const html = `
+      <html>
+        <head>
+          <title>IdeaSpark Admin Report</title>
+          <style>
+            body { font-family: Arial, sans-serif; color: #111827; padding: 32px; }
+            h1 { margin: 0 0 6px; font-size: 24px; }
+            h2 { margin: 24px 0 8px; font-size: 18px; }
+            .meta { color: #6b7280; font-size: 12px; }
+            .grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+            .card { border: 1px solid #e5e7eb; border-radius: 10px; padding: 12px; }
+            .card h3 { margin: 0 0 6px; font-size: 12px; color: #6b7280; text-transform: uppercase; }
+            .card p { margin: 0; font-size: 18px; font-weight: 700; }
+            .bar { height: 10px; background: #e5e7eb; border-radius: 999px; overflow: hidden; }
+            .bar span { display: block; height: 10px; }
+            .bar.users span { background: #111827; width: ${usersWidth}%; }
+            .bar.ideas span { background: #e07a5f; width: ${ideasWidth}%; }
+            table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+            th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid #e5e7eb; font-size: 12px; }
+          </style>
+        </head>
+        <body>
+          <h1>IdeaSpark Admin Report</h1>
+          <div class="meta">Generated on ${now}</div>
+
+          <h2>Platform Snapshot</h2>
+          <div class="grid">
+            <div class="card"><h3>Total Users</h3><p>${stats.totalUsers || 0}</p></div>
+            <div class="card"><h3>Total Ideas</h3><p>${stats.totalIdeas || 0}</p></div>
+            <div class="card"><h3>Total Comments</h3><p>${stats.totalComments || 0}</p></div>
+            <div class="card"><h3>Total Investors</h3><p>${totalInvestors}</p></div>
+            <div class="card"><h3>Total Investment</h3><p>$${Number(totalInvestment).toLocaleString()}</p></div>
+            <div class="card"><h3>Total Connections</h3><p>${totalConnections}</p></div>
+          </div>
+
+          <h2>Visual Snapshot</h2>
+          <div class="card">
+            <p style="margin:0 0 6px;font-size:12px;color:#6b7280;">Users</p>
+            <div class="bar users"><span></span></div>
+            <p style="margin:12px 0 6px;font-size:12px;color:#6b7280;">Ideas</p>
+            <div class="bar ideas"><span></span></div>
+          </div>
+
+          <h2>Top Users</h2>
+          <table>
+            <thead><tr><th>User</th><th>Ideas</th><th>Views</th></tr></thead>
+            <tbody>
+              ${topUsers.length ? topUsers.map((user) => `<tr><td>${user.name || user.email || "User"}</td><td>${user.ideaCount}</td><td>${user.totalViews || 0}</td></tr>`).join("") : `<tr><td colspan="3">No data</td></tr>`}
+            </tbody>
+          </table>
+
+          <h2>Top Ideas</h2>
+          <table>
+            <thead><tr><th>Idea</th><th>Views</th><th>Rating</th></tr></thead>
+            <tbody>
+              ${topIdeas.length ? topIdeas.map((idea) => `<tr><td>${idea.title}</td><td>${idea.views || 0}</td><td>${idea.averageRating ? idea.averageRating.toFixed(1) : "N/A"}</td></tr>`).join("") : `<tr><td colspan="3">No data</td></tr>`}
+            </tbody>
+          </table>
+        </body>
+      </html>`;
+
+    const reportWindow = window.open("", "_blank");
+    if (!reportWindow) return;
+    reportWindow.document.write(html);
+    reportWindow.document.close();
+    reportWindow.focus();
+    reportWindow.print();
   };
 
   useEffect(() => {
@@ -285,6 +367,28 @@ export default function AdminDashboard() {
     return Math.max(maxValue, entry.users || 0, entry.ideas || 0);
   }, 1);
 
+  const normalizedSearch = searchTerm.trim().toLowerCase();
+  const sortedIdeas = [...ideas].sort((a, b) => {
+    const aTime = a?.createdAt ? new Date(a.createdAt).getTime() : 0;
+    const bTime = b?.createdAt ? new Date(b.createdAt).getTime() : 0;
+    return bTime - aTime;
+  });
+  const filteredUsers = normalizedSearch
+    ? users.filter((user) => {
+        const roles = Array.isArray(user.roles) ? user.roles.join(" ") : "";
+        const haystack = `${user.name || ""} ${user.email || ""} ${user.username || ""} ${roles}`.toLowerCase();
+        return haystack.includes(normalizedSearch);
+      })
+    : users;
+  const filteredIdeas = normalizedSearch
+    ? sortedIdeas.filter((idea) => {
+        const tags = Array.isArray(idea.tags) ? idea.tags.join(" ") : "";
+        const author = idea.author?.name || idea.author?.email || "";
+        const haystack = `${idea.title || ""} ${idea.problemStatement || ""} ${idea.solutionDescription || ""} ${tags} ${author}`.toLowerCase();
+        return haystack.includes(normalizedSearch);
+      })
+    : sortedIdeas;
+
   const renderContent = () => {
     switch (pageTitle) {
       case "Ideas":
@@ -295,7 +399,7 @@ export default function AdminDashboard() {
               {ideas.length === 0 ? (
                 <p>No ideas found yet.</p>
               ) : (
-                ideas.map((idea) => (
+                filteredIdeas.map((idea) => (
                   <IdeaCard
                     key={idea._id}
                     idea={idea}
@@ -318,7 +422,7 @@ export default function AdminDashboard() {
               {users.length === 0 ? (
                 <p>No users found yet.</p>
               ) : (
-                users.map((user) => (
+                filteredUsers.map((user) => (
                   <UserCard
                     key={user._id}
                     user={user}
@@ -906,7 +1010,7 @@ export default function AdminDashboard() {
                       </option>
                     ))}
                   {messageForm.recipientType === "user" &&
-                    users.map((user) => (
+                    filteredUsers.map((user) => (
                       <option key={user._id} value={user._id}>
                         {user.name || user.email}
                       </option>
@@ -989,6 +1093,12 @@ export default function AdminDashboard() {
       default:
         return (
           <section className="admin-content">
+            <div className="admin-actions">
+              <button className="btn-primary" onClick={handleGeneratePdf}>
+                Generate PDF Report
+              </button>
+              <button onClick={() => navigate("/analytics")}>View Analytics</button>
+            </div>
             <div className="stats-grid">
               <div className="stat-card card">
                 <h4>Total Users</h4>
@@ -1145,7 +1255,13 @@ export default function AdminDashboard() {
             <div className="topbar-left">
               <h3 className="topbar-title">{pageTitle}</h3>
               <div className="search-field">
-                <input type="text" placeholder="Search..." className="search-input" />
+                <input
+                  type="text"
+                  placeholder="Search..."
+                  className="search-input"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
               </div>
             </div>
 

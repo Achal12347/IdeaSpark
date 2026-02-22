@@ -37,6 +37,7 @@ export default function Analytics() {
             <p className="app-subtitle">High-level metrics across the platform.</p>
           </div>
         </div>
+
         <div className="analytics-metrics app-grid">
           <div className="metric-card app-card">
             <h3>Total Ideas</h3>
@@ -47,6 +48,18 @@ export default function Analytics() {
             <p>{analytics.totalUsers}</p>
           </div>
           <div className="metric-card app-card">
+            <h3>Total Investors</h3>
+            <p>{analytics.totalInvestors}</p>
+          </div>
+          <div className="metric-card app-card">
+            <h3>Total Investment</h3>
+            <p>${Number(analytics.totalInvestment || 0).toLocaleString()}</p>
+          </div>
+          <div className="metric-card app-card">
+            <h3>Total Connections</h3>
+            <p>{analytics.totalConnections}</p>
+          </div>
+          <div className="metric-card app-card">
             <h3>Total Comments</h3>
             <p>{analytics.totalComments}</p>
           </div>
@@ -54,18 +67,66 @@ export default function Analytics() {
             <h3>Average Rating</h3>
             <p>{analytics.averageRating?.toFixed(1) || 'N/A'}</p>
           </div>
+          <div className="metric-card app-card">
+            <h3>Avg Ideas / User</h3>
+            <p>{Number(analytics.avgIdeasPerUser || 0).toFixed(1)}</p>
+          </div>
+        </div>
+        <div className="analytics-split">
+          <div className="analytics-trending app-card">
+            <h3>Trending Ideas</h3>
+            <ul className="trending-list">
+              {analytics.trendingIdeas?.length ? (
+                analytics.trendingIdeas.map((idea) => (
+                  <li key={idea._id} className="trending-item">
+                    {idea.title} - Rating: {idea.averageRating?.toFixed(1)} ({idea.totalRatings} ratings)
+                  </li>
+                ))
+              ) : (
+                <li className="no-trending">No trending ideas</li>
+              )}
+            </ul>
+          </div>
+          <div className="analytics-trending app-card">
+            <h3>Top Users</h3>
+            <ul className="trending-list">
+              {analytics.topUsers?.length ? (
+                analytics.topUsers.map((user) => (
+                  <li key={user.userId} className="trending-item">
+                    {user.name || user.email || 'User'} - {user.ideaCount} ideas
+                  </li>
+                ))
+              ) : (
+                <li className="no-trending">No users yet</li>
+              )}
+            </ul>
+          </div>
         </div>
         <div className="analytics-trending app-card">
-          <h3>Trending Ideas</h3>
+          <h3>Top Ideas by Views</h3>
           <ul className="trending-list">
-            {analytics.trendingIdeas?.length ? (
-              analytics.trendingIdeas.map((idea) => (
+            {analytics.topIdeas?.length ? (
+              analytics.topIdeas.map((idea) => (
                 <li key={idea._id} className="trending-item">
-                  {idea.title} - Rating: {idea.averageRating?.toFixed(1)} ({idea.totalRatings} ratings)
+                  {idea.title} - {idea.views} views, {idea.averageRating?.toFixed(1) || 'N/A'} rating
                 </li>
               ))
             ) : (
-              <li className="no-trending">No trending ideas</li>
+              <li className="no-trending">No ideas yet</li>
+            )}
+          </ul>
+        </div>
+        <div className="analytics-trending app-card">
+          <h3>Ideas by Category</h3>
+          <ul className="trending-list">
+            {analytics.ideasByCategory?.length ? (
+              analytics.ideasByCategory.map((category) => (
+                <li key={category._id || 'uncategorized'} className="trending-item">
+                  {category._id || 'Uncategorized'} - {category.count} ideas
+                </li>
+              ))
+            ) : (
+              <li className="no-trending">No categories yet</li>
             )}
           </ul>
         </div>
