@@ -19,6 +19,7 @@ export default function Messages() {
   const [showPicker, setShowPicker] = useState(false);
   const [adminMessages, setAdminMessages] = useState([]);
   const [currentUserId, setCurrentUserId] = useState("");
+  const [presenceMap, setPresenceMap] = useState({});
 
   const socketUrl = useMemo(
     () =>
@@ -31,7 +32,21 @@ export default function Messages() {
 
   const loadConversations = async () => {
     const data = await apiRequest("/api/direct-messages/conversations");
-    setConversations(Array.isArray(data) ? data : []);
+    const safeData = Array.isArray(data) ? data : [];
+    setConversations(safeData);
+    setPresenceMap((prev) => {
+      const next = { ...prev };
+      safeData.forEach((item) => {
+        const userId = item?.user?._id;
+        const lastCreated = item?.lastMessage?.createdAt;
+        if (!userId || !lastCreated) return;
+        const age = Date.now() - new Date(lastCreated).getTime();
+        if (age <= 5 * 60 * 1000) {
+          next[userId] = Date.now();
+        }
+      });
+      return next;
+    });
   };
 
   const loadAdminMessages = async () => {
@@ -75,6 +90,11 @@ export default function Messages() {
       const recipientId = message?.recipient?._id || message?.recipient;
 
       if (![senderId, recipientId].includes(currentUserId)) return;
+      setPresenceMap((prev) => ({
+        ...prev,
+        ...(senderId ? { [senderId]: Date.now() } : {}),
+        ...(recipientId ? { [recipientId]: Date.now() } : {}),
+      }));
 
       await loadConversations();
       await loadAdminMessages();
@@ -114,6 +134,14 @@ export default function Messages() {
   });
 
   const recentChats = filteredConversations.slice(0, 5);
+
+  const getPresenceState = (userId) => {
+    if (!userId || !presenceMap[userId]) return "Offline";
+    const age = Date.now() - presenceMap[userId];
+    if (age <= 2 * 60 * 1000) return "Active now";
+    if (age <= 10 * 60 * 1000) return "Active recently";
+    return "Offline";
+  };
 
   return (
     <div className="app-page messages-page">
@@ -172,6 +200,9 @@ export default function Messages() {
                       <div>
                         <h4>{item.user.name || item.user.email}</h4>
                         <p>{item.lastMessage?.content}</p>
+                        <span className={`presence-pill ${getPresenceState(item.user._id).toLowerCase().replace(" ", "-")}`}>
+                          {getPresenceState(item.user._id)}
+                        </span>
                       </div>
                       <span className="messages-time">
                         {item.lastMessage?.createdAt
@@ -209,7 +240,7 @@ export default function Messages() {
                 <>
                   <div className="thread-header">
                     <h3>{selectedUser.name || selectedUser.email}</h3>
-                    <p>Private chat</p>
+                    <p>{getPresenceState(selectedUser._id)} | Private chat</p>
                   </div>
                   <div className="thread-body">
                     {thread.length === 0 ? (
@@ -238,6 +269,9 @@ export default function Messages() {
                       value={messageText}
                       onChange={(e) => setMessageText(e.target.value)}
                     />
+                    {messageText.trim() ? (
+                      <p className="typing-indicator">You are typing...</p>
+                    ) : null}
                     <button className="app-button" onClick={handleSend}>
                       Send
                     </button>

@@ -175,3 +175,22 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+@media (max-width: 560px) {
+  .user-card {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .user-action {
+    width: 100%;
+  }
+
+  .user-modal {
+    padding: 14px;
+  }
+
+  .user-modal-body {
+    grid-template-columns: 1fr;
+  }
+}

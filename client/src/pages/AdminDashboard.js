@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { auth } from "../firebase";
 import apiRequest from "../services/api";
@@ -53,7 +53,7 @@ export default function AdminDashboard() {
   const [ideas, setIdeas] = useState([]);
   const [users, setUsers] = useState([]);
   const [analytics, setAnalytics] = useState(null);
-  const [growthData, setGrowthData] = useState([]);
+  const [growthMonths, setGrowthMonths] = useState(6);
   const [contactMessages, setContactMessages] = useState([]);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [messagesError, setMessagesError] = useState("");
@@ -281,15 +281,6 @@ export default function AdminDashboard() {
           pendingReviews,
         });
 
-        const userSeries = buildMonthlySeries(safeUsers, "createdAt");
-        const ideaSeries = buildMonthlySeries(safeIdeas, "createdAt");
-        const combined = userSeries.map((entry, index) => ({
-          label: entry.label,
-          users: entry.count,
-          ideas: ideaSeries[index]?.count || 0,
-        }));
-        setGrowthData(combined);
-
         const apiBaseUrl = process.env.REACT_APP_API_URL;
         if (apiBaseUrl && auth.currentUser) {
           setLoadingMessages(true);
@@ -363,9 +354,35 @@ export default function AdminDashboard() {
     await auth.signOut();
   };
 
+  const growthData = useMemo(() => {
+    const userSeries = buildMonthlySeries(users, "createdAt", growthMonths);
+    const ideaSeries = buildMonthlySeries(ideas, "createdAt", growthMonths);
+    return userSeries.map((entry, index) => ({
+      label: entry.label,
+      users: entry.count,
+      ideas: ideaSeries[index]?.count || 0,
+    }));
+  }, [users, ideas, growthMonths]);
+
   const maxGrowth = growthData.reduce((maxValue, entry) => {
     return Math.max(maxValue, entry.users || 0, entry.ideas || 0);
   }, 1);
+  const pendingRecoveryCount = recoveryRequests.filter(
+    (request) => request.status === "pending"
+  ).length;
+  const unresolvedMessagesCount = contactMessages.length;
+  const quickTopIdeas = (analytics?.topIdeas || []).slice(0, 4);
+  const quickTopUsers = (analytics?.topUsers || []).slice(0, 4);
+  const platformPulse = Math.max(
+    0,
+    Math.min(
+      100,
+      Math.round(
+        ((analytics?.activeInvestors || 0) + (analytics?.newUsersWeek || 0) + stats.activeToday) /
+          3
+      )
+    )
+  );
 
   const normalizedSearch = searchTerm.trim().toLowerCase();
   const sortedIdeas = [...ideas].sort((a, b) => {
@@ -395,7 +412,7 @@ export default function AdminDashboard() {
         return (
           <section className="admin-content">
             <h3>All Ideas</h3>
-            <div className="admin-grid">
+            <div className="admin-grid admin-grid-cards">
               {ideas.length === 0 ? (
                 <p>No ideas found yet.</p>
               ) : (
@@ -418,7 +435,7 @@ export default function AdminDashboard() {
         return (
           <section className="admin-content">
             <h3>All Users</h3>
-            <div className="admin-grid">
+            <div className="admin-grid admin-grid-cards">
               {users.length === 0 ? (
                 <p>No users found yet.</p>
               ) : (
@@ -1093,18 +1110,45 @@ export default function AdminDashboard() {
       default:
         return (
           <section className="admin-content">
+            <div className="admin-hero card">
+              <div>
+                <h3>Admin Control Center</h3>
+                <p>
+                  Monitor growth, moderation workload, and platform health from one
+                  place.
+                </p>
+              </div>
+              <div className="admin-hero-stats">
+                <div className="admin-hero-row">
+                  <span>Platform Pulse</span>
+                  <strong>{platformPulse}%</strong>
+                </div>
+                <div className="admin-progress">
+                  <span style={{ width: `${platformPulse}%` }} />
+                </div>
+                <div className="admin-hero-meta">
+                  <span>{pendingRecoveryCount} pending recovery requests</span>
+                  <span>{unresolvedMessagesCount} contact messages</span>
+                </div>
+              </div>
+            </div>
+
             <div className="admin-actions">
               <button className="btn-primary" onClick={handleGeneratePdf}>
                 Generate PDF Report
               </button>
               <button onClick={() => navigate("/analytics")}>View Analytics</button>
+              <button onClick={() => navigate("/reports")}>Open Reports</button>
+              <button onClick={() => setPageTitle("Recovery Requests")}>
+                Review Recovery Queue
+              </button>
             </div>
             <div className="stats-grid">
-              <div className="stat-card card">
+              <div className="stat-card card clickable" onClick={() => setPageTitle("Users")}>
                 <h4>Total Users</h4>
                 <p>{stats.totalUsers}</p>
               </div>
-              <div className="stat-card card">
+              <div className="stat-card card clickable" onClick={() => setPageTitle("Ideas")}>
                 <h4>Total Ideas</h4>
                 <p>{stats.totalIdeas}</p>
               </div>
@@ -1128,11 +1172,14 @@ export default function AdminDashboard() {
                 <h4>Active Investors (7d)</h4>
                 <p>{analytics?.activeInvestors || 0}</p>
               </div>
-              <div className="stat-card card">
+              <div className="stat-card card clickable" onClick={() => setPageTitle("Messages")}>
                 <h4>Active Today</h4>
                 <p>{stats.activeToday}</p>
               </div>
-              <div className="stat-card card highlight">
+              <div
+                className="stat-card card highlight clickable"
+                onClick={() => setPageTitle("Ideas")}
+              >
                 <h4>Ideas Seeking Funding</h4>
                 <p>{stats.pendingReviews}</p>
               </div>
@@ -1142,7 +1189,27 @@ export default function AdminDashboard() {
               <div className="chart-card card">
                 <div className="chart-header">
                   <h4>User + Idea Growth</h4>
-                  <p>Last 6 months activity</p>
+                  <p>Platform growth trend over time.</p>
+                </div>
+                <div className="chart-controls">
+                  <button
+                    className={growthMonths === 3 ? "active" : ""}
+                    onClick={() => setGrowthMonths(3)}
+                  >
+                    3M
+                  </button>
+                  <button
+                    className={growthMonths === 6 ? "active" : ""}
+                    onClick={() => setGrowthMonths(6)}
+                  >
+                    6M
+                  </button>
+                  <button
+                    className={growthMonths === 12 ? "active" : ""}
+                    onClick={() => setGrowthMonths(12)}
+                  >
+                    12M
+                  </button>
                 </div>
                 <div className="chart-legend">
                   <span className="legend-item">
@@ -1176,8 +1243,24 @@ export default function AdminDashboard() {
               </div>
 
               <div className="analytics-card card">
-                <h4>Analytics Snapshot</h4>
-                <p>Top categories and engagement highlights.</p>
+                <h4>Operations Snapshot</h4>
+                <p>Moderation load, top categories, and ranked entities.</p>
+                <div className="admin-ops-grid">
+                  <div className="admin-ops-item">
+                    <span>Recovery queue</span>
+                    <strong>{pendingRecoveryCount}</strong>
+                    <button onClick={() => setPageTitle("Recovery Requests")}>
+                      Open queue
+                    </button>
+                  </div>
+                  <div className="admin-ops-item">
+                    <span>Contact inbox</span>
+                    <strong>{unresolvedMessagesCount}</strong>
+                    <button onClick={() => setPageTitle("Messages")}>
+                      Open inbox
+                    </button>
+                  </div>
+                </div>
                 <div className="analytics-list">
                   {(analytics?.ideasByCategory || []).slice(0, 4).map((category) => (
                     <div key={category._id || "unknown"} className="analytics-row">
@@ -1192,6 +1275,34 @@ export default function AdminDashboard() {
                     <strong>{analytics.trendingIdeas[0].title}</strong>
                   </div>
                 ) : null}
+                <div className="admin-ranked-lists">
+                  <div>
+                    <p className="admin-ranked-title">Top ideas by views</p>
+                    {quickTopIdeas.length === 0 ? (
+                      <p className="chart-empty">No ideas yet.</p>
+                    ) : (
+                      quickTopIdeas.map((idea) => (
+                        <div key={idea._id} className="analytics-row">
+                          <span>{idea.title}</span>
+                          <span>{idea.views || 0} views</span>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                  <div>
+                    <p className="admin-ranked-title">Top contributors</p>
+                    {quickTopUsers.length === 0 ? (
+                      <p className="chart-empty">No users yet.</p>
+                    ) : (
+                      quickTopUsers.map((user) => (
+                        <div key={user.userId} className="analytics-row">
+                          <span>{user.name || user.email || "User"}</span>
+                          <span>{user.ideaCount} ideas</span>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           </section>
@@ -1200,7 +1311,7 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="dashboard-shell admin-shell">
+    <div className="dashboard-shell dashboard-layout-shell admin-shell">
       <div className="dashboard-frame admin-frame">
         {/* SIDEBAR */}
         <aside className="sidebar admin-sidebar">

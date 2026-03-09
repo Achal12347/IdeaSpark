@@ -109,6 +109,29 @@
   font-size: 12px;
 }
 
+.presence-pill {
+  display: inline-flex;
+  margin-top: 6px;
+  font-size: 10px;
+  font-weight: 600;
+  border: 1px solid var(--app-border);
+  border-radius: 999px;
+  padding: 2px 8px;
+  color: var(--app-muted);
+}
+
+.presence-pill.active-now {
+  color: #166534;
+  border-color: #86efac;
+  background: #f0fdf4;
+}
+
+.presence-pill.active-recently {
+  color: #1d4ed8;
+  border-color: #93c5fd;
+  background: #eff6ff;
+}
+
 .messages-time {
   font-size: 11px;
   color: var(--app-muted);
@@ -176,6 +199,12 @@
   gap: 10px;
 }
 
+.typing-indicator {
+  margin: 0;
+  font-size: 12px;
+  color: var(--app-muted);
+}
+
 .messages-loading,
 .messages-empty {
   color: var(--app-muted);
@@ -240,5 +269,30 @@
 @media (max-width: 900px) {
   .messages-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .messages-item {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .messages-time {
+    white-space: normal;
+  }
+
+  .thread-body {
+    max-height: none;
+    overflow: visible;
+    padding-right: 0;
+  }
+
+  .thread-message {
+    max-width: 100%;
+  }
+
+  .user-picker {
+    padding: 14px;
   }
 }

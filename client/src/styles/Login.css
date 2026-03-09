@@ -106,3 +106,17 @@
   margin-bottom: 12px;
   font-weight: 600;
 }
+
+@media (max-width: 480px) {
+  .login-container {
+    padding: 12px;
+  }
+
+  .login-card {
+    padding: 20px 16px;
+  }
+
+  .login-card h2 {
+    font-size: 22px;
+  }
+}

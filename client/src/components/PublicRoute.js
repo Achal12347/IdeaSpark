@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { buildApiUrl } from "../services/apiBase";
 
 export default function PublicRoute({ children }) {
   const { currentUser, loading } = useAuth();
@@ -16,7 +17,7 @@ export default function PublicRoute({ children }) {
 
       try {
         const token = await currentUser.getIdToken(true);
-        const res = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/me`, {
+        const res = await fetch(buildApiUrl("/api/auth/me"), {
           headers: { Authorization: `Bearer ${token}` },
         });
 

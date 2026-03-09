@@ -1,17 +1,34 @@
 .idea-card {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(150px, 230px);
+  gap: 14px;
+  align-items: center;
 }
 
 .idea-card[role="button"] {
   cursor: pointer;
 }
 
+.idea-card-main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.idea-card-side {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-end;
+  text-align: right;
+}
+
 .idea-card-header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  justify-content: flex-start;
+  align-items: flex-start;
   gap: 12px;
 }
 
@@ -45,10 +62,11 @@
 .idea-card-meta,
 .idea-card-stats {
   display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
+  flex-direction: column;
+  gap: 6px;
   font-size: 12px;
   color: var(--app-muted, var(--dash-muted, #6b7280));
+  align-items: flex-end;
 }
 
 .idea-card-badge {
@@ -73,8 +91,8 @@
 
 .idea-card-footer {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-end;
   gap: 12px;
   font-size: 12px;
   color: var(--app-muted, var(--dash-muted, #6b7280));
@@ -98,9 +116,69 @@
   opacity: 0.9;
 }
 
+.idea-card-quick-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.idea-card-quick-btn {
+  border: 1px solid var(--app-border, var(--dash-border, #e5e7eb));
+  background: var(--app-surface, var(--dash-surface, #ffffff));
+  color: var(--app-muted, var(--dash-muted, #6b7280));
+  border-radius: 999px;
+  padding: 5px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.idea-card-quick-btn:hover {
+  border-color: var(--app-ink, var(--dash-text, #111827));
+  color: var(--app-ink, var(--dash-text, #111827));
+}
+
+.idea-card-feedback {
+  font-size: 11px;
+  color: var(--app-muted, var(--dash-muted, #6b7280));
+}
+
 @media (max-width: 720px) {
+  .idea-card {
+    grid-template-columns: minmax(0, 1fr) minmax(120px, 160px);
+    gap: 10px;
+  }
+
+  .idea-card-side {
+    gap: 8px;
+  }
+
   .idea-card-footer {
-    flex-direction: column;
+    align-items: flex-end;
+  }
+
+  .idea-card-quick-actions {
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 560px) {
+  .idea-card {
+    grid-template-columns: 1fr;
+  }
+
+  .idea-card-side {
     align-items: flex-start;
+    text-align: left;
+  }
+
+  .idea-card-meta,
+  .idea-card-stats,
+  .idea-card-footer,
+  .idea-card-quick-actions {
+    align-items: flex-start;
+    justify-content: flex-start;
   }
 }

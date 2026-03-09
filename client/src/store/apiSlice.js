@@ -1,10 +1,9 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { auth } from "../firebase";
-
-const API_BASE_URL = process.env.REACT_APP_API_URL || "";
+import { API_ORIGIN } from "../services/apiBase";
 
 const rawBaseQuery = fetchBaseQuery({
-  baseUrl: API_BASE_URL,
+  baseUrl: API_ORIGIN,
 });
 
 const baseQueryWithAuth = async (args, api, extraOptions) => {

@@ -62,7 +62,13 @@ export default function Bookmarks() {
         {loading ? (
           <div className="bookmarks-loading">Loading bookmarks...</div>
         ) : bookmarks.length === 0 ? (
-          <div className="no-bookmarks">You have not bookmarked any ideas yet.</div>
+          <div className="no-bookmarks">
+            <h3>No bookmarks yet</h3>
+            <p>Save ideas from the feed to build your private shortlist.</p>
+            <button className="app-button" onClick={() => navigate("/ideas")}>
+              Explore Ideas
+            </button>
+          </div>
         ) : (
           <div className="bookmarks-list">
             {bookmarks.map((bookmark) => (
@@ -71,6 +77,7 @@ export default function Bookmarks() {
                 idea={bookmark}
                 variant="user"
                 className="app-card"
+                quickActions={[{ id: "share", label: "Share" }]}
                 onClick={() => navigate(`/idea/${bookmark._id}`)}
               />
             ))}

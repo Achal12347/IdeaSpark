@@ -1,6 +1,7 @@
 .investor-wrap {
-  max-width: 1100px;
+  width: min(1100px, calc(100% - 32px));
   margin: 0 auto;
+  padding: 24px 0 36px;
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -74,8 +75,8 @@
 
 .investor-grid {
   margin-top: 16px;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: 16px;
 }
 
@@ -83,9 +84,6 @@
   border: 1px solid var(--dash-border);
   border-radius: 16px;
   padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
 }
 
 .investor-card h4 {
@@ -110,7 +108,7 @@
 }
 
 .investor-card .idea-card-footer {
-  margin-top: auto;
+  margin-top: 0;
 }
 
 .offer-panel {
@@ -240,8 +238,17 @@
 }
 
 @media (max-width: 768px) {
+  .investor-wrap {
+    width: calc(100% - 24px);
+    padding: 16px 0 28px;
+  }
+
   .investor-header {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .offer-actions button {
+    width: 100%;
   }
 }

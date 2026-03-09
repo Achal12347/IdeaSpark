@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import IdeaCard from "../components/IdeaCard";
+import { buildApiUrl } from "../services/apiBase";
 import "../styles/appPageTheme.css";
 import "../styles/Unauthorized.css";
 
@@ -13,8 +14,7 @@ export default function Unauthorized() {
   useEffect(() => {
     const loadPublic = async () => {
       try {
-        const baseUrl = process.env.REACT_APP_API_URL || "";
-        const ideasResponse = await fetch(`${baseUrl}/api/ideas`);
+        const ideasResponse = await fetch(buildApiUrl("/api/ideas"));
         const ideasData = await ideasResponse.json();
         const sortedIdeas = Array.isArray(ideasData)
           ? [...ideasData].sort((a, b) => {
@@ -25,7 +25,7 @@ export default function Unauthorized() {
           : [];
         setIdeas(sortedIdeas);
 
-        const usersResponse = await fetch(`${baseUrl}/api/public/users`);
+        const usersResponse = await fetch(buildApiUrl("/api/public/users"));
         const usersData = await usersResponse.json();
         setUsers(Array.isArray(usersData) ? usersData : []);
       } catch (error) {

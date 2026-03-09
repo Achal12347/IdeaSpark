@@ -736,6 +736,17 @@
     width: calc(100% - 32px);
   }
 
+  .nav-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .nav-actions .primary-btn,
+  .nav-actions .ghost-btn {
+    width: 100%;
+  }
+
   .hero-metrics {
     grid-template-columns: 1fr;
   }

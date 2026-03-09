@@ -1,6 +1,7 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useEffect, useState } from "react";
+import { buildApiUrl } from "../services/apiBase";
 
 export default function ProtectedRoute({ children }) {
   const { currentUser, loading: authLoading } = useAuth();
@@ -20,12 +21,9 @@ export default function ProtectedRoute({ children }) {
     const checkProfile = async () => {
       try {
         const token = await currentUser.getIdToken(true);
-        const res = await fetch(
-          `${process.env.REACT_APP_API_URL}/api/users/${currentUser.uid}/exists`,
-          {
-            headers: { Authorization: `Bearer ${token}` },
-          }
-        );
+        const res = await fetch(buildApiUrl(`/api/users/${currentUser.uid}/exists`), {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
         const data = await res.json();
         const exists = Boolean(data.exists);

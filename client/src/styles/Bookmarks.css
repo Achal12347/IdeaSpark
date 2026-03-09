@@ -10,6 +10,22 @@
   color: var(--app-muted);
 }
 
+.no-bookmarks {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+}
+
+.no-bookmarks h3 {
+  margin: 0;
+  color: var(--app-ink);
+}
+
+.no-bookmarks p {
+  margin: 0;
+}
+
 .bookmarks-list {
   display: flex;
   flex-direction: column;
@@ -33,4 +49,10 @@
   gap: 12px;
   font-size: 13px;
   color: var(--app-muted);
+}
+
+@media (max-width: 560px) {
+  .bookmarks-list {
+    gap: 12px;
+  }
 }

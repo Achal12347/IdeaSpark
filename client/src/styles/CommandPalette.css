@@ -1,0 +1,93 @@
+.command-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 80px 20px;
+  z-index: 120;
+}
+
+.command-panel {
+  width: min(620px, 100%);
+  border: 1px solid var(--app-border, #e5e7eb);
+  background: var(--app-surface, #ffffff);
+  border-radius: 16px;
+  box-shadow: 0 22px 50px rgba(15, 23, 42, 0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+}
+
+.command-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.command-head h4 {
+  margin: 0;
+  font-size: 15px;
+}
+
+.command-head span {
+  font-size: 12px;
+  color: var(--app-muted, #6b7280);
+}
+
+.command-input {
+  width: 100%;
+  border: 1px solid var(--app-border, #e5e7eb);
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 14px;
+  background: var(--app-surface, #ffffff);
+  color: var(--app-ink, #111827);
+}
+
+.command-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.command-item {
+  border: 1px solid var(--app-border, #e5e7eb);
+  background: var(--app-surface, #ffffff);
+  color: var(--app-ink, #111827);
+  border-radius: 12px;
+  padding: 10px 12px;
+  text-align: left;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.command-item.active {
+  border-color: var(--app-accent, #111827);
+  background: var(--app-accent-soft, #f3f4f6);
+}
+
+.command-item small {
+  color: var(--app-muted, #6b7280);
+  font-size: 11px;
+}
+
+.command-empty {
+  margin: 0;
+  padding: 14px;
+  text-align: center;
+  color: var(--app-muted, #6b7280);
+}
+
+@media (max-width: 560px) {
+  .command-overlay {
+    padding: 60px 12px 20px;
+  }
+}

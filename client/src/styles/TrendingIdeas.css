@@ -34,3 +34,9 @@
   font-size: 13px;
   color: var(--app-muted);
 }
+
+@media (max-width: 560px) {
+  .trending-list {
+    gap: 12px;
+  }
+}

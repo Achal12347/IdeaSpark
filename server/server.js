@@ -22,16 +22,38 @@ const recoveryRequestRoutes = require("./routes/recoveryRequestRoutes");
 const publicRoutes = require("./routes/publicRoutes");
 const activityRoutes = require("./routes/activityRoutes");
 
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://idea-spark-olive.vercel.app",
+  process.env.CLIENT_URL,
+].filter(Boolean);
+
+const isAllowedOrigin = (origin) => {
+  if (!origin) return true;
+  if (allowedOrigins.includes(origin)) return true;
+  if (/^http:\/\/localhost:\d+$/i.test(origin)) return true;
+  if (/^http:\/\/127\.0\.0\.1:\d+$/i.test(origin)) return true;
+  if (/^https:\/\/idea-spark.*\.vercel\.app$/i.test(origin)) return true;
+  if (/^https:\/\/ideaspark.*\.vercel\.app$/i.test(origin)) return true;
+  return false;
+};
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (isAllowedOrigin(origin)) {
+      callback(null, true);
+      return;
+    }
+    callback(new Error("Not allowed by CORS"));
+  },
+  credentials: true,
+};
+
 // Create app FIRST
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
-  cors: {
-    origin: [
-      "http://localhost:3000",
-      "https://idea-spark-olive.vercel.app",
-    ],
-  },
+  cors: corsOptions,
 });
 app.set("io", io);
 
@@ -41,12 +63,7 @@ app.set("io", io);
 
 // CORS (allow frontend + local dev)
 app.use(
-  cors({
-    origin: [
-      "http://localhost:3000",
-      "https://idea-spark-olive.vercel.app",
-    ],
-  })
+  cors(corsOptions)
 );
 
 app.use(express.json());

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase";
 import { useNavigate, Link } from "react-router-dom";
+import { buildApiUrl } from "../services/apiBase";
 import "../styles/Login.css";
 
 const Login = () => {
@@ -15,20 +16,16 @@ const Login = () => {
     setError("");
 
     try {
-      console.log("API_URL:", process.env.REACT_APP_API_URL);
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
       const token = await userCredential.user.getIdToken();
-      console.log("ID Token:", token);
 
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/me`, {
+      const response = await fetch(buildApiUrl("/api/auth/me"), {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
 
-      console.log("Response status:", response.status);
       const data = await response.json();
-      console.log("Response data:", data);
 
       if (!data.exists) {
         navigate("/profile-setup");

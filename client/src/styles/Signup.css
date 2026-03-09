@@ -99,3 +99,17 @@
   margin-bottom: 12px;
   font-weight: 600;
 }
+
+@media (max-width: 480px) {
+  .signup-container {
+    padding: 12px;
+  }
+
+  .signup-card {
+    padding: 20px 16px;
+  }
+
+  .signup-card h2 {
+    font-size: 22px;
+  }
+}

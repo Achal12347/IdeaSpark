@@ -19,6 +19,10 @@
   gap: 16px;
 }
 
+.admin-grid.admin-grid-cards {
+  grid-template-columns: 1fr;
+}
+
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -43,10 +47,78 @@
   border-color: var(--dash-accent);
 }
 
+.stat-card.clickable {
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card.clickable:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--dash-soft-shadow);
+}
+
 .admin-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
+}
+
+.admin-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr);
+  gap: 16px;
+  align-items: center;
+}
+
+.admin-hero h3 {
+  margin: 0 0 6px;
+  font-size: 22px;
+}
+
+.admin-hero-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid var(--dash-border);
+  background: var(--dash-panel);
+}
+
+.admin-hero-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--dash-muted);
+}
+
+.admin-hero-row strong {
+  color: var(--dash-text);
+  font-size: 20px;
+}
+
+.admin-progress {
+  height: 10px;
+  border-radius: 999px;
+  background: var(--dash-surface);
+  border: 1px solid var(--dash-border);
+  overflow: hidden;
+}
+
+.admin-progress span {
+  display: block;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--dash-accent);
+}
+
+.admin-hero-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--dash-muted);
 }
 
 .admin-card {
@@ -188,6 +260,26 @@
   font-size: 12px;
 }
 
+.chart-controls {
+  display: inline-flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.chart-controls button {
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--dash-border);
+  background: var(--dash-surface);
+  color: var(--dash-muted);
+}
+
+.chart-controls button.active {
+  background: var(--dash-accent);
+  color: var(--dash-surface);
+  border-color: var(--dash-accent);
+}
+
 .legend-item {
   display: inline-flex;
   align-items: center;
@@ -286,6 +378,51 @@
   font-size: 13px;
 }
 
+.admin-ops-grid {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.admin-ops-item {
+  border: 1px solid var(--dash-border);
+  border-radius: 12px;
+  background: var(--dash-panel);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.admin-ops-item span {
+  font-size: 12px;
+  color: var(--dash-muted);
+}
+
+.admin-ops-item strong {
+  font-size: 22px;
+}
+
+.admin-ops-item button {
+  align-self: flex-start;
+}
+
+.admin-ranked-lists {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.admin-ranked-title {
+  margin: 0 0 8px;
+  font-size: 12px;
+  color: var(--dash-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
 .recovery-card {
   display: flex;
   flex-direction: column;
@@ -365,7 +502,12 @@
 
 @media (max-width: 900px) {
   .admin-content {
+    overflow: visible;
     padding-right: 0;
+  }
+
+  .admin-hero {
+    grid-template-columns: 1fr;
   }
 
   .admin-grid,

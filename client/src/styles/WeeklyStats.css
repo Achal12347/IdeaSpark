@@ -20,3 +20,9 @@
   text-align: center;
   color: var(--app-muted);
 }
+
+@media (max-width: 560px) {
+  .stat-item p {
+    font-size: 22px;
+  }
+}

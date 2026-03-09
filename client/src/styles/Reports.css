@@ -1,22 +1,73 @@
-﻿@import "./appPageTheme.css";
+@import "./appPageTheme.css";
 
-.report-item h3 {
-  margin: 0 0 8px;
+.reports-summary {
+  margin-top: 8px;
+}
+
+.report-metric h3 {
+  margin: 0 0 6px;
+  font-size: 13px;
+  color: var(--app-muted);
+}
+
+.report-metric p {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--app-ink);
+}
+
+.report-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.report-control-block {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.report-control-block h3 {
+  margin: 0;
   font-size: 16px;
 }
 
-.report-item p {
-  margin: 0 0 12px;
-  color: var(--app-muted);
-  font-size: 14px;
+.report-type-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
-.report-btn {
+.report-controls .chip-toggle {
   padding: 8px 14px;
   border-radius: 999px;
   border: 1px solid var(--app-border);
-  background: var(--app-accent);
-  color: #ffffff;
-  cursor: pointer;
+  background: var(--app-surface);
+  color: var(--app-ink);
   font-weight: 600;
+  cursor: pointer;
+}
+
+.report-controls .chip-toggle.active {
+  background: var(--app-accent);
+  border-color: var(--app-accent);
+  color: var(--app-surface);
+}
+
+.report-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+@media (max-width: 720px) {
+  .report-actions {
+    flex-direction: column;
+  }
+
+  .report-actions button {
+    width: 100%;
+  }
 }

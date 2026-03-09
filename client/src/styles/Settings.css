@@ -6,6 +6,36 @@
   gap: 16px;
 }
 
+.settings-sync {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--app-border);
+  background: var(--app-surface);
+  color: var(--app-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.settings-sync-saved {
+  color: #166534;
+  border-color: #86efac;
+  background: #f0fdf4;
+}
+
+.settings-sync-saving {
+  color: #1d4ed8;
+  border-color: #93c5fd;
+  background: #eff6ff;
+}
+
+.settings-sync-error {
+  color: #b91c1c;
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
 .settings-section {
   display: flex;
   flex-direction: column;
@@ -201,4 +231,11 @@
   border: 1px solid var(--app-border);
   text-align: center;
   color: var(--app-muted);
+}
+
+@media (max-width: 720px) {
+  .settings-sync {
+    width: 100%;
+    justify-content: center;
+  }
 }

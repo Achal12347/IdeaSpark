@@ -1,6 +1,7 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useEffect, useState } from "react";
+import { buildApiUrl } from "../services/apiBase";
 
 export default function AuthRoute({ children }) {
   const { currentUser, loading } = useAuth();
@@ -14,7 +15,7 @@ export default function AuthRoute({ children }) {
       if (accountDeleted) return;
       try {
         const token = await currentUser.getIdToken(true);
-        const res = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/me`, {
+        const res = await fetch(buildApiUrl("/api/auth/me"), {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();

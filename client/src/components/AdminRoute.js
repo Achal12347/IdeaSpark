@@ -1,6 +1,7 @@
 import { Navigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import { buildApiUrl } from "../services/apiBase";
 
 export default function AdminRoute({ children }) {
   const [allowed, setAllowed] = useState(null); // null = still checking
@@ -19,7 +20,7 @@ export default function AdminRoute({ children }) {
 
       try {
         const token = await currentUser.getIdToken(true);
-        const res = await fetch(`${process.env.REACT_APP_API_URL}/api/auth/me`, {
+        const res = await fetch(buildApiUrl("/api/auth/me"), {
           headers: {
             Authorization: `Bearer ${token}`,
           },

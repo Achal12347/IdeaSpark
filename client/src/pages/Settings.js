@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { fetchUserProfile, updateUserProfile } from "../services/userService";
 import { auth } from "../firebase";
@@ -41,20 +41,34 @@ export default function Settings() {
     createdAt: "",
   });
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [toast, setToast] = useState("");
+  const [saveState, setSaveState] = useState("idle");
   const [contactForm, setContactForm] = useState({
     name: "",
     email: "",
     message: "",
   });
   const [contactStatus, setContactStatus] = useState("");
+  const autoSaveTimer = useRef(null);
+  const initialSnapshot = useRef("");
+
+  const buildPayload = useCallback(
+    (sourceProfile) => ({
+      name: sourceProfile.name,
+      bio: sourceProfile.bio,
+      links: sourceProfile.links,
+      collaborationPreferences: sourceProfile.collaborationPreferences,
+      availability: sourceProfile.availability,
+      notificationSettings: sourceProfile.notificationSettings,
+      appearanceSettings: sourceProfile.appearanceSettings,
+    }),
+    []
+  );
 
   useEffect(() => {
     const loadProfile = async () => {
       try {
         const data = await fetchUserProfile();
-        setProfile({
+        const nextProfile = {
           name: data?.name || "",
           bio: data?.bio || "",
           links: {
@@ -73,7 +87,9 @@ export default function Settings() {
             ...(data?.appearanceSettings || {}),
           },
           createdAt: data?.createdAt || "",
-        });
+        };
+        setProfile(nextProfile);
+        initialSnapshot.current = JSON.stringify(buildPayload(nextProfile));
 
         const userEmail = auth.currentUser?.email || "";
         setContactForm((prev) => ({
@@ -88,7 +104,7 @@ export default function Settings() {
       }
     };
     loadProfile();
-  }, []);
+  }, [buildPayload]);
 
   useEffect(() => {
     const socketUrl = (process.env.REACT_APP_API_URL || "http://localhost:5000").replace(
@@ -101,7 +117,7 @@ export default function Settings() {
       if (!auth.currentUser) return;
       const data = await fetchUserProfile();
       if (data?._id !== payload.userId) return;
-      setProfile({
+      const nextProfile = {
         name: data?.name || "",
         bio: data?.bio || "",
         links: {
@@ -120,10 +136,49 @@ export default function Settings() {
           ...(data?.appearanceSettings || {}),
         },
         createdAt: data?.createdAt || "",
-      });
+      };
+      setProfile(nextProfile);
+      initialSnapshot.current = JSON.stringify(buildPayload(nextProfile));
     });
     return () => socket.disconnect();
-  }, []);
+  }, [buildPayload]);
+
+  useEffect(() => {
+    if (loading) return;
+    document.documentElement.setAttribute(
+      "data-theme",
+      profile.appearanceSettings.theme || "light"
+    );
+  }, [loading, profile.appearanceSettings.theme]);
+
+  useEffect(() => {
+    if (loading) return;
+    const payload = buildPayload(profile);
+    const serialized = JSON.stringify(payload);
+    if (!initialSnapshot.current || serialized === initialSnapshot.current) return;
+
+    if (autoSaveTimer.current) {
+      clearTimeout(autoSaveTimer.current);
+    }
+
+    setSaveState("saving");
+    autoSaveTimer.current = setTimeout(async () => {
+      try {
+        await updateUserProfile(payload);
+        initialSnapshot.current = serialized;
+        setSaveState("saved");
+      } catch (error) {
+        console.error("Error updating profile:", error);
+        setSaveState("error");
+      }
+    }, 450);
+
+    return () => {
+      if (autoSaveTimer.current) {
+        clearTimeout(autoSaveTimer.current);
+      }
+    };
+  }, [profile, loading, buildPayload]);
 
   const lastLoginTime = useMemo(() => {
     const raw = auth.currentUser?.metadata?.lastSignInTime;
@@ -180,34 +235,6 @@ export default function Settings() {
     }));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setSaving(true);
-    try {
-      await updateUserProfile({
-        name: profile.name,
-        bio: profile.bio,
-        links: profile.links,
-        collaborationPreferences: profile.collaborationPreferences,
-        availability: profile.availability,
-        notificationSettings: profile.notificationSettings,
-        appearanceSettings: profile.appearanceSettings,
-      });
-      setToast("Settings updated successfully.");
-      document.documentElement.setAttribute(
-        "data-theme",
-        profile.appearanceSettings.theme || "light"
-      );
-      setTimeout(() => setToast(""), 2600);
-    } catch (error) {
-      console.error("Error updating profile:", error);
-      setToast("Failed to update settings.");
-      setTimeout(() => setToast(""), 2600);
-    } finally {
-      setSaving(false);
-    }
-  };
-
   const handleContactChange = (e) => {
     const { name, value } = e.target;
     setContactForm((prev) => ({ ...prev, [name]: value }));
@@ -217,11 +244,14 @@ export default function Settings() {
     e.preventDefault();
     setContactStatus("");
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/contact`, {
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL || "http://localhost:5000"}/api/contact`,
+        {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(contactForm),
-      });
+        }
+      );
       const data = await response.json();
       if (!response.ok) {
         throw new Error(data.message || "Unable to submit feedback.");
@@ -251,9 +281,18 @@ export default function Settings() {
             <h1 className="app-title">Settings</h1>
             <p className="app-subtitle">Personalize your IdeaSpark experience.</p>
           </div>
+          <span className={`settings-sync settings-sync-${saveState}`}>
+            {saveState === "saving"
+              ? "Saving..."
+              : saveState === "saved"
+                ? "All changes saved"
+                : saveState === "error"
+                  ? "Save failed"
+                  : "Autosave enabled"}
+          </span>
         </div>
 
-        <form className="settings-form app-card" onSubmit={handleSubmit}>
+        <div className="settings-form app-card">
           <section className="settings-section">
             <h3>Profile basics</h3>
             <p className="section-note">Visible to others on your public profile.</p>
@@ -548,11 +587,7 @@ export default function Settings() {
             </div>
           </section>
 
-          <button type="submit" className="submit-button" disabled={saving}>
-            {saving ? "Saving..." : "Save Settings"}
-          </button>
-        </form>
-        {toast ? <div className="settings-toast">{toast}</div> : null}
+        </div>
       </div>
     </div>
   );

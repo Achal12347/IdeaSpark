@@ -43,6 +43,7 @@ import AccountDeleted from "./pages/AccountDeleted";
 import Analytics from "./pages/Analytics";
 import Unauthorized from "./pages/Unauthorized";
 import IdeaPreview from "./pages/IdeaPreview";
+import GlobalCommandPalette from "./components/GlobalCommandPalette";
 
 function ThemeSync() {
   const { currentUser, loading } = useAuth();
@@ -72,6 +73,7 @@ function App() {
   return (
     <AuthProvider>
       <ThemeSync />
+      <GlobalCommandPalette />
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/about" element={<AboutUs />} />

@@ -14,34 +14,10 @@
   margin-top: 8px;
 }
 
-.idea-card {
+.ideas-grid.app-grid {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.idea-card:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--app-shadow);
-}
-
-.idea-card h4 {
-  margin: 0;
-  font-size: 18px;
-}
-
-.idea-card-description {
-  margin: 0;
-  color: var(--app-muted);
-  line-height: 1.5;
-}
-
-.idea-card-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  gap: 16px;
 }
 
 .ideas-loading {
